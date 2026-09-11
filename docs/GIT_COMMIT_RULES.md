@@ -192,3 +192,65 @@ For work based on an approved visual reference under `docs/design/`, do not comm
 5. build/lint/tests pass.
 
 Visual similarity is part of Definition of Done for reference-driven UI tasks.
+
+## 11. Atomic Commit Cadence
+
+A milestone may contain many commits. A task may also contain multiple commits.
+
+**Commit is not reserved for task or milestone completion.**
+
+After each independently reviewable coherent unit:
+
+1. run the checks relevant to that unit;
+2. inspect the staged diff;
+3. verify that the unit is internally consistent;
+4. commit it before beginning the next independent unit.
+
+Required workflow:
+
+```text
+PLAN
+→ COHERENT UNIT
+→ IMPLEMENT
+→ TARGETED TEST
+→ REVIEW
+→ VERIFY
+→ COMMIT
+→ NEXT COHERENT UNIT
+```
+
+Do not use:
+
+```text
+PLAN
+→ IMPLEMENT MANY UNITS
+→ COMPLETE WHOLE TASK
+→ ONE LARGE COMMIT
+```
+
+Frontend Foundation is not one commit. Prefer atomic units such as workspace setup, test setup, design tokens, individual primitive groups, layouts, responsive navigation, localization, focused test coverage and documentation.
+
+A task is a planning unit. A commit is an atomic implementation unit. They are not required to be 1:1.
+
+Do not begin the next independent coherent unit while the previous unit is verified and still uncommitted, unless there is a documented technical reason the units cannot be separated.
+
+## 12. Commit Size Guardrail
+
+Before starting the next independent change, inspect:
+
+```text
+git diff --stat
+git diff --numstat
+```
+
+A commit should normally remain small enough for a reviewer to understand in one focused review.
+
+If a pending diff contains:
+
+- more than approximately 15 meaningful source files;
+- more than approximately 800–1200 manually written changed lines; or
+- multiple independently reversible concerns;
+
+stop and split the work into separate commits. These are review triggers, not hard limits.
+
+Generated files such as lockfiles, generated metadata, migrations and approved asset imports may legitimately exceed these numbers and should be evaluated separately.

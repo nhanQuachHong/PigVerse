@@ -23,6 +23,11 @@ Priority order:
 
 Requirement IDs and approved business rules are authoritative. `docs/OPEN_DECISIONS.md` remains open unless explicitly delegated or resolved in an ADR as an engineering decision.
 
+## Agent Routing
+
+Follow `docs/AGENT_ROUTING.md` for model routing, subagent delegation,
+evidence requirements, ownership rules, and integration responsibilities.
+
 ## Product Scope
 
 Target is the full approved Pigverse Genesis product through production hardening and release. Early milestones are not the finish line.
@@ -76,6 +81,88 @@ For first project analysis, **do not modify code**.
 - Never store or request wallet private keys/seed phrases.
 - Never commit secrets.
 - Never weaken tests or authorization to make a feature pass.
+
+## Atomic Commit Cadence
+
+A milestone may contain many commits. A task may also contain multiple commits.
+
+**Commit is not reserved for task or milestone completion.**
+
+After each independently reviewable coherent unit:
+
+1. run the checks relevant to that unit;
+2. inspect the staged diff;
+3. verify that the unit is internally consistent;
+4. commit it before beginning the next independent unit.
+
+Required workflow:
+
+```text
+PLAN
+→ COHERENT UNIT
+→ IMPLEMENT
+→ TARGETED TEST
+→ REVIEW
+→ VERIFY
+→ COMMIT
+→ NEXT COHERENT UNIT
+```
+
+Do not use:
+
+```text
+PLAN
+→ IMPLEMENT MANY UNITS
+→ COMPLETE WHOLE TASK
+→ ONE LARGE COMMIT
+```
+
+A task is a planning unit. A commit is an atomic implementation unit. They are not required to be 1:1.
+
+Do not begin the next independent coherent unit while the previous unit is verified and still uncommitted, unless there is a documented technical reason the units cannot be separated.
+
+## Commit Size Guardrail
+
+Before starting the next independent change, inspect:
+
+```text
+git diff --stat
+git diff --numstat
+```
+
+A commit should normally remain small enough for a reviewer to understand in one focused review.
+
+If a pending diff contains:
+
+- more than approximately 15 meaningful source files;
+- more than approximately 800–1200 manually written changed lines; or
+- multiple independently reversible concerns;
+
+stop and split the work into separate commits. These are review triggers, not hard limits.
+
+Generated files such as lockfiles, generated metadata, migrations and approved asset imports may legitimately exceed these numbers and should be evaluated separately.
+
+## Frontend Foundation Rule
+
+Do not implement full Pigverse pages before the shared frontend foundation is established.
+
+All public pages must reuse the same:
+
+- design tokens;
+- typography;
+- spacing;
+- buttons;
+- cards;
+- badges;
+- layouts;
+- responsive breakpoints;
+- loading states;
+- error states;
+- wallet states.
+
+Do not create page-specific replacements for an existing shared component.
+
+Approved design references define visual direction. The shared frontend foundation defines how that direction is implemented consistently across the application.
 
 ## Smart Contract Rules
 
