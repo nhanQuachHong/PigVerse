@@ -32,7 +32,7 @@ pigverse_assets_package/
 │           ├── user-provided-home-reference.png
 │           └── generated-home-reference-v1.png
 │
-└── public/
+└── apps/web/public/
     └── assets/
         ├── nft/
         │   ├── 01-captain-oink.png
@@ -68,7 +68,7 @@ pigverse_assets_package/
 
 ## Usage Rules
 
-### `public/assets/nft/`
+### `apps/web/public/assets/nft/`
 
 These are the canonical 1:1 NFT artworks.
 
@@ -77,13 +77,13 @@ These are the canonical 1:1 NFT artworks.
 - Do not crop, recolor, regenerate, or silently replace them after approval.
 - UI cards may use scaled versions of these assets.
 
-### `public/assets/characters/`
+### `apps/web/public/assets/characters/`
 
 This location is reserved for transparent-background character variants.
 
 Transparent variants are for UI composition only and must not replace the canonical NFT artwork.
 
-### `public/assets/backgrounds/`
+### `apps/web/public/assets/backgrounds/`
 
 Reusable production backgrounds.
 
@@ -92,11 +92,11 @@ Reusable production backgrounds.
 - `clouds-decoration-source.png`: full source illustration; create a transparent cloud overlay if needed.
 - `footer-landscape.png`: wide footer/section landscape.
 
-### `public/assets/hero/`
+### `apps/web/public/assets/hero/`
 
 Pre-composed hero artwork. Use when a fixed four-character hero is desired. Prefer composing transparent approved character assets over a background when responsive control is important.
 
-### `public/assets/story/`
+### `apps/web/public/assets/story/`
 
 Lore illustrations:
 
@@ -104,13 +104,13 @@ Lore illustrations:
 - Oink Crystal incident;
 - adventure/journey scene.
 
-### `public/assets/states/`
+### `apps/web/public/assets/states/`
 
 Reusable empty/error illustrations.
 
 For flexible UI cards, create transparent versions while preserving these full originals.
 
-### `public/assets/celebration/`
+### `apps/web/public/assets/celebration/`
 
 Shared mint-success background. The actual minted canonical NFT artwork should be layered into the success UI by the frontend; do not generate ten separate celebration backgrounds.
 
@@ -128,7 +128,7 @@ For frontend implementation use this priority:
 
 1. Approved page reference in `docs/design/`.
 2. Approved Pigverse design-system documentation in the repository.
-3. Shared production assets in `public/assets/`.
+3. Shared production assets in `apps/web/public/assets/`.
 4. Existing reusable UI components / design tokens.
 5. Engineering judgment only where the approved design does not define behavior.
 

@@ -25,7 +25,10 @@ const expectedArtwork = {
     "4c0c8c481c5c4cbb46f410e7b0f6b085463113f6e8f21ae3803becf43d235e63",
 };
 
-const artworkDirectory = new URL("../public/assets/nft/", import.meta.url);
+const artworkDirectory = new URL(
+  "../apps/web/public/assets/nft/",
+  import.meta.url,
+);
 const actualArtwork = (await readdir(artworkDirectory)).sort();
 
 assert.deepEqual(
