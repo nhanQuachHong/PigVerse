@@ -1,0 +1,20 @@
+{
+  "name": "@pigverse/database",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "migrate": "tsx src/migrate.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.test.json"
+  },
+  "dependencies": {
+    "postgres": "3.4.9"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.2",
+    "tsx": "4.23.13",
+    "vitest": "5.0.0"
+  }
+}

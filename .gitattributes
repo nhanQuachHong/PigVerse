@@ -1,0 +1,2 @@
+# Approved specification Markdown uses two-space hard line breaks intentionally.
+docs/*.md whitespace=-blank-at-eol

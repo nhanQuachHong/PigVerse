@@ -1,0 +1,32 @@
+{
+  "name": "pigverse",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@11.19.0",
+  "engines": {
+    "node": ">=24.0.0 <25.0.0",
+    "pnpm": ">=11.19.0 <12.0.0"
+  },
+  "scripts": {
+    "build": "pnpm -r --if-present build",
+    "db:migrate": "pnpm --filter @pigverse/database migrate",
+    "dev": "pnpm --filter @pigverse/web dev",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint .",
+    "test": "pnpm -r --if-present test",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "verify": "pnpm verify:config && pnpm verify:assets && pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "verify:assets": "node scripts/verify-assets.mjs",
+    "verify:config": "node scripts/verify-config-examples.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.5",
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.3.4",
+    "globals": "17.12.0",
+    "prettier": "3.9.6",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.70.0"
+  }
+}

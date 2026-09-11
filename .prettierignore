@@ -1,0 +1,8 @@
+.next
+artifacts
+cache
+coverage
+dist
+node_modules
+public/assets
+docs/*.md
