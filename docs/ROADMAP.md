@@ -15,7 +15,7 @@ This roadmap covers the approved product through production release. Completing 
 
 ## M1 — Frontend Foundation
 
-**Status:** IN DEVELOPMENT.
+**Status:** VERIFIED — local unit, build, accessibility and desktop/mobile visual-regression checks passed 2026-09-12; hosted CI awaits the first authorized push.
 
 **Goal:** Establish the shared frontend foundation before implementing full pages.
 
