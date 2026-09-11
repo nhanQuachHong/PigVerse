@@ -15,6 +15,7 @@
     "format:check": "prettier --check .",
     "lint": "eslint .",
     "test": "pnpm -r --if-present test",
+    "test:e2e": "pnpm --filter @pigverse/web test:e2e",
     "typecheck": "pnpm -r --if-present typecheck",
     "verify": "pnpm verify:config && pnpm verify:assets && pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
     "verify:assets": "node scripts/verify-assets.mjs",
