@@ -1,5 +1,5 @@
-import { PlannedRoute } from "../../src/components/layout/planned-route";
+import { FoundationGallery } from "../../src/components/foundation/foundation-gallery";
 
 export default function Home() {
-  return <PlannedRoute milestone="M1" title="Frontend Foundation" />;
+  return <FoundationGallery />;
 }
