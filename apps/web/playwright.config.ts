@@ -14,7 +14,7 @@ export default defineConfig({
     trace: "on-first-retry",
   },
   webServer: {
-    command: "pnpm dev --port 3100",
+    command: "pnpm build && pnpm start --port 3100",
     reuseExistingServer: !process.env.CI,
     url: "http://localhost:3100",
   },
