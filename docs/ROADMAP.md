@@ -27,6 +27,8 @@ This roadmap covers the approved product through production release. Completing 
 
 ## M2 — Genesis Smart Contract
 
+**Status:** IN DEVELOPMENT — fixed token-domain guard implemented; mint, owner controls and immutable metadata remain pending.
+
 **Goal:** Implement and verify the 10-token exact-mint contract.
 
 **Requirements:** `FR-MINT-001`, `FR-MINT-003`, `FR-CONTRACT-001`, `FR-CONTRACT-002`.  
