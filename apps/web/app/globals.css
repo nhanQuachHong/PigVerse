@@ -1,68 +1,70 @@
-:root {
-  color-scheme: light;
-  font-family:
-    Inter,
-    ui-rounded,
-    "SF Pro Rounded",
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
-  background: #fff8f4;
-  color: #442d3f;
-}
+@import "../src/styles/tokens.css";
+@import "../src/styles/components.css";
 
 * {
   box-sizing: border-box;
 }
 
+html {
+  min-width: 20rem;
+  scroll-behavior: smooth;
+}
+
 body {
   min-height: 100vh;
   margin: 0;
-  background:
-    radial-gradient(
-      circle at 20% 20%,
-      rgb(255 205 222 / 75%),
-      transparent 32rem
-    ),
-    linear-gradient(160deg, #fff8f4 0%, #eef7ff 100%);
+  background: var(--pv-color-canvas);
+  color: var(--pv-color-ink);
+  font-family: var(--pv-font-body);
+  font-size: var(--pv-text-md);
+  line-height: 1.55;
+  text-rendering: optimizeLegibility;
 }
 
-main {
-  display: grid;
-  min-height: 100vh;
-  place-items: center;
-  padding: 2rem;
+button,
+input,
+textarea,
+select {
+  font: inherit;
 }
 
-.foundation-card {
-  width: min(42rem, 100%);
-  padding: clamp(2rem, 6vw, 4rem);
-  border: 1px solid rgb(125 83 119 / 18%);
-  border-radius: 2rem;
-  background: rgb(255 255 255 / 88%);
-  box-shadow: 0 1.5rem 4rem rgb(94 57 89 / 12%);
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
 }
 
-.eyebrow {
-  margin: 0 0 0.75rem;
-  color: #c14e86;
-  font-size: 0.8rem;
-  font-weight: 800;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+a {
+  color: inherit;
+  text-decoration: none;
 }
 
-h1 {
-  margin: 0;
-  font-size: clamp(2rem, 7vw, 4rem);
-  line-height: 1;
+img,
+svg {
+  display: block;
+  max-width: 100%;
 }
 
+h1,
+h2,
+h3,
 p {
-  margin: 1.25rem 0 0;
-  color: #6d5568;
-  font-size: 1.05rem;
-  line-height: 1.7;
+  margin-block-start: 0;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--pv-font-display);
+  letter-spacing: -0.035em;
+  line-height: 1.06;
+}
+
+:focus-visible {
+  outline: 3px solid var(--pv-color-focus);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: var(--pv-color-pink-200);
+  color: var(--pv-color-ink);
 }

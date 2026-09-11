@@ -1,0 +1,70 @@
+:root {
+  color-scheme: light;
+
+  --pv-color-canvas: #fff9f7;
+  --pv-color-surface: #ffffff;
+  --pv-color-surface-soft: #fff3f6;
+  --pv-color-surface-blue: #eef6ff;
+  --pv-color-ink: #17224f;
+  --pv-color-ink-muted: #647096;
+  --pv-color-border: #eadfe7;
+  --pv-color-pink-50: #fff2f7;
+  --pv-color-pink-100: #ffe0eb;
+  --pv-color-pink-200: #ffc3d8;
+  --pv-color-pink-500: #f23e7f;
+  --pv-color-pink-600: #dd2869;
+  --pv-color-blue-50: #eff6ff;
+  --pv-color-blue-500: #4d72e8;
+  --pv-color-green-50: #e5fbef;
+  --pv-color-green-600: #168857;
+  --pv-color-purple-50: #f0ebff;
+  --pv-color-purple-600: #6f55d9;
+  --pv-color-amber-50: #fff2d9;
+  --pv-color-amber-700: #a35c00;
+  --pv-color-red-50: #fff0f3;
+  --pv-color-red-600: #d72a55;
+  --pv-color-focus: #2e66d2;
+
+  --pv-font-display:
+    "Nunito Variable", ui-rounded, "Arial Rounded MT Bold", system-ui,
+    sans-serif;
+  --pv-font-body:
+    "Plus Jakarta Sans Variable", Inter, system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  --pv-text-xs: 0.75rem;
+  --pv-text-sm: 0.875rem;
+  --pv-text-md: 1rem;
+  --pv-text-lg: 1.125rem;
+  --pv-text-xl: clamp(1.35rem, 2vw, 1.75rem);
+  --pv-text-2xl: clamp(2rem, 5vw, 3.6rem);
+
+  --pv-space-1: 0.25rem;
+  --pv-space-2: 0.5rem;
+  --pv-space-3: 0.75rem;
+  --pv-space-4: 1rem;
+  --pv-space-5: 1.25rem;
+  --pv-space-6: 1.5rem;
+  --pv-space-8: 2rem;
+  --pv-space-10: 2.5rem;
+  --pv-space-12: 3rem;
+  --pv-space-16: 4rem;
+
+  --pv-radius-sm: 0.625rem;
+  --pv-radius-md: 1rem;
+  --pv-radius-lg: 1.5rem;
+  --pv-radius-xl: 2rem;
+  --pv-radius-pill: 999px;
+
+  --pv-shadow-sm: 0 0.25rem 1rem rgb(64 41 76 / 7%);
+  --pv-shadow-md: 0 0.75rem 2.5rem rgb(79 47 87 / 11%);
+  --pv-shadow-pink: 0 0.75rem 2rem rgb(242 62 127 / 22%);
+
+  --pv-container: 75rem;
+  --pv-gutter: clamp(1rem, 4vw, 2rem);
+  --pv-header-height: 4.5rem;
+  --pv-transition: 180ms ease;
+  --pv-z-header: 20;
+  --pv-z-modal: 50;
+  --pv-z-toast: 60;
+}
