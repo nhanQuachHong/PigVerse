@@ -27,7 +27,7 @@ This roadmap covers the approved product through production release. Completing 
 
 ## M2 — Genesis Smart Contract
 
-**Status:** IN DEVELOPMENT — fixed token domain, abstract ERC-721 ownership/immutable-URI core and owner/pause/exact-payment controls verified locally; concrete public mint eligibility, publication synchronization and proceeds handling remain pending.
+**Status:** IN DEVELOPMENT — concrete publication-bound mint and owner withdrawal pass local integration tests alongside core invariants; adversarial integration tests, deployment verification and backend publication synchronization remain pending.
 
 **Goal:** Implement and verify the 10-token exact-mint contract.
 
