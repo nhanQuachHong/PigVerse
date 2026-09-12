@@ -8,6 +8,13 @@ It requires an explicit `GenesisSepolia.owner` address parameter and fixes the
 initial mint price to zero. The owner can differ from the deploying account.
 No token is published, minted or reserved during deployment.
 
+Approved public owner address:
+`0xbf61Aa23FC0d92f2B0a50A0b1367754f135b39B4`, recorded in
+`ignition/parameters/base-sepolia.json`. The guarded entry point uses this value
+unless the deployment operator explicitly sets `GENESIS_OWNER_ADDRESS`.
+This public parameter contains no signing credentials. An external deployment
+has not been signed or submitted by adding it.
+
 The current local test deploys the real module and verifies owner, zero price,
 zero minted supply, max supply ten, unpaused state, and ten empty publication
 references. Unpaused does not enable mint without publication.
