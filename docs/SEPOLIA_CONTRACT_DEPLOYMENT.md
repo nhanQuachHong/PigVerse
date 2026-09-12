@@ -26,8 +26,12 @@ documentation or Git. Do not use this test-price module for Mainnet.
 
 `ignition/deploy-sepolia.ts` explicitly connects to `baseSepolia` and checks the
 provider chain ID and `GENESIS_OWNER_ADDRESS` before invoking Ignition. Its
-preflight rejects Mainnet, local chains and invalid/zero owners. Release-profile
-selection and external signer setup remain pending. Do not bypass this entry
+preflight rejects Mainnet, local chains and invalid/zero owners. The production
+profile (Solidity 0.8.34, optimizer 200 runs) passes all 25 local contract tests
+with `pnpm --filter @pigverse/contracts test:production`. Use
+`build:production` to compile the same profile. External signer setup and
+verification of the target network's supported EVM revision remain pending.
+Do not bypass this entry
 point by deploying the module directly to another network.
 
 After execution, retain the Ignition journal, contract address,
