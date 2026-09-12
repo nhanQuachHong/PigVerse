@@ -27,12 +27,18 @@ documentation or Git. Do not use this test-price module for Mainnet.
 `ignition/deploy-sepolia.ts` explicitly connects to `baseSepolia` and checks the
 provider chain ID and `GENESIS_OWNER_ADDRESS` before invoking Ignition. Its
 preflight rejects Mainnet, local chains and invalid/zero owners. The production
-profile (Solidity 0.8.34, optimizer 200 runs) passes all 25 local contract tests
+profile (Solidity 0.8.34, Cancun EVM target, optimizer 200 runs) passes all 25 local contract tests
 with `pnpm --filter @pigverse/contracts test:production`. Use
 `build:production` to compile the same profile. External signer setup and
 verification of the target network's supported EVM revision remain pending.
 Do not bypass this entry
 point by deploying the module directly to another network.
+
+Both compiler profiles explicitly target Cancun rather than inheriting the
+compiler's Osaka default. This fixes generated-opcode expectations across
+profiles; it does not substitute for RPC simulation of the deployment artifact.
+See [Solidity compiler target documentation](https://docs.soliditylang.org/en/latest/using-the-compiler.html)
+for the meaning of `evmVersion` and compatibility warnings.
 
 After execution, retain the Ignition journal, contract address,
 transaction hash, chain ID, compiler/build profile and constructor arguments;
