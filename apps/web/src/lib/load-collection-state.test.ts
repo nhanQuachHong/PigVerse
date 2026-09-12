@@ -1,5 +1,6 @@
 import { expect, it } from "vitest";
 import { loadCollectionState } from "./load-collection-state";
+import { encodeAbiParameters, toFunctionSelector } from "viem";
 
 const config = {
   rpcUrl: "https://rpc.example",
@@ -47,4 +48,42 @@ it("preserves all slots without inventing mint progress during HTTP failure", as
   expect(result.tokens).toHaveLength(10);
   expect(result.tokens.every((token) => token.status === "unknown")).toBe(true);
   expect(result.mintedCount).toBeNull();
+});
+
+it("reads publication on-chain and isolates failed publication reads", async () => {
+  const fetcher: typeof fetch = async (_input, init) => {
+    const request = JSON.parse(String(init?.body));
+    const respond = (result: unknown) =>
+      Response.json({ jsonrpc: "2.0", id: request.id, result });
+    if (request.method === "eth_chainId") return respond("0x14a34");
+    if (request.method === "eth_blockNumber") return respond("0x123");
+    expect(request.params[1]).toBe("0x123");
+    if (request.method === "eth_getCode") return respond("0x6000");
+    const data: string = request.params[0].data;
+    if (data === "0x5c975abb") return respond(`0x${"0".repeat(64)}`);
+    const id = Number(BigInt(`0x${data.slice(10)}`));
+    if (data.startsWith(toFunctionSelector("publishedURI(uint256)"))) {
+      if (id === 3) return new Response("unavailable", { status: 503 });
+      return respond(
+        encodeAbiParameters(
+          [{ type: "string" }],
+          [id === 2 ? "ipfs://fixture/2" : ""],
+        ),
+      );
+    }
+    return Response.json({
+      jsonrpc: "2.0",
+      id: request.id,
+      error: {
+        code: 3,
+        data: `0x7e273289${id.toString(16).padStart(64, "0")}`,
+      },
+    });
+  };
+  const result = await loadCollectionState(config, null, fetcher);
+  expect(result.tokens[0]?.status).toBe("coming-soon");
+  expect(result.tokens[1]?.status).toBe("available");
+  expect(result.tokens[2]?.status).toBe("unknown");
+  expect(result.mintedCount).toBe(0);
+  expect(result.degraded).toBe(true);
 });

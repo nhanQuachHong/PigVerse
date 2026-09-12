@@ -16,7 +16,7 @@ export async function GET() {
     try {
       snapshot = await loadCollectionState(
         { contract, rpcUrl, chainId: 84532 },
-        new Set(),
+        null,
       );
     } catch {
       // Do not expose configuration or provider diagnostics to public callers.
@@ -28,15 +28,15 @@ export async function GET() {
       maxSupply: 10,
       block: snapshot?.block ?? null,
       mintedCount: snapshot?.mintedCount ?? null,
-      degraded: true,
-      publicationState: "unavailable",
+      degraded: snapshot?.degraded ?? true,
+      publicationState: snapshot?.publicationState ?? "unavailable",
       tokens: CHARACTER_CATALOG.map((character) => {
         const state = snapshot?.tokens.find(
           (token) => token.tokenId === character.tokenId,
         );
         return {
           ...character,
-          status: state?.status === "minted" ? "minted" : "unknown",
+          status: state?.status ?? "unknown",
           owner: state?.owner ?? null,
         };
       }),
