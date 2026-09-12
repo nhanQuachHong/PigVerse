@@ -3,6 +3,21 @@
 Status: Ignition module verified on local OP-compatible network; external
 Sepolia deployment and explorer verification are not yet completed.
 
+## Read-only network simulation evidence
+
+The production Cancun artifact constructor executed successfully through
+`eth_call` at Base Sepolia block `46717194` (chain ID `84532`), returning 7,669
+bytes of runtime code. Init-code hash:
+`0xc36b894eac5d7a68207364d88562cfdba94df5b35a7d119dbcaa82a703e67457`.
+Runtime hash:
+`0xfb930ae14eaf7f0811cba634cf3e8fc531b3e83f5dc28bc08bcbc8e5cc18f90c`.
+
+Repeat with `pnpm --filter @pigverse/contracts simulate:sepolia`. This compiles
+production then performs a read-only constructor call via the public endpoint
+listed in [Base network documentation](https://docs.base.org/get-started/connect-to-base).
+It neither signs nor broadcasts transactions. Constructor simulation does not
+prove deployed storage, explorer verification or full live mint behavior.
+
 Module: `packages/contracts/ignition/modules/GenesisSepolia.ts`.
 It requires an explicit `GenesisSepolia.owner` address parameter and fixes the
 initial mint price to zero. The owner can differ from the deploying account.
