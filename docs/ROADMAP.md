@@ -39,6 +39,8 @@ This roadmap covers the approved product through production release. Completing 
 
 ## M3 — Public Home + Collection
 
+**Status:** IN DEVELOPMENT — Collection now renders canonical cards, VI/EN filters and chain-derived/degraded states; desktop/mobile screenshots reviewed. Home, live deployment integration and content enrichment remain pending.
+
 **Goal:** Deliver Home and Collection with 10 Genesis slots using the shared frontend foundation.
 
 **Requirements:** `FR-PUBLIC-001`, `FR-PUBLIC-002`, part of `FR-I18N-001`.  

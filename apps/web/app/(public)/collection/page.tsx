@@ -1,5 +1,10 @@
-import { PlannedRoute } from "../../../src/components/layout/planned-route";
+import { CollectionView } from "../../../src/components/collection/collection-view";
+import { GET } from "../../api/collection/route";
+import "../../../src/styles/collection.css";
 
-export default function CollectionPage() {
-  return <PlannedRoute milestone="M3" title="Collection" />;
+export const dynamic = "force-dynamic";
+
+export default async function CollectionPage() {
+  const response = await GET();
+  return <CollectionView data={await response.json()} />;
 }
