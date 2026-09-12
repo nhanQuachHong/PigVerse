@@ -25,6 +25,7 @@ const messages = {
     "status.minting": "Đang mint",
     "status.comingSoon": "Sắp ra mắt",
     "status.paused": "Tạm dừng",
+    "status.unknown": "Chưa xác định",
     "state.empty.title": "Chưa có NFT",
     "state.empty.description":
       "Bộ sưu tập của bạn đang chờ chuyến phiêu lưu đầu tiên.",
@@ -56,6 +57,7 @@ const messages = {
     "status.minting": "Minting",
     "status.comingSoon": "Coming soon",
     "status.paused": "Paused",
+    "status.unknown": "Status unavailable",
     "state.empty.title": "No NFTs yet",
     "state.empty.description":
       "Your collection is waiting for its first adventure.",

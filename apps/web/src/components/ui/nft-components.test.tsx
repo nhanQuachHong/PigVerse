@@ -12,6 +12,15 @@ function renderWithLocale(component: ReactNode) {
 }
 
 describe("NFT and wallet primitives", () => {
+  it("labels an unknown chain state without suggesting availability", () => {
+    renderWithLocale(<NFTStatusBadge status="unknown" />);
+    expect(screen.getByText("Chưa xác định")).toHaveAttribute(
+      "data-status",
+      "unknown",
+    );
+    expect(screen.queryByText("Có thể mint")).not.toBeInTheDocument();
+  });
+
   it("renders localized NFT status", () => {
     renderWithLocale(<NFTStatusBadge status="available" />);
     expect(screen.getByText("Có thể mint")).toBeInTheDocument();

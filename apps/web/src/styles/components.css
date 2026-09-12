@@ -449,7 +449,8 @@
   background: var(--pv-color-purple-50);
   color: var(--pv-color-purple-600);
 }
-.pv-status--coming-soon {
+.pv-status--coming-soon,
+.pv-status--unknown {
   background: #eef0f7;
   color: #66708e;
 }

@@ -3,7 +3,7 @@
 import { useLocale } from "../i18n/locale-provider";
 
 export type NFTStatus =
-  "available" | "minted" | "minting" | "coming-soon" | "paused";
+  "available" | "minted" | "minting" | "coming-soon" | "paused" | "unknown";
 
 const messageKeys = {
   available: "status.available",
@@ -11,6 +11,7 @@ const messageKeys = {
   minting: "status.minting",
   "coming-soon": "status.comingSoon",
   paused: "status.paused",
+  unknown: "status.unknown",
 } as const;
 
 export function NFTStatusBadge({ status }: { status: NFTStatus }) {
