@@ -53,7 +53,7 @@ Backend/Public UI ----------------------> Base RPC (authoritative reads)
 | Current mint price | Base smart contract |
 | Immutable minted asset reference | Contract/token URI + content-addressed storage according to final contract design |
 | Draft content before mint | Application datastore |
-| Admin authorization | Backend authorization store/config according to final approved governance |
+| Admin authorization | Authenticated wallet session checked against current on-chain Contract Owner |
 | Admin audit history | Application audit store |
 | Mint activity dashboard | Chain receipt/events are authoritative; DB is an index/observation |
 | Artwork/metadata durability | IPFS + required backup storage |

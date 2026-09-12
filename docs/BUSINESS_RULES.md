@@ -64,11 +64,11 @@
 - Example: A DB row saying wallet A owns token 2 must be corrected if chain says wallet B owns it.
 
 ## BR-010 — Administrative Rights Are Explicit
-- Rule: Application Admin and Contract Owner are distinct logical roles. Admin endpoints require authenticated authorized Admin status; contract owner functions require on-chain owner authorization.
+- Rule: Owner/Admin is one role, identified by the current on-chain Contract Owner. Admin endpoints require a valid authenticated session and current owner authorization; privileged contract functions enforce owner authorization on-chain.
 - Reason: Prevent frontend-only or role-confused authorization.
 - Affected features: Admin auth, contract controls.
-- Exceptions: Same human/wallet may hold both roles initially.
-- Example: Being in the application Admin list does not automatically bypass contract owner checks.
+- Exceptions: None. See OWNER_ADMIN_ROLE_DECISION.md for the approved role update.
+- Example: A former owner with an unexpired session cannot perform privileged operations after ownership transfer.
 
 ## BR-011 — Minted Content Is Immutable
 - Rule: Once a Genesis NFT is minted, its approved artwork and NFT metadata/content representation must not be changed through the product.
@@ -126,12 +126,12 @@
 - Exceptions: None.
 - Example: Admin Dashboard cannot mark token 1 as reserved.
 
-## BR-019 — Multiple Application Admins Are Supported
-- Rule: The application authorization model can contain multiple Admin wallet addresses.
-- Reason: Product owner selected multi-admin application operations.
+## BR-019 — Current Owner Is Application Admin
+- Rule: The current on-chain owner is the sole Owner/Admin authority for Genesis.
+- Reason: Product Owner approved the unified User / Owner-Admin matrix, superseding the earlier multi-admin model.
 - Affected features: Admin auth and authorization.
-- Exceptions: Initial deployment may start with one authorized Admin.
-- Example: Two distinct approved wallets may independently authenticate as Application Admins.
+- Exceptions: None in the approved Genesis scope.
+- Example: Ownership transfer replaces the authorized Admin; cached allowlists cannot preserve the former owner's privileges.
 
 ## BR-020 — Season 2 Must Not Mutate Genesis Identity
 - Rule: Future seasons/collections are separate from Genesis and must not change Genesis token IDs, max supply, or minted history.

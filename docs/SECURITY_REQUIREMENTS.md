@@ -29,12 +29,15 @@
 
 Every Admin write/read of privileged operational data must enforce authorization in backend code. UI gating is convenience only.
 
-## SEC-AUTHZ-002 — Role Separation
+## SEC-AUTHZ-002 — Unified Owner/Admin Authorization
 
-Application Admin and Contract Owner are separate authorities.
+The current on-chain Contract Owner is the application Admin, per the approved
+OWNER_ADMIN_ROLE_DECISION.md update.
 
-- Admin authorization does not grant contract owner rights.
-- Contract ownership does not automatically grant backend Admin rights unless wallet is separately authorized.
+- Backend access still requires a valid wallet-signature session and a check against current on-chain ownership.
+- Ownership transfer revokes the former owner's privileged access, even if their session has not expired.
+- An unavailable or invalid owner read must fail closed for privileged operations.
+- Contract writes require the owner wallet signature; the backend must not hold its private key.
 
 ## SEC-CONTRACT-001 — Genesis Invariants
 

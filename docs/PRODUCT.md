@@ -108,7 +108,7 @@ Numeric KPI targets are TBD. Initial success criteria are functional and operati
 - Goals: Pause/unpause minting and configure mint price safely.
 - Needs: Clear confirmation of network, contract, current price and pause state.
 - Pain points: Wrong-network actions, accidental price changes, compromised owner wallet.
-- Permissions: On-chain owner functions only. Application Admin status and Contract Owner status are logically separate roles even if initially held by the same person.
+- Permissions: Unified Owner/Admin role for application content and contract controls, following OWNER_ADMIN_ROLE_DECISION.md.
 
 # Roles & Permissions
 
@@ -119,14 +119,15 @@ Numeric KPI targets are TBD. Initial success criteria are functional and operati
 | Connect wallet | ✓ | ✓ | ✓ | ✓ |
 | Mint available NFT | ✗ until wallet connected | ✓ | ✓ if using collector flow | ✓ if using collector flow |
 | View My NFTs | ✗ until wallet connected | ✓ | ✓ | ✓ |
-| Create/edit NFT draft | ✗ | ✗ | ✓ | ✗ unless also Admin |
-| Upload artwork / metadata | ✗ | ✗ | ✓ | ✗ unless also Admin |
-| Publish/unpublish unminted NFT | ✗ | ✗ | ✓ | ✗ unless also Admin |
+| Create/edit NFT draft | ✗ | ✗ | ✓ | ✓ |
+| Upload artwork / metadata | ✗ | ✗ | ✓ | ✓ |
+| Publish/unpublish unminted NFT | ✗ | ✗ | ✓ | ✓ |
 | Edit minted NFT content | ✗ | ✗ | ✗ | ✗ |
-| View application audit history | ✗ | ✗ | ✓ | ✗ unless also Admin |
+| View application audit history | ✗ | ✗ | ✓ | ✓ |
 | View mint activity | ✗ | own/public data only | ✓ | ✓ if also Admin |
-| Pause/unpause contract | ✗ | ✗ | ✗ unless owner | ✓ |
-| Change mint price | ✗ | ✗ | ✗ unless owner | ✓ |
+| Pause/unpause contract | ✗ | ✗ | ✓ | ✓ |
+| Change mint price | ✗ | ✗ | ✓ | ✓ |
+| Withdraw contract proceeds | ✗ | ✗ | ✓ | ✓ |
 | Increase Genesis max supply | ✗ | ✗ | ✗ | ✗ |
 | Burn Genesis NFT | ✗ | ✗ | ✗ | ✗ |
 | Reserve Genesis NFT | ✗ | ✗ | ✗ | ✗ |
