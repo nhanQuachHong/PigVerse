@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { it } from "node:test";
 import { network } from "hardhat";
-import { getContract, parseAbi } from "viem";
+import { getContract, isAddress, parseAbi } from "viem";
 import GenesisSepolia from "../ignition/modules/GenesisSepolia.js";
 
 it("deploys the Sepolia module with explicit owner, zero price and no allocated NFTs", async () => {
@@ -11,8 +11,13 @@ it("deploys the Sepolia module with explicit owner, zero price and no allocated 
   const { genesis } = await ignition.deploy(GenesisSepolia, {
     parameters: { GenesisSepolia: { owner: owner.account.address } },
   });
+  const deployed: unknown = genesis;
+  assert.ok(deployed && typeof deployed === "object" && "address" in deployed);
+  assert.ok(
+    typeof deployed.address === "string" && isAddress(deployed.address),
+  );
   const core = getContract({
-    address: genesis.address,
+    address: deployed.address,
     client: await viem.getPublicClient(),
     abi: parseAbi([
       "function owner() view returns (address)",
