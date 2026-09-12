@@ -1,5 +1,13 @@
 # Pigverse — Product Specification
 
+## Approved role update
+
+The Product Owner approved the unified User / Owner-Admin matrix in
+`OWNER_ADMIN_ROLE_DECISION.md`. That decision supersedes older separate-role
+wording in this specification and downstream documents. Owner/Admin may edit
+unminted NFTs, publish/unpublish, pause/unpause, change price and withdraw;
+both roles mint through the same public conditions.
+
 ## Document Control
 
 - Product: Pigverse
