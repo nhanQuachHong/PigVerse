@@ -13,6 +13,7 @@ abstract contract GenesisNFTCore is ERC721, GenesisTokenDomain {
     error GenesisAlreadyMinted(uint256 tokenId);
     error EmptyGenesisMetadata();
     error GenesisBurnForbidden();
+    error GenesisMetadataNotPrepared(uint256 tokenId);
 
     constructor() ERC721("Pigverse Genesis", "PIGVERSE") {}
 
@@ -36,6 +37,11 @@ abstract contract GenesisNFTCore is ERC721, GenesisTokenDomain {
     function _update(address to, uint256 tokenId, address auth) internal override returns (address) {
         _requireGenesisTokenId(tokenId);
         if (to == address(0)) revert GenesisBurnForbidden();
+        // Every inherited mint path must carry the metadata established by
+        // _mintGenesis; raw ERC721 _mint/_safeMint must not bypass preparation.
+        if (_ownerOf(tokenId) == address(0) && bytes(_mintedURIs[tokenId]).length == 0) {
+            revert GenesisMetadataNotPrepared(tokenId);
+        }
         return super._update(to, tokenId, auth);
     }
 }

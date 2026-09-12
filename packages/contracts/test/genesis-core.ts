@@ -7,6 +7,7 @@ import { getContract, parseAbi, zeroAddress } from "viem";
 const abi = parseAbi([
   "function mint(address recipient, uint256 tokenId, string uri)",
   "function burn(uint256 tokenId)",
+  "function rawMint(address recipient, uint256 tokenId)",
   "function ownerOf(uint256 tokenId) view returns (address)",
   "function tokenURI(uint256 tokenId) view returns (string)",
   "function totalSupply() view returns (uint256)",
@@ -16,6 +17,7 @@ const abi = parseAbi([
   "error GenesisAlreadyMinted(uint256 tokenId)",
   "error EmptyGenesisMetadata()",
   "error GenesisBurnForbidden()",
+  "error GenesisMetadataNotPrepared(uint256 tokenId)",
   "error ERC721NonexistentToken(uint256 tokenId)",
   "error ERC721InvalidReceiver(address receiver)",
   "error ERC721InsufficientApproval(address operator, uint256 tokenId)",
@@ -123,6 +125,19 @@ describe("Genesis ERC-721 core — BR-001..003,009,011,017", async () => {
     assert.equal(await probe.read.observedURI(), uri);
     assert.equal(await probe.read.observedSupply(), 1n);
     assert.equal(await core.read.totalSupply(), 1n);
+  });
+
+  it("rejects inherited raw mint paths without consuming identity or supply", async () => {
+    const core = await fresh();
+    await assert.rejects(
+      core.write.rawMint([alice.account.address, 5n]),
+      /GenesisMetadataNotPrepared/,
+    );
+    await assert.rejects(core.read.ownerOf([5n]), /ERC721NonexistentToken/);
+    assert.equal(await core.read.totalSupply(), 0n);
+    await core.write.mint([alice.account.address, 5n, uri]);
+    assert.equal(await core.read.totalSupply(), 1n);
+    assert.equal(await core.read.tokenURI([5n]), uri);
   });
 
   it("supports standard ERC-165, ERC-721 and metadata interfaces", async () => {

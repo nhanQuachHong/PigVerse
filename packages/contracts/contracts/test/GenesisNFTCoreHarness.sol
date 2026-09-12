@@ -13,6 +13,10 @@ contract GenesisNFTCoreHarness is GenesisNFTCore {
     function burn(uint256 tokenId) external {
         _burn(tokenId);
     }
+
+    function rawMint(address recipient, uint256 tokenId) external {
+        _mint(recipient, tokenId);
+    }
 }
 
 contract GenesisReceiverProbe is IERC721Receiver {
