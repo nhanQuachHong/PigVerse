@@ -8,6 +8,9 @@ describe("database migration foundation", () => {
       new URL("../migrations/", import.meta.url),
     );
 
-    expect(files).toEqual(["0001_create_collection_deployments.sql"]);
+    expect(files).toEqual([
+      "0001_create_collection_deployments.sql",
+      "0002_create_admin_auth.sql",
+    ]);
   });
 });
