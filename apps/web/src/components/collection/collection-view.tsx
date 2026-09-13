@@ -7,19 +7,12 @@ import { useLocale } from "../i18n/locale-provider";
 import { Button, ButtonLink } from "../ui/button";
 import { PageContainer } from "../ui/page-container";
 import { NFTCard } from "../ui/nft-card";
-import type { CollectionStatus } from "../../lib/collection-state";
+import type { PublicCollection } from "../../lib/public-collection";
 
-export type CollectionData = {
-  mintedCount: number | null;
-  degraded: boolean;
-  tokens: {
-    tokenId: number;
-    name: string;
-    artwork: string;
-    status: CollectionStatus;
-    owner: string | null;
-  }[];
-};
+export type CollectionData = Pick<
+  PublicCollection,
+  "degraded" | "mintedCount" | "tokens"
+>;
 
 export function CollectionView({ data }: { data: CollectionData }) {
   const { locale } = useLocale();
