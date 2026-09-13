@@ -46,6 +46,7 @@ for (const configuration of configurations) {
   );
   assert.ok("NEXT_PUBLIC_CONTRACT_ADDRESS" in values);
   assert.ok("DATABASE_URL" in values);
+  assert.ok("PIGVERSE_APP_ORIGIN" in values);
   assert.equal(
     values[configuration.privateKey],
     "",
