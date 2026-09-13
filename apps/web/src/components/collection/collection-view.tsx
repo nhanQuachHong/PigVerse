@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { useCollectionRefresh } from "./use-collection-refresh";
+import { usePublicStateRefresh } from "../public/use-public-state-refresh";
 import { useLocale } from "../i18n/locale-provider";
 import { Button, ButtonLink } from "../ui/button";
 import { PageContainer } from "../ui/page-container";
@@ -24,7 +24,7 @@ export type CollectionData = {
 export function CollectionView({ data }: { data: CollectionData }) {
   const { locale } = useLocale();
   const vi = locale === "vi";
-  const { refresh, pending } = useCollectionRefresh();
+  const { refresh, pending } = usePublicStateRefresh();
   const [filter, setFilter] = useState<"all" | "available" | "minted">("all");
   const tokens = data.tokens.filter(
     (token) => filter === "all" || token.status === filter,

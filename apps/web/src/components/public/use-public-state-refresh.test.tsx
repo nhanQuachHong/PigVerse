@@ -1,11 +1,11 @@
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { useCollectionRefresh } from "./use-collection-refresh";
+import { usePublicStateRefresh } from "./use-public-state-refresh";
 
 const router = vi.hoisted(() => ({ refresh: vi.fn() }));
 vi.mock("next/navigation", () => ({ useRouter: () => router }));
 
-describe("collection refresh", () => {
+describe("public chain-state refresh", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     router.refresh.mockReset();
@@ -16,8 +16,8 @@ describe("collection refresh", () => {
     vi.restoreAllMocks();
   });
 
-  it("refreshes an open collection every 30 seconds", () => {
-    const { unmount } = renderHook(useCollectionRefresh);
+  it("refreshes a visible page every 30 seconds and cleans up", () => {
+    const { unmount } = renderHook(usePublicStateRefresh);
     act(() => vi.advanceTimersByTime(29_999));
     expect(router.refresh).not.toHaveBeenCalled();
     act(() => vi.advanceTimersByTime(1));
@@ -37,7 +37,7 @@ describe("collection refresh", () => {
         finish = resolve;
       }),
     );
-    const { result, unmount } = renderHook(useCollectionRefresh);
+    const { result, unmount } = renderHook(usePublicStateRefresh);
     act(() => result.current.refresh());
     expect(result.current.pending).toBe(true);
     act(() => {
@@ -54,7 +54,7 @@ describe("collection refresh", () => {
   it("skips hidden tabs and refreshes on return without duplicate focus reads", () => {
     const visibility = vi.spyOn(document, "visibilityState", "get");
     visibility.mockReturnValue("hidden");
-    const { unmount } = renderHook(useCollectionRefresh);
+    const { unmount } = renderHook(usePublicStateRefresh);
     act(() => vi.advanceTimersByTime(60_000));
     expect(router.refresh).not.toHaveBeenCalled();
     visibility.mockReturnValue("visible");

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
-export function useCollectionRefresh() {
+export function usePublicStateRefresh() {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const lastRefresh = useRef(-Infinity);
@@ -12,7 +12,6 @@ export function useCollectionRefresh() {
   }, [pending, router]);
 
   useEffect(() => {
-    // Refresh only visible pages; debounce focus + visibility events together.
     const refreshVisible = () => {
       if (document.visibilityState !== "visible" || pending) return;
       const now = Date.now();
