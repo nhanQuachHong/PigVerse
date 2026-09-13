@@ -19,7 +19,7 @@ test("public shell has no horizontal overflow", async ({ page }) => {
 test("admin shell matches its visual baseline", async ({ page }) => {
   await page.goto("/admin");
   await expect(
-    page.getByRole("heading", { name: "Admin foundation", level: 1 }),
+    page.getByRole("heading", { name: "Xác minh ví quản trị", level: 1 }),
   ).toBeVisible();
   await expect(page).toHaveScreenshot("admin-foundation.png", {
     animations: "disabled",
@@ -44,10 +44,10 @@ test("mobile admin navigation is available", async ({ page, isMobile }) => {
   test.skip(!isMobile, "Mobile navigation applies only to the mobile project");
   await page.goto("/admin");
   const menu = page.locator(".pv-admin-menu-toggle");
-  await expect(menu).toHaveAccessibleName("Open admin navigation");
+  await expect(menu).toHaveAccessibleName("Mở điều hướng quản trị");
   await menu.press("Enter");
   await expect(menu).toHaveAttribute("aria-expanded", "true");
   await expect(
-    page.getByRole("navigation", { name: "Admin navigation" }),
+    page.getByRole("navigation", { name: "Điều hướng quản trị" }),
   ).toBeVisible();
 });

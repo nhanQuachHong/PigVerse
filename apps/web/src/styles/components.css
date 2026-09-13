@@ -812,6 +812,11 @@
   color: var(--pv-color-ink-muted);
   font-size: var(--pv-text-sm);
 }
+.pv-admin-header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--pv-space-3);
+}
 .pv-admin-user__avatar {
   display: grid;
   width: 2.25rem;
@@ -853,6 +858,87 @@
   max-width: 42rem;
   margin-bottom: 0;
   color: var(--pv-color-ink-muted);
+}
+.pv-admin-access {
+  display: grid;
+  min-height: calc(100vh - 4.5rem);
+  place-items: center;
+  padding-block: var(--pv-space-10);
+}
+.pv-admin-access-card {
+  display: grid;
+  width: min(100%, 38rem);
+  justify-items: center;
+  gap: var(--pv-space-4);
+  padding: clamp(1.5rem, 6vw, 3.5rem);
+  background:
+    linear-gradient(rgb(255 255 255 / 94%), rgb(255 255 255 / 94%)),
+    url("/assets/backgrounds/hero-world.png") center / cover;
+  box-shadow: var(--pv-shadow-md);
+  text-align: center;
+}
+.pv-admin-access-card h1 {
+  margin-bottom: 0;
+  font-size: clamp(2rem, 5vw, 3rem);
+}
+.pv-admin-access-card > p:not(.pv-eyebrow, .pv-admin-error) {
+  max-width: 32rem;
+  margin-bottom: 0;
+  color: var(--pv-color-ink-muted);
+}
+.pv-admin-access-card__icon {
+  display: grid;
+  width: 4.5rem;
+  height: 4.5rem;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--pv-color-pink-100);
+  box-shadow: var(--pv-shadow-pink);
+  font-size: 2.25rem;
+}
+.pv-admin-access-card__steps {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--pv-space-2);
+}
+.pv-admin-access-card__steps span {
+  padding: 0.45rem 0.75rem;
+  border-radius: var(--pv-radius-pill);
+  background: var(--pv-color-blue-50);
+  color: var(--pv-color-blue-500);
+  font-size: var(--pv-text-xs);
+  font-weight: 800;
+}
+.pv-admin-access-card__safety {
+  font-size: var(--pv-text-xs);
+}
+.pv-admin-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--pv-space-3);
+  width: 100%;
+  margin-bottom: var(--pv-space-5);
+  padding: var(--pv-space-4);
+  border-radius: var(--pv-radius-md);
+  text-align: left;
+}
+.pv-admin-notice p,
+.pv-admin-error {
+  margin-bottom: 0;
+}
+.pv-admin-notice--warning {
+  background: var(--pv-color-amber-50);
+  color: var(--pv-color-amber-700);
+}
+.pv-admin-error {
+  color: var(--pv-color-red-600);
+  font-size: var(--pv-text-sm);
+  font-weight: 700;
+}
+.pv-admin-wallet-value {
+  overflow-wrap: anywhere;
+  font-size: var(--pv-text-lg) !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1039,6 +1125,10 @@
   }
   .pv-admin-header {
     padding-inline: var(--pv-space-4);
+  }
+  .pv-admin-search,
+  .pv-admin-user {
+    display: none;
   }
   .pv-admin-stat-grid {
     grid-template-columns: 1fr 1fr;

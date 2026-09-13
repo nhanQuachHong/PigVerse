@@ -106,8 +106,9 @@ final Product Owner-approved bilingual narrative copy is still required.
 **Status:** IN DEVELOPMENT — hashed PostgreSQL challenge/session persistence,
 origin-bound expiring single-use wallet challenges, signature verification,
 current-owner authorization, strict opaque cookies, logout/session routes and
-bounded app-level abuse controls pass local security tests; protected Admin UI and
-deployed PostgreSQL/RPC wallet E2E remain pending.
+bounded app-level abuse controls plus a wallet-signature access UI pass local
+security, component and visual tests; deployed PostgreSQL/RPC wallet E2E and the
+privileged workflows assigned to later milestones remain pending.
 
 **Goal:** Establish the admin shell and secure Admin Dashboard access.
 

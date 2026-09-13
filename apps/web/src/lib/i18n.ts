@@ -48,6 +48,45 @@ const messages = {
     "common.explore": "Khám phá bộ sưu tập",
     "common.retry": "Thử lại",
     "common.close": "Đóng",
+    "admin.header": "Quản trị Pigverse",
+    "admin.navDashboard": "Tổng quan",
+    "admin.navNfts": "Quản lý NFT",
+    "admin.navAssets": "Xử lý tài sản",
+    "admin.navMinting": "Minting",
+    "admin.navSettings": "Cài đặt",
+    "admin.navLabel": "Điều hướng quản trị",
+    "admin.navOpen": "Mở điều hướng quản trị",
+    "admin.navClose": "Đóng điều hướng quản trị",
+    "admin.secureAccess": "Quyền truy cập Owner/Admin",
+    "admin.signInTitle": "Xác minh ví quản trị",
+    "admin.signInDescription":
+      "Kết nối ví Owner hiện tại và ký thông điệp dùng một lần để mở phiên quản trị bảo mật.",
+    "admin.stepsLabel": "Các bước xác thực",
+    "admin.stepConnect": "Kết nối ví",
+    "admin.stepSign": "Ký thông điệp",
+    "admin.stepVerify": "Xác minh Owner từ chain",
+    "admin.signMessage": "Ký để đăng nhập",
+    "admin.signingIn": "Đang xác minh…",
+    "admin.noTransaction":
+      "Chữ ký này không gửi giao dịch và không tốn phí gas. Pigverse không bao giờ yêu cầu private key hoặc seed phrase.",
+    "admin.unavailable":
+      "Xác thực Admin hiện chưa khả dụng. Cần cấu hình contract, RPC, database và app origin ở phía server.",
+    "admin.error":
+      "Không thể xác thực quyền Admin. Hãy kiểm tra ví Owner, mạng và thử lại.",
+    "admin.ownerVerified": "Owner đã được xác minh on-chain",
+    "admin.dashboardTitle": "Admin Dashboard",
+    "admin.dashboardDescription":
+      "Phiên này được kiểm tra lại với Owner hiện tại của contract.",
+    "admin.signOut": "Đăng xuất",
+    "admin.accountMismatch":
+      "Ví đang kết nối khác với ví Owner của phiên. Hãy kết nối lại ví Owner trước khi thực hiện giao dịch contract.",
+    "admin.genesisSupply": "Tổng cung Genesis",
+    "admin.identityRule": "Mỗi nhân vật là duy nhất",
+    "admin.activeNetwork": "Mạng mục tiêu",
+    "admin.currentOwner": "Owner hiện tại",
+    "admin.workflowsPending": "Workflow quản trị đang được triển khai an toàn",
+    "admin.workflowsPendingDescription":
+      "Quản lý nội dung, publish, pause, giá mint và withdraw sẽ chỉ xuất hiện khi API có guard phiên, audit log và kiểm thử tương ứng.",
   },
   en: {
     "nav.home": "Home",
@@ -95,6 +134,45 @@ const messages = {
     "common.explore": "Explore Collection",
     "common.retry": "Try again",
     "common.close": "Close",
+    "admin.header": "Pigverse Admin",
+    "admin.navDashboard": "Dashboard",
+    "admin.navNfts": "NFT Management",
+    "admin.navAssets": "Asset Processing",
+    "admin.navMinting": "Minting",
+    "admin.navSettings": "Settings",
+    "admin.navLabel": "Admin navigation",
+    "admin.navOpen": "Open admin navigation",
+    "admin.navClose": "Close admin navigation",
+    "admin.secureAccess": "Owner/Admin access",
+    "admin.signInTitle": "Verify the Admin wallet",
+    "admin.signInDescription":
+      "Connect the current Owner wallet and sign a one-time message to open a secure Admin session.",
+    "admin.stepsLabel": "Authentication steps",
+    "admin.stepConnect": "Connect wallet",
+    "admin.stepSign": "Sign message",
+    "admin.stepVerify": "Verify Owner on-chain",
+    "admin.signMessage": "Sign in with wallet",
+    "admin.signingIn": "Verifying…",
+    "admin.noTransaction":
+      "This signature sends no transaction and costs no gas. Pigverse never asks for a private key or seed phrase.",
+    "admin.unavailable":
+      "Admin authentication is not available yet. Server-side contract, RPC, database and app-origin configuration are required.",
+    "admin.error":
+      "Admin access could not be verified. Check the Owner wallet and network, then try again.",
+    "admin.ownerVerified": "Owner verified on-chain",
+    "admin.dashboardTitle": "Admin Dashboard",
+    "admin.dashboardDescription":
+      "This session is revalidated against the contract's current Owner.",
+    "admin.signOut": "Sign out",
+    "admin.accountMismatch":
+      "The connected wallet differs from the session Owner. Reconnect the Owner wallet before sending contract transactions.",
+    "admin.genesisSupply": "Genesis total supply",
+    "admin.identityRule": "Each character is unique",
+    "admin.activeNetwork": "Target network",
+    "admin.currentOwner": "Current Owner",
+    "admin.workflowsPending": "Admin workflows are being built safely",
+    "admin.workflowsPendingDescription":
+      "Content management, publishing, pause, mint price and withdrawal controls will appear only with guarded APIs, audit records and matching tests.",
   },
 } as const;
 
