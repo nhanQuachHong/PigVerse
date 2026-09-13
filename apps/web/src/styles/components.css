@@ -575,6 +575,14 @@
 .pv-field__input::placeholder {
   color: #99a1ba;
 }
+.pv-field__control--textarea {
+  align-items: stretch;
+  padding-block: var(--pv-space-3);
+}
+.pv-field__textarea {
+  min-height: 7rem;
+  resize: vertical;
+}
 .pv-field__message {
   color: var(--pv-color-ink-muted);
   font-size: var(--pv-text-xs);

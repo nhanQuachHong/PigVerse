@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { Button } from "./button";
-import { FormField } from "./form-field";
+import { FormField, TextAreaField } from "./form-field";
 
 describe("shared frontend components", () => {
   it("connects field errors to the input", () => {
@@ -24,6 +24,19 @@ describe("shared frontend components", () => {
     expect(screen.getByRole("button", { name: "Save" })).toHaveAttribute(
       "type",
       "button",
+    );
+  });
+
+  it("connects textarea hints without replacing the shared field pattern", () => {
+    render(
+      <TextAreaField
+        hint="Plain text, Vietnamese"
+        label="Story"
+        name="story"
+      />,
+    );
+    expect(screen.getByLabelText("Story")).toHaveAccessibleDescription(
+      "Plain text, Vietnamese",
     );
   });
 });
