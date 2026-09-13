@@ -1,0 +1,74 @@
+.pv-my-nfts-page {
+  display: grid;
+  min-height: 70vh;
+  gap: var(--pv-space-8);
+  padding-block: clamp(2rem, 7vw, 5rem);
+}
+
+.pv-my-nfts-header {
+  max-width: 46rem;
+}
+
+.pv-my-nfts-header h1 {
+  margin-bottom: var(--pv-space-3);
+  font-size: var(--pv-text-2xl);
+}
+
+.pv-my-nfts-header > p:not(.pv-eyebrow) {
+  color: var(--pv-color-ink-muted);
+}
+
+.pv-my-nfts-header code {
+  display: inline-block;
+  padding: var(--pv-space-2) var(--pv-space-3);
+  border-radius: var(--pv-radius-pill);
+  background: var(--pv-color-purple-50);
+  color: var(--pv-color-purple-600);
+  font-family: var(--pv-font-body);
+  font-weight: 750;
+}
+
+.pv-my-nfts-state {
+  padding: clamp(1.5rem, 5vw, 3rem);
+  text-align: center;
+}
+
+.pv-my-nfts-state > p {
+  max-width: 38rem;
+  margin-inline: auto;
+  color: var(--pv-color-ink-muted);
+}
+
+.pv-my-nfts-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--pv-space-4);
+}
+
+.pv-my-nfts-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--pv-space-5);
+}
+
+.pv-my-nfts-trust-note {
+  font-size: var(--pv-text-sm);
+}
+
+@media (max-width: 48rem) {
+  .pv-my-nfts-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 30rem) {
+  .pv-my-nfts-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .pv-my-nfts-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,5 +1,6 @@
 @import "../src/styles/tokens.css";
 @import "../src/styles/components.css";
+@import "../src/styles/my-nfts.css";
 
 * {
   box-sizing: border-box;

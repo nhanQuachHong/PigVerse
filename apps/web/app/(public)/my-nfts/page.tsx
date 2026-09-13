@@ -1,5 +1,5 @@
-import { PlannedRoute } from "../../../src/components/layout/planned-route";
+import { MyNftsView } from "../../../src/components/my-nfts/my-nfts-view";
 
 export default function MyNftsPage() {
-  return <PlannedRoute milestone="M6" title="My NFTs" />;
+  return <MyNftsView />;
 }

@@ -79,6 +79,10 @@ and browser-wallet verification remain pending.
 
 ## M6 — My NFTs
 
+**Status:** VERIFIED LOCALLY — chain-derived ownership, zero-token, unavailable,
+refresh and account-change behavior pass unit/API/UI and responsive visual tests;
+live Base Sepolia transfer verification awaits deployment.
+
 **Goal:** Show Genesis NFTs currently owned by the connected wallet.
 
 **Requirements:** `FR-WALLET-002`.  
