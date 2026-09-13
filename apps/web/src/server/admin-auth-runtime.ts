@@ -1,4 +1,5 @@
 import { getAdminAuthStore } from "./admin-auth-store";
+import { authenticateAdminSession } from "./admin-auth";
 import { readCurrentOwner } from "./current-owner";
 import { resolvePublicChainConfig } from "../lib/public-collection";
 
@@ -66,4 +67,12 @@ export function adminAuthJson(body: unknown, init: ResponseInit = {}) {
   const headers = new Headers(init.headers);
   headers.set("Cache-Control", "no-store");
   return Response.json(body, { ...init, headers });
+}
+
+export async function authenticateAdminRequest(
+  request: Request,
+  runtime = getAdminAuthRuntime(),
+) {
+  const token = readCookie(request, adminSessionCookieName);
+  return token ? authenticateAdminSession(token, runtime) : null;
 }

@@ -119,6 +119,12 @@ privileged workflows assigned to later milestones remain pending.
 
 ## M9 — Admin Content + IPFS / Metadata
 
+**Status:** IN DEVELOPMENT — environment-bound immutable content revisions,
+optimistic stale-edit detection, in-transaction chain mint rechecks, atomic draft
+audit events and session-protected list/update APIs pass local tests. Asset
+provider adapters, processing/retry, publish/unpublish, reconciliation and Admin
+editor/history UI remain pending.
+
 **Goal:** Manage and publish complete asset packages for the 10 unminted characters safely.
 
 **Requirements:** `FR-ADMIN-002`, `FR-ADMIN-003`, `FR-ADMIN-004`, `FR-ADMIN-005`, `FR-ASSET-001`, `FR-I18N-001`.  

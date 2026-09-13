@@ -43,7 +43,9 @@ export type DraftWrite = LocalizedDraft & {
 
 export type DraftWriteResult =
   | { content: ContentRevision; status: "updated" }
-  | { status: "chain-unavailable" | "conflict" | "minted-locked" };
+  | { status: "chain-unavailable" }
+  | { status: "conflict" }
+  | { status: "minted-locked" };
 
 export type TokenMutationState = "minted" | "unavailable" | "unminted";
 
