@@ -14,6 +14,7 @@ describe("database migration foundation", () => {
       "0001_create_collection_deployments.sql",
       "0002_create_admin_auth.sql",
       "0003_create_genesis_content.sql",
+      "0004_add_asset_integrity.sql",
     ]);
   });
 
@@ -31,5 +32,17 @@ describe("database migration foundation", () => {
     expect(source).toContain("metadata_backup_ref IS NOT NULL");
     expect(source).toContain("CREATE TABLE audit_events");
     expect(source).not.toMatch(/owner_address|ownership_status/);
+  });
+
+  it("requires byte-integrity hashes on complete asset packages", async () => {
+    const source = await readFile(
+      new URL("../migrations/0004_add_asset_integrity.sql", import.meta.url),
+      "utf8",
+    );
+
+    expect(source).toContain("artwork_sha256 char(64)");
+    expect(source).toContain("metadata_sha256 char(64)");
+    expect(source).toContain("asset_packages_complete_hashes");
+    expect(source).toContain("status <> 'COMPLETE' OR");
   });
 });
