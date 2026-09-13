@@ -95,8 +95,15 @@ export async function fetchAdminContent() {
     cache: "no-store",
     credentials: "same-origin",
   });
-  if (!response.ok) throw new AdminContentClientError("CONTENT_UNAVAILABLE");
-  return parseSlots(await response.json());
+  const body: unknown = await response.json();
+  if (!response.ok) {
+    const code =
+      body && typeof body === "object" && "code" in body
+        ? String(body.code)
+        : "CONTENT_UNAVAILABLE";
+    throw new AdminContentClientError(code);
+  }
+  return parseSlots(body);
 }
 
 export async function updateAdminDraft(

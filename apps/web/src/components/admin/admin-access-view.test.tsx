@@ -5,6 +5,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { LocaleProvider } from "../i18n/locale-provider";
 import { AdminAccessView } from "./admin-access-view";
 
+vi.mock("./admin-content-panel", () => ({
+  AdminContentPanel: () => <div>Protected content editor</div>,
+}));
+
 const owner = "0x1111111111111111111111111111111111111111" as const;
 const other = "0x2222222222222222222222222222222222222222" as const;
 

@@ -123,7 +123,8 @@ privileged workflows assigned to later milestones remain pending.
 optimistic stale-edit detection, in-transaction chain mint rechecks, atomic draft
 audit events and session-protected list/update APIs pass local tests. Asset
 provider adapters, processing/retry, publish/unpublish, reconciliation and Admin
-editor/history UI remain pending.
+history UI remain pending; the bilingual 10-slot draft editor passes component
+and desktop/mobile visual tests.
 
 **Goal:** Manage and publish complete asset packages for the 10 unminted characters safely.
 

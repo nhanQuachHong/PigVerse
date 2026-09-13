@@ -7,6 +7,7 @@ import { useConnection, useSignMessage, useSwitchChain } from "wagmi";
 import { type AdminSession, adminSessionQuery } from "../../lib/admin-session";
 import { targetChain } from "../../lib/web3-config";
 import { useLocale } from "../i18n/locale-provider";
+import { AdminContentPanel } from "./admin-content-panel";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import { Icon } from "../ui/icon";
@@ -169,10 +170,7 @@ export function AdminAccessView() {
             <span>{t("admin.currentOwner")}</span>
           </Card>
         </div>
-        <Card className="pv-admin-placeholder">
-          <h2>{t("admin.workflowsPending")}</h2>
-          <p>{t("admin.workflowsPendingDescription")}</p>
-        </Card>
+        <AdminContentPanel />
         {error && (
           <p className="pv-admin-error" role="alert">
             {t("admin.error")}

@@ -87,6 +87,40 @@ const messages = {
     "admin.workflowsPending": "Workflow quản trị đang được triển khai an toàn",
     "admin.workflowsPendingDescription":
       "Quản lý nội dung, publish, pause, giá mint và withdraw sẽ chỉ xuất hiện khi API có guard phiên, audit log và kiểm thử tương ứng.",
+    "admin.editorEyebrow": "M9 · Nội dung Genesis",
+    "admin.editorSectionTitle": "Bản nháp 10 nhân vật",
+    "admin.editorRefresh": "Làm mới từ chain",
+    "admin.editorTitle": "Nội dung song ngữ",
+    "admin.editorRevision": "Revision",
+    "admin.editorNoDraft": "chưa có draft",
+    "admin.editorDraftHint":
+      "Có thể lưu bản nháp chưa hoàn chỉnh. Cả VI và EN sẽ bắt buộc trước khi xử lý tài sản hoặc publish.",
+    "admin.editorNameVi": "Tên · Tiếng Việt",
+    "admin.editorNameEn": "Name · English",
+    "admin.editorDescriptionVi": "Mô tả · Tiếng Việt",
+    "admin.editorDescriptionEn": "Description · English",
+    "admin.editorStoryVi": "Câu chuyện · Tiếng Việt",
+    "admin.editorStoryEn": "Story · English",
+    "admin.editorSave": "Lưu revision mới",
+    "admin.editorSaving": "Đang kiểm tra chain và lưu…",
+    "admin.editorSaved": "Đã lưu và ghi audit",
+    "admin.editorLocked": "Token đã mint; nội dung được khóa bất biến.",
+    "admin.editorChainUnavailable":
+      "Không thể chứng minh token chưa mint. Chỉnh sửa bị khóa an toàn.",
+    "admin.editorErrorStale":
+      "Draft đã thay đổi ở nơi khác. Làm mới trước khi chỉnh sửa tiếp.",
+    "admin.editorErrorMinted":
+      "Token đã mint trong lúc chỉnh sửa. Không có thay đổi nào được lưu.",
+    "admin.editorErrorChain":
+      "Không đọc được chain nên thay đổi không được lưu. Vui lòng thử lại.",
+    "admin.editorErrorGeneric":
+      "Không thể lưu draft. Không có trạng thái thành công được tạo.",
+    "admin.editorUnavailableTitle": "Không tải được nội dung Admin",
+    "admin.editorUnavailable":
+      "Database hoặc chain hiện không khả dụng. Hãy thử lại sau.",
+    "admin.chain.minted": "Đã mint · khóa",
+    "admin.chain.unminted": "Chưa mint · có thể sửa",
+    "admin.chain.unavailable": "Chain chưa xác định",
   },
   en: {
     "nav.home": "Home",
@@ -173,6 +207,41 @@ const messages = {
     "admin.workflowsPending": "Admin workflows are being built safely",
     "admin.workflowsPendingDescription":
       "Content management, publishing, pause, mint price and withdrawal controls will appear only with guarded APIs, audit records and matching tests.",
+    "admin.editorEyebrow": "M9 · Genesis content",
+    "admin.editorSectionTitle": "Ten character drafts",
+    "admin.editorRefresh": "Refresh from chain",
+    "admin.editorTitle": "Bilingual content",
+    "admin.editorRevision": "Revision",
+    "admin.editorNoDraft": "no draft",
+    "admin.editorDraftHint":
+      "Incomplete drafts may be saved. Both VI and EN will be required before asset processing or publication.",
+    "admin.editorNameVi": "Name · Vietnamese",
+    "admin.editorNameEn": "Name · English",
+    "admin.editorDescriptionVi": "Description · Vietnamese",
+    "admin.editorDescriptionEn": "Description · English",
+    "admin.editorStoryVi": "Story · Vietnamese",
+    "admin.editorStoryEn": "Story · English",
+    "admin.editorSave": "Save new revision",
+    "admin.editorSaving": "Checking chain and saving…",
+    "admin.editorSaved": "Saved with an audit record",
+    "admin.editorLocked":
+      "This token is minted; its content is immutably locked.",
+    "admin.editorChainUnavailable":
+      "The token cannot be proven unminted. Editing is safely locked.",
+    "admin.editorErrorStale":
+      "This draft changed elsewhere. Refresh before editing further.",
+    "admin.editorErrorMinted":
+      "The token minted while you were editing. No change was saved.",
+    "admin.editorErrorChain":
+      "Chain state is unavailable, so the change was not saved. Try again.",
+    "admin.editorErrorGeneric":
+      "The draft could not be saved. No success state was created.",
+    "admin.editorUnavailableTitle": "Admin content unavailable",
+    "admin.editorUnavailable":
+      "The database or chain is currently unavailable. Please try again.",
+    "admin.chain.minted": "Minted · locked",
+    "admin.chain.unminted": "Unminted · editable",
+    "admin.chain.unavailable": "Chain unavailable",
   },
 } as const;
 

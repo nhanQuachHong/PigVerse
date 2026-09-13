@@ -51,6 +51,21 @@ describe("Admin content client", () => {
     ).rejects.toMatchObject({ code: "STALE_EDIT" });
   });
 
+  it("preserves an authorization loss from the protected list", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValue(
+          Response.json({ code: "ADMIN_AUTH_REQUIRED" }, { status: 401 }),
+        ),
+    );
+
+    await expect(fetchAdminContent()).rejects.toMatchObject({
+      code: "ADMIN_AUTH_REQUIRED",
+    });
+  });
+
   it("rejects a successful response whose revision targets another token", async () => {
     vi.stubGlobal(
       "fetch",
