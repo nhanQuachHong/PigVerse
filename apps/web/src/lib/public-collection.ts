@@ -48,6 +48,7 @@ export function resolvePublicChainConfig(
     environment.NEXT_PUBLIC_CHAIN_ID !== "84532" ||
     !contract ||
     !isAddress(contract) ||
+    /^0x0{40}$/i.test(contract) ||
     !rpcUrl
   )
     return null;

@@ -46,6 +46,13 @@ describe("public collection service", () => {
     expect(
       resolvePublicChainConfig({
         ...valid,
+        NEXT_PUBLIC_CONTRACT_ADDRESS:
+          "0x0000000000000000000000000000000000000000",
+      }),
+    ).toBeNull();
+    expect(
+      resolvePublicChainConfig({
+        ...valid,
         BASE_SEPOLIA_RPC_URL: "file:///tmp/rpc",
       }),
     ).toBeNull();
