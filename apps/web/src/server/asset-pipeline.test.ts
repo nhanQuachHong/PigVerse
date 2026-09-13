@@ -206,4 +206,17 @@ describe("provider-neutral asset pipeline", () => {
     });
     expect(runtime.backup.put).toHaveBeenCalledTimes(2);
   });
+
+  it("does not mislabel checkpoint-store failures as provider failures", async () => {
+    const runtime = dependencies();
+    vi.spyOn(runtime.store, "save").mockRejectedValueOnce(
+      new Error("database unavailable"),
+    );
+
+    await expect(processAssetPackage(input(), runtime)).rejects.toThrow(
+      "database unavailable",
+    );
+    expect(runtime.ipfs.put).toHaveBeenCalledTimes(1);
+    expect(runtime.store.save).toHaveBeenCalledTimes(1);
+  });
 });

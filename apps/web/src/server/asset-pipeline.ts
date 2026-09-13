@@ -187,22 +187,14 @@ export async function processAssetPackage(
   const prefix = `genesis-${input.tokenId}-r${input.contentRevision}`;
 
   if (!assetPackage.artworkIpfsUri) {
+    let uploaded: { uri: string };
     try {
-      const uploaded = await dependencies.ipfs.put({
+      uploaded = await dependencies.ipfs.put({
         bytes: input.artworkBytes,
         contentType: "image/png",
         idempotencyKey: `${prefix}-artwork-ipfs`,
         name: canonicalArtwork.filename,
       });
-      if (!ipfsPattern.test(uploaded.uri))
-        return recordError(
-          assetPackage,
-          "INVALID_PROVIDER_RESULT",
-          dependencies.store,
-        );
-      assetPackage.artworkIpfsUri = uploaded.uri as `ipfs://${string}`;
-      assetPackage.status = "ARTWORK_STORED";
-      await dependencies.store.save(assetPackage);
     } catch {
       return recordError(
         assetPackage,
@@ -210,25 +202,26 @@ export async function processAssetPackage(
         dependencies.store,
       );
     }
+    if (!ipfsPattern.test(uploaded.uri))
+      return recordError(
+        assetPackage,
+        "INVALID_PROVIDER_RESULT",
+        dependencies.store,
+      );
+    assetPackage.artworkIpfsUri = uploaded.uri as `ipfs://${string}`;
+    assetPackage.status = "ARTWORK_STORED";
+    await dependencies.store.save(assetPackage);
   }
 
   if (!assetPackage.artworkBackupRef) {
+    let stored: { reference: string };
     try {
-      const stored = await dependencies.backup.put({
+      stored = await dependencies.backup.put({
         bytes: input.artworkBytes,
         contentType: "image/png",
         idempotencyKey: `${prefix}-artwork-backup`,
         name: canonicalArtwork.filename,
       });
-      if (!stored.reference.trim())
-        return recordError(
-          assetPackage,
-          "INVALID_PROVIDER_RESULT",
-          dependencies.store,
-        );
-      assetPackage.artworkBackupRef = stored.reference;
-      assetPackage.status = "BACKUP_STORED";
-      await dependencies.store.save(assetPackage);
     } catch {
       return recordError(
         assetPackage,
@@ -236,6 +229,15 @@ export async function processAssetPackage(
         dependencies.store,
       );
     }
+    if (!stored.reference.trim())
+      return recordError(
+        assetPackage,
+        "INVALID_PROVIDER_RESULT",
+        dependencies.store,
+      );
+    assetPackage.artworkBackupRef = stored.reference;
+    assetPackage.status = "BACKUP_STORED";
+    await dependencies.store.save(assetPackage);
   }
 
   let metadataBytes: Uint8Array;
@@ -270,22 +272,14 @@ export async function processAssetPackage(
   assetPackage.metadataSha256 = metadataSha256;
 
   if (!assetPackage.metadataIpfsUri) {
+    let uploaded: { uri: string };
     try {
-      const uploaded = await dependencies.ipfs.put({
+      uploaded = await dependencies.ipfs.put({
         bytes: metadataBytes,
         contentType: "application/json",
         idempotencyKey: `${prefix}-metadata-ipfs`,
         name: `${prefix}.json`,
       });
-      if (!ipfsPattern.test(uploaded.uri))
-        return recordError(
-          assetPackage,
-          "INVALID_PROVIDER_RESULT",
-          dependencies.store,
-        );
-      assetPackage.metadataIpfsUri = uploaded.uri as `ipfs://${string}`;
-      assetPackage.status = "METADATA_STORED";
-      await dependencies.store.save(assetPackage);
     } catch {
       return recordError(
         assetPackage,
@@ -293,24 +287,26 @@ export async function processAssetPackage(
         dependencies.store,
       );
     }
+    if (!ipfsPattern.test(uploaded.uri))
+      return recordError(
+        assetPackage,
+        "INVALID_PROVIDER_RESULT",
+        dependencies.store,
+      );
+    assetPackage.metadataIpfsUri = uploaded.uri as `ipfs://${string}`;
+    assetPackage.status = "METADATA_STORED";
+    await dependencies.store.save(assetPackage);
   }
 
   if (!assetPackage.metadataBackupRef) {
+    let stored: { reference: string };
     try {
-      const stored = await dependencies.backup.put({
+      stored = await dependencies.backup.put({
         bytes: metadataBytes,
         contentType: "application/json",
         idempotencyKey: `${prefix}-metadata-backup`,
         name: `${prefix}.json`,
       });
-      if (!stored.reference.trim())
-        return recordError(
-          assetPackage,
-          "INVALID_PROVIDER_RESULT",
-          dependencies.store,
-        );
-      assetPackage.metadataBackupRef = stored.reference;
-      await dependencies.store.save(assetPackage);
     } catch {
       return recordError(
         assetPackage,
@@ -318,6 +314,14 @@ export async function processAssetPackage(
         dependencies.store,
       );
     }
+    if (!stored.reference.trim())
+      return recordError(
+        assetPackage,
+        "INVALID_PROVIDER_RESULT",
+        dependencies.store,
+      );
+    assetPackage.metadataBackupRef = stored.reference;
+    await dependencies.store.save(assetPackage);
   }
 
   const finalChainState = await safeTokenState(dependencies.readTokenState);
