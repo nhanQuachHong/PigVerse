@@ -2,16 +2,16 @@
 
 import { useLocale } from "../i18n/locale-provider";
 import { Icon } from "./icon";
+import type { ButtonHTMLAttributes } from "react";
 
 export type WalletState = "disconnected" | "connected" | "wrong-network";
 
 export function WalletButton({
   address = "0xA3bc…7F2D",
-  onClick,
   state = "disconnected",
-}: {
+  ...props
+}: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children"> & {
   address?: string;
-  onClick?: () => void;
   state?: WalletState;
 }) {
   const { t } = useLocale();
@@ -28,8 +28,8 @@ export function WalletButton({
     <button
       aria-label={accessibleLabel}
       className={`pv-wallet-button pv-wallet-button--${state}`}
-      onClick={onClick}
       type="button"
+      {...props}
     >
       <Icon name={state === "wrong-network" ? "alert" : "wallet"} />
       <span>{label}</span>

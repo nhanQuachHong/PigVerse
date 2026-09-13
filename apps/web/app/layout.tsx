@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 
 import { LocaleProvider } from "../src/components/i18n/locale-provider";
 import { ToastProvider } from "../src/components/ui/toast";
+import { Web3Provider } from "../src/components/web3/web3-provider";
 
 import "@fontsource-variable/nunito";
 import "@fontsource-variable/plus-jakarta-sans";
@@ -23,7 +24,9 @@ export default function RootLayout({
           Skip to content
         </a>
         <LocaleProvider>
-          <ToastProvider>{children}</ToastProvider>
+          <Web3Provider>
+            <ToastProvider>{children}</ToastProvider>
+          </Web3Provider>
         </LocaleProvider>
       </body>
     </html>

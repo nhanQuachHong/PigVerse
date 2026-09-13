@@ -13,6 +13,20 @@ const messages = {
     "wallet.connect": "Kết nối ví",
     "wallet.connected": "Đã kết nối",
     "wallet.wrongNetwork": "Sai mạng",
+    "wallet.choose": "Chọn ví",
+    "wallet.connectDescription":
+      "Pigverse chỉ yêu cầu quyền xem địa chỉ ví. Chúng tôi không bao giờ yêu cầu private key hoặc seed phrase.",
+    "wallet.connectedTitle": "Ví đã kết nối",
+    "wallet.connectedDescription": "Thông tin kết nối hiện tại của bạn.",
+    "wallet.disconnect": "Ngắt kết nối",
+    "wallet.error": "Không thể hoàn tất yêu cầu ví. Vui lòng thử lại.",
+    "wallet.switchNetwork": "Chuyển sang Base Sepolia",
+    "wallet.switching": "Đang chuyển mạng…",
+    "wallet.wrongNetworkDescription":
+      "Ví đang ở sai mạng. Hãy chuyển sang Base Sepolia trước khi tiếp tục.",
+    "wallet.address": "Địa chỉ",
+    "wallet.network": "Mạng",
+    "wallet.unsupportedNetwork": "Mạng không hỗ trợ",
     "foundation.eyebrow": "M1 · Nền tảng giao diện",
     "foundation.title": "Một ngôn ngữ thiết kế cho toàn bộ Pigverse.",
     "foundation.description":
@@ -45,6 +59,21 @@ const messages = {
     "wallet.connect": "Connect Wallet",
     "wallet.connected": "Connected",
     "wallet.wrongNetwork": "Wrong network",
+    "wallet.choose": "Choose a wallet",
+    "wallet.connectDescription":
+      "Pigverse only requests permission to view your wallet address. We never ask for a private key or seed phrase.",
+    "wallet.connectedTitle": "Wallet connected",
+    "wallet.connectedDescription": "Your current connection details.",
+    "wallet.disconnect": "Disconnect",
+    "wallet.error":
+      "The wallet request could not be completed. Please try again.",
+    "wallet.switchNetwork": "Switch to Base Sepolia",
+    "wallet.switching": "Switching network…",
+    "wallet.wrongNetworkDescription":
+      "Your wallet is on the wrong network. Switch to Base Sepolia to continue.",
+    "wallet.address": "Address",
+    "wallet.network": "Network",
+    "wallet.unsupportedNetwork": "Unsupported network",
     "foundation.eyebrow": "M1 · Frontend foundation",
     "foundation.title": "One design language for every Pigverse experience.",
     "foundation.description":

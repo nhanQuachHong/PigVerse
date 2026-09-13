@@ -8,7 +8,7 @@ import { useLocale } from "../i18n/locale-provider";
 import { PigverseLogo } from "../brand/pigverse-logo";
 import { Icon } from "../ui/icon";
 import { PageContainer } from "../ui/page-container";
-import { WalletButton } from "../ui/wallet-button";
+import { WalletControl } from "../web3/wallet-control";
 
 const navItems = [
   { href: "/", key: "nav.home" },
@@ -85,7 +85,7 @@ export function PublicShell({ children }: { children: ReactNode }) {
                 EN
               </button>
             </div>
-            <WalletButton />
+            <WalletControl />
             <button
               aria-expanded={menuOpen}
               aria-label={menuOpen ? t("nav.close") : t("nav.open")}

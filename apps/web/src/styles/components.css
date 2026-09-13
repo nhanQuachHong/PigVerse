@@ -246,6 +246,11 @@
   font-weight: 750;
 }
 
+.pv-wallet-button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
 .pv-wallet-button--connected {
   border-color: var(--pv-color-border);
   background: white;
@@ -263,6 +268,58 @@
   height: 0.55rem;
   border-radius: 50%;
   background: #20b873;
+}
+
+.pv-wallet-options,
+.pv-wallet-panel {
+  display: grid;
+  gap: var(--pv-space-4);
+}
+
+.pv-wallet-options .pv-button,
+.pv-wallet-panel > .pv-button,
+.pv-wallet-panel__warning .pv-button {
+  width: 100%;
+}
+
+.pv-wallet-panel dl {
+  display: grid;
+  gap: var(--pv-space-3);
+  margin: 0;
+}
+
+.pv-wallet-panel dl > div {
+  display: grid;
+  gap: var(--pv-space-1);
+}
+
+.pv-wallet-panel dt {
+  color: var(--pv-color-ink-muted);
+  font-size: var(--pv-text-sm);
+  font-weight: 700;
+}
+
+.pv-wallet-panel dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.pv-wallet-panel__warning {
+  background: var(--pv-color-amber-50);
+  border-radius: var(--pv-radius-md);
+  display: grid;
+  gap: var(--pv-space-3);
+  padding: var(--pv-space-4);
+}
+
+.pv-wallet-panel__warning p,
+.pv-wallet-panel__error {
+  margin: 0;
+}
+
+.pv-wallet-panel__error {
+  color: var(--pv-color-red-600);
+  font-weight: 700;
 }
 .pv-nav-toggle {
   display: none;
