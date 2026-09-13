@@ -1,4 +1,6 @@
-import postgres, { type Sql } from "postgres";
+import type { Sql } from "postgres";
+
+import { getDatabase } from "./database";
 
 export type AdminChallenge = {
   chainId: number;
@@ -201,15 +203,6 @@ export class MemoryAdminAuthStore implements AdminAuthStore {
   }
 }
 
-let sharedSql: Sql | undefined;
-
 export function getAdminAuthStore(): AdminAuthStore {
-  const databaseUrl = process.env.DATABASE_URL;
-  if (!databaseUrl) throw new Error("Admin authentication is unavailable");
-  sharedSql ??= postgres(databaseUrl, {
-    connect_timeout: 5,
-    idle_timeout: 20,
-    max: 5,
-  });
-  return new PostgresAdminAuthStore(sharedSql);
+  return new PostgresAdminAuthStore(getDatabase());
 }
