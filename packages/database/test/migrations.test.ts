@@ -15,6 +15,7 @@ describe("database migration foundation", () => {
       "0002_create_admin_auth.sql",
       "0003_create_genesis_content.sql",
       "0004_add_asset_integrity.sql",
+      "0005_add_asset_checkpoint_version.sql",
     ]);
   });
 
@@ -44,5 +45,18 @@ describe("database migration foundation", () => {
     expect(source).toContain("metadata_sha256 char(64)");
     expect(source).toContain("asset_packages_complete_hashes");
     expect(source).toContain("status <> 'COMPLETE' OR");
+  });
+
+  it("versions asset checkpoints for safe concurrent retries", async () => {
+    const source = await readFile(
+      new URL(
+        "../migrations/0005_add_asset_checkpoint_version.sql",
+        import.meta.url,
+      ),
+      "utf8",
+    );
+
+    expect(source).toContain("checkpoint_version integer NOT NULL DEFAULT 0");
+    expect(source).toContain("checkpoint_version >= 0");
   });
 });

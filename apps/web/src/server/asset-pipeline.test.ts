@@ -149,19 +149,12 @@ describe("provider-neutral asset pipeline", () => {
 
   it("rejects an asset package bound to a different token", async () => {
     const runtime = dependencies();
-    vi.spyOn(runtime.store, "loadOrCreate").mockResolvedValueOnce({
-      artworkBackupRef: null,
-      artworkIpfsUri: null,
-      artworkSha256: null,
+    const mismatched = await runtime.store.loadOrCreate({
       contentId: "1",
       contentRevision: 1,
-      metadataBackupRef: null,
-      metadataIpfsUri: null,
-      metadataSha256: null,
-      safeErrorCode: null,
-      status: "PENDING",
       tokenId: 2,
     });
+    vi.spyOn(runtime.store, "loadOrCreate").mockResolvedValueOnce(mismatched);
 
     await expect(processAssetPackage(input(), runtime)).resolves.toMatchObject({
       errorCode: "INVALID_CONTENT_BINDING",
@@ -218,5 +211,22 @@ describe("provider-neutral asset pipeline", () => {
     );
     expect(runtime.ipfs.put).toHaveBeenCalledTimes(1);
     expect(runtime.store.save).toHaveBeenCalledTimes(1);
+  });
+
+  it("rejects stale checkpoint writes", async () => {
+    const store = new MemoryAssetPackageStore();
+    const first = await store.loadOrCreate({
+      contentId: "1",
+      contentRevision: 1,
+      tokenId: 1,
+    });
+    const stale = structuredClone(first);
+    first.status = "ARTWORK_STORED";
+
+    const saved = await store.save(first);
+    expect(saved.checkpointVersion).toBe(1);
+    await expect(store.save(stale)).rejects.toThrow(
+      "Asset package checkpoint conflict",
+    );
   });
 });

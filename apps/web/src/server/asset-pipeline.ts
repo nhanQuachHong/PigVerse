@@ -18,6 +18,7 @@ export type AssetPackage = {
   artworkBackupRef: string | null;
   artworkIpfsUri: `ipfs://${string}` | null;
   artworkSha256: string | null;
+  checkpointVersion: number;
   contentId: string;
   contentRevision: number;
   metadataBackupRef: string | null;
@@ -48,7 +49,7 @@ export interface AssetPackageStore {
     contentRevision: number;
     tokenId: number;
   }): Promise<AssetPackage>;
-  save(assetPackage: AssetPackage): Promise<void>;
+  save(assetPackage: AssetPackage): Promise<AssetPackage>;
 }
 
 export interface ContentAddressedStorage {
@@ -126,8 +127,8 @@ async function recordError(
 ) {
   assetPackage.safeErrorCode = errorCode;
   assetPackage.status = "ERROR";
-  await store.save(assetPackage);
-  return errorResult(errorCode, assetPackage);
+  const saved = await store.save(assetPackage);
+  return errorResult(errorCode, saved);
 }
 
 async function safeTokenState(
@@ -156,7 +157,7 @@ export async function processAssetPackage(
   if (initialChainState !== "unminted")
     return errorResult("CHAIN_STATE_UNAVAILABLE", null);
 
-  const assetPackage = await dependencies.store.loadOrCreate({
+  let assetPackage = await dependencies.store.loadOrCreate({
     contentId: input.contentId,
     contentRevision: input.contentRevision,
     tokenId: input.tokenId,
@@ -210,7 +211,7 @@ export async function processAssetPackage(
       );
     assetPackage.artworkIpfsUri = uploaded.uri as `ipfs://${string}`;
     assetPackage.status = "ARTWORK_STORED";
-    await dependencies.store.save(assetPackage);
+    assetPackage = await dependencies.store.save(assetPackage);
   }
 
   if (!assetPackage.artworkBackupRef) {
@@ -237,14 +238,18 @@ export async function processAssetPackage(
       );
     assetPackage.artworkBackupRef = stored.reference;
     assetPackage.status = "BACKUP_STORED";
-    await dependencies.store.save(assetPackage);
+    assetPackage = await dependencies.store.save(assetPackage);
   }
+
+  const artworkIpfsUri = assetPackage.artworkIpfsUri;
+  if (!artworkIpfsUri)
+    throw new Error("Asset package checkpoint was not persisted");
 
   let metadataBytes: Uint8Array;
   try {
     metadataBytes = await dependencies.buildMetadata(
       input.content,
-      assetPackage.artworkIpfsUri,
+      artworkIpfsUri,
     );
     if (!isUint8Array(metadataBytes) || metadataBytes.length === 0)
       return recordError(
@@ -295,7 +300,7 @@ export async function processAssetPackage(
       );
     assetPackage.metadataIpfsUri = uploaded.uri as `ipfs://${string}`;
     assetPackage.status = "METADATA_STORED";
-    await dependencies.store.save(assetPackage);
+    assetPackage = await dependencies.store.save(assetPackage);
   }
 
   if (!assetPackage.metadataBackupRef) {
@@ -321,7 +326,7 @@ export async function processAssetPackage(
         dependencies.store,
       );
     assetPackage.metadataBackupRef = stored.reference;
-    await dependencies.store.save(assetPackage);
+    assetPackage = await dependencies.store.save(assetPackage);
   }
 
   const finalChainState = await safeTokenState(dependencies.readTokenState);
@@ -339,7 +344,7 @@ export async function processAssetPackage(
     );
   assetPackage.safeErrorCode = null;
   assetPackage.status = "COMPLETE";
-  await dependencies.store.save(assetPackage);
+  assetPackage = await dependencies.store.save(assetPackage);
   return { assetPackage, status: "complete" };
 }
 
@@ -363,6 +368,7 @@ export class MemoryAssetPackageStore implements AssetPackageStore {
       artworkBackupRef: null,
       artworkIpfsUri: null,
       artworkSha256: null,
+      checkpointVersion: 0,
       contentId,
       contentRevision,
       metadataBackupRef: null,
@@ -377,11 +383,19 @@ export class MemoryAssetPackageStore implements AssetPackageStore {
   }
 
   async save(assetPackage: AssetPackage) {
-    const copy = structuredClone(assetPackage);
-    this.packages.set(
-      `${assetPackage.contentId}:${assetPackage.contentRevision}`,
-      copy,
-    );
+    const key = `${assetPackage.contentId}:${assetPackage.contentRevision}`;
+    const current = this.packages.get(key);
+    if (
+      !current ||
+      current.checkpointVersion !== assetPackage.checkpointVersion
+    )
+      throw new Error("Asset package checkpoint conflict");
+    const copy = structuredClone({
+      ...assetPackage,
+      checkpointVersion: assetPackage.checkpointVersion + 1,
+    });
+    this.packages.set(key, copy);
     this.writes.push(copy);
+    return structuredClone(copy);
   }
 }
