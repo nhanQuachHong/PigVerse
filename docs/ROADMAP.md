@@ -65,9 +65,10 @@ The current detail experience deliberately labels editorial content as pending a
 
 ## M5 — Wallet + Mint Flow
 
-**Status:** IN DEVELOPMENT — the reactive injected/EIP-6963 wallet foundation and
-Base Sepolia network guard are implemented locally; mint transaction handling and
-live browser-wallet verification remain pending.
+**Status:** IN DEVELOPMENT — the reactive injected/EIP-6963 wallet foundation,
+Base Sepolia network guard, exact-token preflight/submission, pending restoration
+and authoritative receipt outcomes are implemented locally; live deployed-chain
+and browser-wallet verification remain pending.
 
 **Goal:** Complete the collector exact-token mint journey on Base Sepolia.
 

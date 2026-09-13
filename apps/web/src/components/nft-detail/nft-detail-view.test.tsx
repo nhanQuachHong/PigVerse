@@ -9,6 +9,10 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ refresh: vi.fn() }),
 }));
 
+vi.mock("../web3/mint-panel", () => ({
+  MintPanel: () => null,
+}));
+
 const owner = "0x2222222222222222222222222222222222222222";
 const contract = "0x1111111111111111111111111111111111111111";
 const detail: PublicNftDetail = {

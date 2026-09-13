@@ -11,6 +11,7 @@ import { NFTCard } from "../ui/nft-card";
 import { NFTStatusBadge } from "../ui/nft-status-badge";
 import { PageContainer } from "../ui/page-container";
 import { SectionHeading } from "../ui/section-heading";
+import { MintPanel } from "../web3/mint-panel";
 
 function shortAddress(value: string) {
   return `${value.slice(0, 6)}…${value.slice(-4)}`;
@@ -176,6 +177,7 @@ export function NftDetailView({ detail }: { detail: PublicNftDetail }) {
               </dd>
             </div>
           </dl>
+          <MintPanel detail={detail} />
           <ButtonLink href="/collection" size="lg">
             {vi ? "Quay lại bộ sưu tập" : "Back to Collection"}
           </ButtonLink>

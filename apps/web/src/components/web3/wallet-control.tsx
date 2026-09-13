@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   useConnect,
   useConnection,
@@ -49,15 +49,20 @@ export function WalletControl() {
     connection.status === "reconnecting" ||
     connect.isPending;
 
-  const open = () => {
+  const open = useCallback(() => {
     setError(undefined);
     setIsOpen(true);
-  };
+  }, []);
 
   const close = () => {
     setError(undefined);
     setIsOpen(false);
   };
+
+  useEffect(() => {
+    window.addEventListener("pigverse:open-wallet", open);
+    return () => window.removeEventListener("pigverse:open-wallet", open);
+  }, [open]);
 
   const connectWallet = (connector: (typeof connectors)[number]) => {
     setError(undefined);
