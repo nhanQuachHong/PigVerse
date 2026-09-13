@@ -21,6 +21,7 @@ export type PublicCollection = {
   publicationState: "known" | "unavailable";
   tokens: Array<{
     artwork: string;
+    metadataUri: string | null;
     name: string;
     owner: string | null;
     status: CollectionStatus;
@@ -102,6 +103,7 @@ export async function getPublicCollection(
       );
       return {
         ...character,
+        metadataUri: snapshot?.metadataUris.get(character.tokenId) ?? null,
         status: state?.status ?? "unknown",
         owner: state?.owner ?? null,
       };

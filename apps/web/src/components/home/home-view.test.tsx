@@ -14,6 +14,7 @@ const data = {
   degraded: false,
   tokens: CHARACTER_CATALOG.map((character, index) => ({
     ...character,
+    metadataUri: null,
     owner: index < 3 ? "0x1111111111111111111111111111111111111111" : null,
     status: index < 3 ? ("minted" as const) : ("available" as const),
   })),

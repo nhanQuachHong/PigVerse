@@ -15,6 +15,9 @@ describe("public collection service", () => {
     expect(result.tokens.every((token) => token.status === "unknown")).toBe(
       true,
     );
+    expect(result.tokens.every((token) => token.metadataUri === null)).toBe(
+      true,
+    );
   });
 
   it("accepts only the explicit Base Sepolia environment tuple", () => {

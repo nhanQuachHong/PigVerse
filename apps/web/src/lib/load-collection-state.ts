@@ -23,6 +23,7 @@ export async function loadCollectionState(
   );
   let paused: boolean | null = null;
   const confirmedPublished = new Set(published ?? []);
+  const metadataUris = new Map<number, string>();
   const unavailablePublication = new Set<number>();
   if (snapshot.block !== null) {
     try {
@@ -57,9 +58,10 @@ export async function loadCollectionState(
               functionName: "publishedURI",
               data: data as `0x${string}`,
             });
-            if (uri.startsWith("ipfs://") && uri.length > 7)
+            if (uri.startsWith("ipfs://") && uri.length > 7) {
               confirmedPublished.add(tokenId);
-            else if (uri !== "") throw new Error("Invalid published URI");
+              metadataUris.set(tokenId, uri);
+            } else if (uri !== "") throw new Error("Invalid published URI");
           } catch {
             unavailablePublication.add(tokenId);
           }
@@ -78,6 +80,7 @@ export async function loadCollectionState(
   }
   return {
     block: snapshot.block,
+    metadataUris,
     ...projection,
     degraded:
       snapshot.block === null ||

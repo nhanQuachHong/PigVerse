@@ -84,6 +84,8 @@ it("reads publication on-chain and isolates failed publication reads", async () 
   expect(result.tokens[0]?.status).toBe("coming-soon");
   expect(result.tokens[1]?.status).toBe("available");
   expect(result.tokens[2]?.status).toBe("unknown");
+  expect(result.metadataUris.get(2)).toBe("ipfs://fixture/2");
+  expect(result.metadataUris.has(1)).toBe(false);
   expect(result.mintedCount).toBe(0);
   expect(result.degraded).toBe(true);
 });
