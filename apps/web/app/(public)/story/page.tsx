@@ -1,5 +1,5 @@
-import { PlannedRoute } from "../../../src/components/layout/planned-route";
+import { StoryView } from "../../../src/components/story/story-view";
 
 export default function StoryPage() {
-  return <PlannedRoute milestone="M7" title="The Pigverse Story" />;
+  return <StoryView />;
 }

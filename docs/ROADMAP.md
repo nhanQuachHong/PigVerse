@@ -91,6 +91,10 @@ live Base Sepolia transfer verification awaits deployment.
 
 ## M7 — Story
 
+**Status:** IN DEVELOPMENT — responsive VI/EN editorial structure, approved
+illustrations and explicit missing-content behavior pass local UI/visual checks;
+final Product Owner-approved bilingual narrative copy is still required.
+
 **Goal:** Deliver the bilingual Pigverse Story using the public shell and shared content patterns.
 
 **Requirements:** part of `FR-I18N-001`; `FR-LICENSE-001` only after approved legal text exists.  

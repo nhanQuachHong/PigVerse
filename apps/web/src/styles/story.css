@@ -1,0 +1,126 @@
+.pv-story-page {
+  overflow: hidden;
+}
+
+.pv-story-hero {
+  background:
+    radial-gradient(circle at 20% 20%, #ffe5ef 0, transparent 34%),
+    linear-gradient(120deg, #fff9f7 35%, #e8f2ff);
+}
+
+.pv-story-hero__inner {
+  display: grid;
+  min-height: 35rem;
+  grid-template-columns: minmax(18rem, 0.8fr) minmax(24rem, 1.2fr);
+  align-items: center;
+  gap: var(--pv-space-8);
+  padding-block: clamp(2.5rem, 8vw, 6rem);
+}
+
+.pv-story-hero h1 {
+  max-width: 12ch;
+  margin-bottom: var(--pv-space-4);
+  font-size: var(--pv-text-2xl);
+}
+
+.pv-story-hero__inner > div > p:not(.pv-eyebrow) {
+  max-width: 36rem;
+  margin-bottom: var(--pv-space-6);
+  color: var(--pv-color-ink-muted);
+}
+
+.pv-story-hero img {
+  width: 120%;
+  max-width: none;
+  height: auto;
+  filter: drop-shadow(var(--pv-shadow-md));
+}
+
+.pv-story-content {
+  display: grid;
+  gap: var(--pv-space-10);
+  padding-block: clamp(2.5rem, 7vw, 5rem);
+}
+
+.pv-story-pending {
+  padding: var(--pv-space-5);
+  border-color: var(--pv-color-amber-700);
+  background: var(--pv-color-amber-50);
+}
+
+.pv-story-pending p {
+  max-width: 70rem;
+  margin: var(--pv-space-2) 0 0;
+  color: var(--pv-color-ink-muted);
+}
+
+.pv-story-chapters {
+  display: grid;
+  gap: var(--pv-space-8);
+}
+
+.pv-story-chapter {
+  display: grid;
+  grid-template-columns: minmax(22rem, 1.1fr) minmax(18rem, 0.9fr);
+  overflow: hidden;
+  align-items: center;
+}
+
+.pv-story-chapter:nth-child(even) img {
+  order: 2;
+}
+
+.pv-story-chapter img {
+  width: 100%;
+  height: 28rem;
+  object-fit: cover;
+}
+
+.pv-story-chapter > div {
+  padding: clamp(1.5rem, 5vw, 3.5rem);
+}
+
+.pv-story-chapter h2 {
+  margin-bottom: var(--pv-space-3);
+  font-size: var(--pv-text-xl);
+}
+
+.pv-story-chapter > div > p:not(.pv-eyebrow) {
+  margin: 0;
+  color: var(--pv-color-ink-muted);
+}
+
+.pv-story-cta {
+  padding: clamp(2rem, 6vw, 4rem);
+  border-radius: var(--pv-radius-xl);
+  background: linear-gradient(135deg, var(--pv-color-pink-50), #e8f2ff);
+  text-align: center;
+}
+
+.pv-story-cta h2 {
+  margin-bottom: var(--pv-space-5);
+}
+
+@media (max-width: 48rem) {
+  .pv-story-hero__inner,
+  .pv-story-chapter {
+    grid-template-columns: 1fr;
+  }
+
+  .pv-story-hero__inner {
+    min-height: auto;
+  }
+
+  .pv-story-hero img {
+    width: 100%;
+  }
+
+  .pv-story-chapter:nth-child(even) img {
+    order: 0;
+  }
+
+  .pv-story-chapter img {
+    height: auto;
+    aspect-ratio: 3 / 2;
+  }
+}
