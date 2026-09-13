@@ -41,6 +41,8 @@ This roadmap covers the approved product through production release. Completing 
 
 **Status:** IN DEVELOPMENT — Collection now renders canonical cards, VI/EN filters and chain-derived/degraded states; desktop/mobile screenshots reviewed. Home, live deployment integration and content enrichment remain pending.
 
+Collection freshness (`FR-PUBLIC-002`, `BR-009`): visible pages refresh their server-derived state every 30 seconds and on tab return. Hidden tabs and pending refresh transitions do not initiate automatic reads; manual retry shares the pending guard. Hook tests cover timing, visibility, cleanup and pending transitions. This is browsing freshness, not a replacement for pre-mint chain validation; live deployed-contract verification remains pending.
+
 **Goal:** Deliver Home and Collection with 10 Genesis slots using the shared frontend foundation.
 
 **Requirements:** `FR-PUBLIC-001`, `FR-PUBLIC-002`, part of `FR-I18N-001`.  
