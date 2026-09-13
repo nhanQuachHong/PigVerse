@@ -4,12 +4,14 @@ import { network } from "hardhat";
 import { getContract, parseAbi } from "viem";
 
 const abi = parseAbi([
-  "function publish(uint256 id, string uri)",
-  "function unpublish(uint256 id)",
+  "function publish(uint256 id, uint256 expectedRevision, string uri)",
+  "function unpublish(uint256 id, uint256 expectedRevision)",
   "function mint(uint256 id, uint256 revision) payable",
   "function withdraw()",
   "function pause()",
   "function setMintPrice(uint256 price)",
+  "function publicationRevision(uint256 id) view returns (uint256)",
+  "function publishedURI(uint256 id) view returns (string)",
   "function tokenURI(uint256 id) view returns (string)",
   "function totalSupply() view returns (uint256)",
   "error TokenNotPublished(uint256 id)",
@@ -42,27 +44,40 @@ describe("Pigverse concrete publication and mint integration", async () => {
   it("requires publication and protects the revision selected by the collector", async () => {
     const core = await fresh();
     await assert.rejects(core.write.mint([1n, 0n]), /TokenNotPublished/);
-    await core.write.publish([1n, uri]);
-    await core.write.unpublish([1n]);
+    await core.write.publish([1n, 0n, uri]);
+    await assert.rejects(
+      core.write.publish([1n, 0n, `${uri}/stale`]),
+      /PublicationChanged/,
+    );
+    assert.equal(await core.read.publishedURI([1n]), uri);
+    await core.write.unpublish([1n, 1n]);
+    await assert.rejects(core.write.unpublish([1n, 1n]), /PublicationChanged/);
+    assert.equal(await core.read.publicationRevision([1n]), 2n);
     await assert.rejects(core.write.mint([1n, 1n]), /PublicationChanged/);
     await assert.rejects(core.write.mint([1n, 2n]), /TokenNotPublished/);
-    await core.write.publish([1n, `${uri}/new`]);
+    await core.write.publish([1n, 2n, `${uri}/new`]);
     await assert.rejects(core.write.mint([1n, 1n]), /PublicationChanged/);
     await core.write.mint([1n, 3n], { account: user.account });
     assert.equal(await core.read.tokenURI([1n]), `${uri}/new`);
-    await assert.rejects(core.write.publish([1n, uri]), /GenesisAlreadyMinted/);
-    await assert.rejects(core.write.unpublish([1n]), /GenesisAlreadyMinted/);
+    await assert.rejects(
+      core.write.publish([1n, 3n, uri]),
+      /GenesisAlreadyMinted/,
+    );
+    await assert.rejects(
+      core.write.unpublish([1n, 3n]),
+      /GenesisAlreadyMinted/,
+    );
     await assert.rejects(core.write.mint([1n, 3n]), /GenesisAlreadyMinted/);
   });
 
   it("rejects unauthorized publication and withdrawal and non-IPFS references", async () => {
     const core = await fresh();
     await assert.rejects(
-      core.write.publish([1n, uri], { account: user.account }),
+      core.write.publish([1n, 0n, uri], { account: user.account }),
       /OwnableUnauthorizedAccount/,
     );
     await assert.rejects(
-      core.write.unpublish([1n], { account: user.account }),
+      core.write.unpublish([1n, 0n], { account: user.account }),
       /OwnableUnauthorizedAccount/,
     );
     await assert.rejects(
@@ -71,7 +86,7 @@ describe("Pigverse concrete publication and mint integration", async () => {
     );
     for (const invalid of ["", "ipfs://", "https://example.com/mutable.json"]) {
       await assert.rejects(
-        core.write.publish([1n, invalid]),
+        core.write.publish([1n, 0n, invalid]),
         /InvalidMetadataURI/,
       );
     }
@@ -79,7 +94,7 @@ describe("Pigverse concrete publication and mint integration", async () => {
 
   it("applies payment and pause equally to owner and user and withdraws proceeds", async () => {
     const core = await fresh();
-    await core.write.publish([2n, uri]);
+    await core.write.publish([2n, 0n, uri]);
     await core.write.setMintPrice([100n]);
     for (const account of [owner.account, user.account]) {
       await assert.rejects(
@@ -105,7 +120,7 @@ describe("Pigverse concrete publication and mint integration", async () => {
       100n,
     );
     assert.equal(await publicClient.getBalance({ address: core.address }), 0n);
-    await core.write.publish([3n, uri]);
+    await core.write.publish([3n, 0n, uri]);
     await core.write.pause();
     for (const account of [owner.account, user.account]) {
       await assert.rejects(

@@ -7,10 +7,12 @@ Authority: the approved unified Owner/Admin matrix in
 and `CONTRACT_INTEGRATION_DECISIONS.md`.
 
 `PigverseGenesis` composes the NFT core and owner controls. Only the owner can
-publish/unpublish an unminted token. Each change increments a revision, including
-unpublish. Mint takes the chosen ID and expected revision, pays the current exact
-price, and copies the published URI into immutable minted storage. This prevents
-silently minting changed content from a stale page. No alternate owner mint exists.
+publish/unpublish an unminted token. Each mutation supplies the expected current
+publication revision and fails on a stale value; each successful change increments
+that revision, including unpublish. Mint takes the chosen ID and expected revision,
+pays the current exact price, and copies the published URI into immutable minted
+storage. This prevents stale Admin tabs or collector pages from silently acting on
+changed content. No alternate owner mint exists.
 
 Publication requires a nonempty `ipfs://` reference. This is a scheme check, not
 proof of a valid CID, safe metadata or successful pinning/backup. The authenticated

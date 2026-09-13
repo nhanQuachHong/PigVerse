@@ -22,19 +22,23 @@ contract PigverseGenesis is GenesisNFTCore, GenesisMintControls, ReentrancyGuard
 
     /// @dev The owner attests the backend verified the complete asset package.
     /// IPFS pinning, backup and nested metadata validation remain backend gates.
-    function publish(uint256 tokenId, string calldata uri) external onlyOwner {
+    function publish(uint256 tokenId, uint256 expectedRevision, string calldata uri) external onlyOwner {
         _requireUnminted(tokenId);
+        uint256 revision = publicationRevision[tokenId];
+        if (expectedRevision != revision) revert PublicationChanged(expectedRevision, revision);
         bytes memory value = bytes(uri);
         if (value.length <= 7 || bytes7(value) != bytes7("ipfs://")) revert InvalidMetadataURI();
         publishedURI[tokenId] = uri;
-        uint256 revision = ++publicationRevision[tokenId];
+        revision = ++publicationRevision[tokenId];
         emit PublicationUpdated(tokenId, revision, uri);
     }
 
-    function unpublish(uint256 tokenId) external onlyOwner {
+    function unpublish(uint256 tokenId, uint256 expectedRevision) external onlyOwner {
         _requireUnminted(tokenId);
+        uint256 revision = publicationRevision[tokenId];
+        if (expectedRevision != revision) revert PublicationChanged(expectedRevision, revision);
         delete publishedURI[tokenId];
-        uint256 revision = ++publicationRevision[tokenId];
+        revision = ++publicationRevision[tokenId];
         emit PublicationUpdated(tokenId, revision, "");
     }
 

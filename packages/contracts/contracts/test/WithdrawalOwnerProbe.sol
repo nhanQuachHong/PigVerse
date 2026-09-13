@@ -11,8 +11,8 @@ contract WithdrawalOwnerProbe {
 
     constructor() {
         genesis = new PigverseGenesis(address(this), 100);
-        genesis.publish(1, "ipfs://fixture/1");
-        genesis.publish(2, "ipfs://fixture/2");
+        genesis.publish(1, 0, "ipfs://fixture/1");
+        genesis.publish(2, 0, "ipfs://fixture/2");
     }
 
     function configure(bool reject) external {

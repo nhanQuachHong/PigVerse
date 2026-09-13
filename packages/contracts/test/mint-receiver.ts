@@ -17,14 +17,14 @@ it("concrete mint rolls back rejected receivers and blocks cross-token reentry",
     address: deployed.address,
     client,
     abi: parseAbi([
-      "function publish(uint256 id, string uri)",
+      "function publish(uint256 id, uint256 expectedRevision, string uri)",
       "function totalSupply() view returns (uint256)",
       "function ownerOf(uint256 id) view returns (address)",
       "error ERC721NonexistentToken(uint256 tokenId)",
     ]),
   });
-  await core.write.publish([1n, "ipfs://fixture/1"]);
-  await core.write.publish([2n, "ipfs://fixture/2"]);
+  await core.write.publish([1n, 0n, "ipfs://fixture/1"]);
+  await core.write.publish([2n, 0n, "ipfs://fixture/2"]);
   const receiver = await viem.deployContract("MintReceiverProbe", [
     core.address,
   ]);
