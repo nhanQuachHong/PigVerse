@@ -26,6 +26,13 @@ export type ContentRevision = LocalizedDraft & {
   updatedAt: Date;
 };
 
+export type GenesisDeployment = {
+  chainId: 84532;
+  contractAddress: `0x${string}`;
+  deploymentKey: string;
+  environment: "base-sepolia";
+};
+
 export type DraftWrite = LocalizedDraft & {
   actorWallet: `0x${string}`;
   correlationId: string;
@@ -36,7 +43,9 @@ export type DraftWrite = LocalizedDraft & {
 
 export type DraftWriteResult =
   | { content: ContentRevision; status: "updated" }
-  | { status: "conflict" | "minted-locked" };
+  | { status: "chain-unavailable" | "conflict" | "minted-locked" };
+
+export type TokenMutationState = "minted" | "unavailable" | "unminted";
 
 const localizedDraftFields: Array<keyof LocalizedDraft> = [
   "nameVi",
@@ -48,10 +57,11 @@ const localizedDraftFields: Array<keyof LocalizedDraft> = [
 ];
 
 export interface AdminContentStore {
+  ensureDeployment(deployment: GenesisDeployment): Promise<void>;
   listCurrent(deploymentKey: string): Promise<ContentRevision[]>;
   replaceDraft(
     input: DraftWrite,
-    confirmUnminted: () => Promise<boolean>,
+    readTokenState: () => Promise<TokenMutationState>,
   ): Promise<DraftWriteResult>;
 }
 
@@ -90,6 +100,41 @@ function fromRow(row: ContentRow): ContentRevision {
 export class PostgresAdminContentStore implements AdminContentStore {
   constructor(private readonly sql: Sql) {}
 
+  async ensureDeployment(deployment: GenesisDeployment) {
+    await this.sql`
+      INSERT INTO collection_deployments (
+        deployment_key, collection_code, environment, chain_id,
+        contract_address, is_active
+      ) VALUES (
+        ${deployment.deploymentKey}, 'GENESIS', ${deployment.environment},
+        ${deployment.chainId}, ${deployment.contractAddress}, true
+      )
+      ON CONFLICT DO NOTHING
+    `;
+    const rows = await this.sql<
+      Array<{
+        chain_id: string;
+        contract_address: string;
+        environment: string;
+        is_active: boolean;
+      }>
+    >`
+      SELECT environment, chain_id, contract_address, is_active
+      FROM collection_deployments
+      WHERE deployment_key = ${deployment.deploymentKey}
+      LIMIT 1
+    `;
+    const row = rows[0];
+    if (
+      !row?.is_active ||
+      row.environment !== deployment.environment ||
+      Number(row.chain_id) !== deployment.chainId ||
+      row.contract_address.toLowerCase() !==
+        deployment.contractAddress.toLowerCase()
+    )
+      throw new Error("Configured Genesis deployment does not match database");
+  }
+
   async listCurrent(deploymentKey: string) {
     const rows = await this.sql<ContentRow[]>`
       SELECT content_id, deployment_key, token_id, revision, lifecycle_state,
@@ -104,7 +149,7 @@ export class PostgresAdminContentStore implements AdminContentStore {
 
   async replaceDraft(
     input: DraftWrite,
-    confirmUnminted: () => Promise<boolean>,
+    readTokenState: () => Promise<TokenMutationState>,
   ): Promise<DraftWriteResult> {
     return this.sql.begin(async (transaction) => {
       const currentRows = await transaction<ContentRow[]>`
@@ -120,7 +165,11 @@ export class PostgresAdminContentStore implements AdminContentStore {
       const current = currentRows[0] ? fromRow(currentRows[0]) : null;
       if ((current?.revision ?? 0) !== input.expectedRevision)
         return { status: "conflict" };
-      if (!(await confirmUnminted())) return { status: "minted-locked" };
+      if (current?.lifecycleState === "MINTED_LOCKED")
+        return { status: "minted-locked" };
+      const tokenState = await readTokenState();
+      if (tokenState === "minted") return { status: "minted-locked" };
+      if (tokenState === "unavailable") return { status: "chain-unavailable" };
 
       const revision = (current?.revision ?? 0) + 1;
       if (current)
@@ -176,7 +225,21 @@ export class MemoryAdminContentStore implements AdminContentStore {
     toRevision: number;
   }> = [];
   readonly revisions: ContentRevision[] = [];
+  readonly deployments = new Map<string, GenesisDeployment>();
   private nextContentId = 1;
+
+  async ensureDeployment(deployment: GenesisDeployment) {
+    const existing = this.deployments.get(deployment.deploymentKey);
+    if (
+      existing &&
+      (existing.chainId !== deployment.chainId ||
+        existing.environment !== deployment.environment ||
+        existing.contractAddress.toLowerCase() !==
+          deployment.contractAddress.toLowerCase())
+    )
+      throw new Error("Configured Genesis deployment does not match database");
+    this.deployments.set(deployment.deploymentKey, structuredClone(deployment));
+  }
 
   async listCurrent(deploymentKey: string) {
     return this.revisions
@@ -196,14 +259,18 @@ export class MemoryAdminContentStore implements AdminContentStore {
 
   async replaceDraft(
     input: DraftWrite,
-    confirmUnminted: () => Promise<boolean>,
+    readTokenState: () => Promise<TokenMutationState>,
   ): Promise<DraftWriteResult> {
     const current = (await this.listCurrent(input.deploymentKey)).find(
       (content) => content.tokenId === input.tokenId,
     );
     if ((current?.revision ?? 0) !== input.expectedRevision)
       return { status: "conflict" };
-    if (!(await confirmUnminted())) return { status: "minted-locked" };
+    if (current?.lifecycleState === "MINTED_LOCKED")
+      return { status: "minted-locked" };
+    const tokenState = await readTokenState();
+    if (tokenState === "minted") return { status: "minted-locked" };
+    if (tokenState === "unavailable") return { status: "chain-unavailable" };
     const revision = (current?.revision ?? 0) + 1;
     const content: ContentRevision = {
       contentId: String(this.nextContentId++),

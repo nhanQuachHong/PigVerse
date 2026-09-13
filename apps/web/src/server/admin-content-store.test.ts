@@ -22,10 +22,10 @@ const draft: DraftWrite = {
 describe("Admin content store contract", () => {
   it("creates immutable revisions and append-only audit events", async () => {
     const store = new MemoryAdminContentStore();
-    const first = await store.replaceDraft(draft, async () => true);
+    const first = await store.replaceDraft(draft, async () => "unminted");
     const second = await store.replaceDraft(
       { ...draft, expectedRevision: 1, storyEn: "Revised story" },
-      async () => true,
+      async () => "unminted",
     );
 
     expect(first).toMatchObject({
@@ -48,13 +48,13 @@ describe("Admin content store contract", () => {
 
   it("rejects stale revisions without checking or writing chain state", async () => {
     const store = new MemoryAdminContentStore();
-    await store.replaceDraft(draft, async () => true);
-    const confirmUnminted = vi.fn().mockResolvedValue(true);
+    await store.replaceDraft(draft, async () => "unminted");
+    const readTokenState = vi.fn().mockResolvedValue("unminted");
 
     await expect(
-      store.replaceDraft({ ...draft, expectedRevision: 0 }, confirmUnminted),
+      store.replaceDraft({ ...draft, expectedRevision: 0 }, readTokenState),
     ).resolves.toEqual({ status: "conflict" });
-    expect(confirmUnminted).not.toHaveBeenCalled();
+    expect(readTokenState).not.toHaveBeenCalled();
     expect(store.revisions).toHaveLength(1);
     expect(store.auditEvents).toHaveLength(1);
   });
@@ -62,10 +62,38 @@ describe("Admin content store contract", () => {
   it("rejects a minted token without a revision or audit side effect", async () => {
     const store = new MemoryAdminContentStore();
 
-    await expect(store.replaceDraft(draft, async () => false)).resolves.toEqual(
-      { status: "minted-locked" },
-    );
+    await expect(
+      store.replaceDraft(draft, async () => "minted"),
+    ).resolves.toEqual({ status: "minted-locked" });
     expect(store.revisions).toHaveLength(0);
     expect(store.auditEvents).toHaveLength(0);
+  });
+
+  it("fails closed without labelling an RPC outage as minted", async () => {
+    const store = new MemoryAdminContentStore();
+
+    await expect(
+      store.replaceDraft(draft, async () => "unavailable"),
+    ).resolves.toEqual({ status: "chain-unavailable" });
+    expect(store.revisions).toHaveLength(0);
+    expect(store.auditEvents).toHaveLength(0);
+  });
+
+  it("registers one exact environment-bound deployment identity", async () => {
+    const store = new MemoryAdminContentStore();
+    const deployment = {
+      chainId: 84532,
+      contractAddress: "0x3333333333333333333333333333333333333333",
+      deploymentKey: "genesis:base-sepolia:84532",
+      environment: "base-sepolia",
+    } as const;
+    await store.ensureDeployment(deployment);
+    await expect(store.ensureDeployment(deployment)).resolves.toBeUndefined();
+    await expect(
+      store.ensureDeployment({
+        ...deployment,
+        contractAddress: "0x4444444444444444444444444444444444444444",
+      }),
+    ).rejects.toThrow("does not match database");
   });
 });
