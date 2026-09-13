@@ -8,20 +8,12 @@ test.beforeEach(async ({ page }) => {
   await page.locator("img").first().waitFor({ state: "visible" });
 });
 
-test("foundation shell has no horizontal overflow", async ({ page }) => {
+test("public shell has no horizontal overflow", async ({ page }) => {
   const dimensions = await page.evaluate(() => ({
     clientWidth: document.documentElement.clientWidth,
     scrollWidth: document.documentElement.scrollWidth,
   }));
   expect(dimensions.scrollWidth).toBe(dimensions.clientWidth);
-});
-
-test("foundation gallery matches its visual baseline", async ({ page }) => {
-  await expect(page).toHaveScreenshot("frontend-foundation.png", {
-    animations: "disabled",
-    fullPage: true,
-    maxDiffPixelRatio: 0.01,
-  });
 });
 
 test("admin shell matches its visual baseline", async ({ page }) => {

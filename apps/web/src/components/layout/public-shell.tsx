@@ -41,6 +41,27 @@ export function PublicShell({ children }: { children: ReactNode }) {
                 {t(item.key)}
               </Link>
             ))}
+            <div
+              aria-label="Language"
+              className="pv-public-nav__locale"
+              role="group"
+            >
+              <button
+                aria-pressed={locale === "vi"}
+                onClick={() => setLocale("vi")}
+                type="button"
+              >
+                VI
+              </button>
+              <span aria-hidden="true">/</span>
+              <button
+                aria-pressed={locale === "en"}
+                onClick={() => setLocale("en")}
+                type="button"
+              >
+                EN
+              </button>
+            </div>
           </nav>
           <div className="pv-public-header__actions">
             <div

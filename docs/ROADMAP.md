@@ -39,7 +39,9 @@ This roadmap covers the approved product through production release. Completing 
 
 ## M3 — Public Home + Collection
 
-**Status:** IN DEVELOPMENT — Collection now renders canonical cards, VI/EN filters and chain-derived/degraded states; desktop/mobile screenshots reviewed. Home, live deployment integration and content enrichment remain pending.
+**Status:** IN DEVELOPMENT — Home and Collection now render canonical artwork, VI/EN content and honest chain-derived/degraded states; desktop/mobile screenshots reviewed. Live deployment integration and final character-content enrichment remain pending.
+
+Home (`FR-PUBLIC-001`, `BR-001`, `BR-007`, `BR-015`): renders the approved Pigverse hero direction, four featured canonical characters, all ten Genesis identities, chain-derived N/10 progress, degraded-state retry and Story/Collection paths. Component coverage proves the specified authoritative `3 / 10 Minted` acceptance state; E2E covers VI/EN rendering (including the mobile-menu locale control), exact card counts, responsive overflow and desktop/mobile visual baselines.
 
 Collection freshness (`FR-PUBLIC-002`, `BR-009`): visible pages refresh their server-derived state every 30 seconds and on tab return. Hidden tabs and pending refresh transitions do not initiate automatic reads; manual retry shares the pending guard. Hook tests cover timing, visibility, cleanup and pending transitions. This is browsing freshness, not a replacement for pre-mint chain validation; live deployed-contract verification remains pending.
 

@@ -227,6 +227,10 @@
   color: var(--pv-color-pink-600);
 }
 
+.pv-public-nav__locale {
+  display: none;
+}
+
 .pv-wallet-button {
   display: inline-flex;
   min-height: 2.7rem;
@@ -830,6 +834,24 @@
   }
   .pv-public-nav a[aria-current="page"] {
     background: var(--pv-color-pink-50);
+  }
+  .pv-public-nav__locale {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--pv-space-2);
+    padding: var(--pv-space-3);
+    color: var(--pv-color-ink-muted);
+    font-size: var(--pv-text-sm);
+    font-weight: 800;
+  }
+  .pv-public-nav__locale button {
+    border: 0;
+    background: transparent;
+    color: inherit;
+  }
+  .pv-public-nav__locale button[aria-pressed="true"] {
+    color: var(--pv-color-pink-600);
   }
   .pv-nav-toggle {
     display: grid;
