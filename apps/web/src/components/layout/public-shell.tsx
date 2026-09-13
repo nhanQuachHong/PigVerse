@@ -103,7 +103,11 @@ export function PublicShell({ children }: { children: ReactNode }) {
         <PageContainer className="pv-footer__inner">
           <PigverseLogo compact />
           <p>Genesis Collection · 10 NFTs</p>
-          <p>Built on Base Sepolia</p>
+          <p>
+            {locale === "vi"
+              ? "Mạng mục tiêu · Base Sepolia"
+              : "Target network · Base Sepolia"}
+          </p>
         </PageContainer>
       </footer>
     </div>

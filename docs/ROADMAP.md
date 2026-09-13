@@ -53,6 +53,10 @@ Collection freshness (`FR-PUBLIC-002`, `BR-009`): visible pages refresh their se
 
 ## M4 — NFT Detail
 
+**Status:** IN DEVELOPMENT — Valid Genesis routes render canonical artwork, chain-derived status/owner, deployment identifiers, on-chain IPFS metadata URI when available, related tokens, license disclosure and responsive visual baselines. Live deployed-state verification and approved final VI/EN character lore remain pending.
+
+The current detail experience deliberately labels editorial content as pending approval because final polished character stories have not been supplied (`SPEC_REVIEW.md`). It does not promote placeholder lore to canon. Invalid and non-canonical route IDs return 404; degraded reads remain explicit and never imply mintability. API/service/component tests cover invalid IDs, the unconfigured state and a minted owner/deployment/IPFS fixture.
+
 **Goal:** Deliver the NFT Detail experience for every valid Genesis token.
 
 **Requirements:** `FR-PUBLIC-003`, part of `FR-I18N-001`, `FR-LICENSE-001` placeholder only until legal text is approved.  
