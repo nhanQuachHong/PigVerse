@@ -29,6 +29,7 @@ chain ownership. RPC, IPFS and backup providers are external trust boundaries.
 | XSS/clickjacking/browser capability abuse | React renders text; application-wide CSP, frame denial, MIME, referrer, permissions, cross-origin and HSTS headers are asserted against the optimized server. | Baseline verified locally |
 | Committed credentials | `verify:secrets` scans tracked and non-ignored candidate files, redacts values in findings and is part of `verify`; CI runs it. Blank examples remain valid. | Verified locally |
 | Known production dependency advisory | CI runs `pnpm audit --prod --audit-level high`. The 2026-09-14 local registry result reported no known vulnerabilities. | Time-bound pass |
+| Health failure log disclosure | Readiness failures emit only a bounded correlation ID and allowlisted integration category; raw exception/provider content never enters the structured logger. | Verified locally |
 
 Primary implementation evidence includes:
 

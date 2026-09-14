@@ -20,11 +20,16 @@ ten seconds to protect PostgreSQL and RPC from monitoring bursts; the HTTP
 response remains `no-store`. These are operational defaults, not approved SLA
 claims, and may be tuned from deployment evidence.
 
-The public response contains only `ok/error` component states, overall status
-and an ISO timestamp. It never returns endpoint URLs, contract/Owner addresses,
-database errors, stack traces, provider payloads or credentials. Liveness and
-readiness are separate so a provider outage does not cause an orchestrator to
-restart a healthy application process.
+The public response contains only `ok/error` component states, overall status,
+an ISO timestamp and a bounded correlation ID also returned as the
+`X-Correlation-ID` header. It never returns endpoint URLs, contract/Owner
+addresses, database errors, stack traces, provider payloads or credentials.
+Each failed readiness component emits one structured JSON event with only the
+correlation ID, fixed event name, allowlisted integration, severity and
+timestamp. Raw exceptions are never accepted by this logger, and logging-sink
+failure cannot change the health response. Liveness and readiness are separate
+so a provider outage does not cause an orchestrator to restart a healthy
+application process.
 
 ## Boundaries and follow-up
 
@@ -37,10 +42,12 @@ OD-005/OD-006 are approved and implemented.
 
 ## Verification
 
-Requirements: NFR-OPS-005, NFR-OPS-006, NFR-REL-007 and SEC-SECRETS-001.
+Requirements: NFR-OPS-004, NFR-OPS-005, NFR-OPS-006, NFR-REL-007,
+SEC-SECRETS-001 and SEC-LOG-001.
 
 Unit and route tests cover ready, missing configuration, false, rejected and
-timed-out integrations, cache/coalescing behavior and response redaction.
-Playwright verifies the emitted degraded response from the optimized server when
-deployment configuration is intentionally absent. Live provider and hosted
-monitoring verification remain pending.
+timed-out integrations, cache/coalescing behavior, correlation propagation,
+structured allowlists and response/log redaction. Playwright verifies the emitted
+degraded response and safe JSON events from the optimized server when deployment
+configuration is intentionally absent. Live provider and hosted monitoring
+verification remain pending.

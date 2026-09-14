@@ -192,8 +192,10 @@ remain pending; open HIGH findings prevent M10 completion.
 readiness endpoints are implemented. Readiness checks configuration, current
 on-chain Owner access and PostgreSQL within bounded time, coalesces concurrent
 probes and reports only `ok/error`; optimized-server tests verify degraded
-behavior without leaking integration details. Structured failure logging,
-metrics/alerts, provider retry/failover and controlled failure drills remain.
+behavior without leaking integration details. Structured failure logging with
+correlation IDs and allowlisted integration names is implemented for health
+failures. Broader Admin/asset/mint failure instrumentation, metrics/alerts,
+provider retry/failover and controlled failure drills remain.
 
 **Goal:** Production-grade failure handling and visibility.
 
