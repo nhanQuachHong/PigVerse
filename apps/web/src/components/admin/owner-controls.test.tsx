@@ -2,6 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { pendingOwnerControlKey } from "../../lib/pending-owner-control";
 import { LocaleProvider } from "../i18n/locale-provider";
 import { OwnerControls } from "./owner-controls";
 
@@ -37,8 +38,24 @@ const mocks = vi.hoisted(() => ({
     data: undefined as { status: "reverted" | "success" } | undefined,
     isError: false,
   },
+  record: vi.fn(),
+  invalidateQueries: vi.fn(),
   write: vi.fn(),
   writePending: false,
+}));
+
+vi.mock("@tanstack/react-query", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@tanstack/react-query")>();
+  return {
+    ...actual,
+    useQueryClient: () => ({
+      invalidateQueries: mocks.invalidateQueries,
+    }),
+  };
+});
+
+vi.mock("../../lib/admin-owner-controls", () => ({
+  recordAdminOwnerControl: mocks.record,
 }));
 
 vi.mock("wagmi", async (importOriginal) => {
@@ -70,6 +87,7 @@ function renderControls() {
 
 describe("OwnerControls", () => {
   beforeEach(() => {
+    window.localStorage.clear();
     mocks.connection.address = ownerWallet;
     mocks.connection.chainId = 84532;
     mocks.connection.status = "connected";
@@ -87,6 +105,17 @@ describe("OwnerControls", () => {
     mocks.mintPrice.refetch.mockReset();
     mocks.receipt.data = undefined;
     mocks.receipt.isError = false;
+    mocks.record.mockReset();
+    mocks.record.mockResolvedValue({
+      action: "pause",
+      blockHash: `0x${"b".repeat(64)}`,
+      blockNumber: "2748",
+      finality: "included",
+      newMintPrice: null,
+      transactionHash,
+      withdrawnAmount: null,
+    });
+    mocks.invalidateQueries.mockReset();
     mocks.write.mockReset();
     mocks.writePending = false;
     mocks.write.mockResolvedValue(transactionHash);
@@ -106,6 +135,15 @@ describe("OwnerControls", () => {
       functionName: "pause",
     });
     expect(screen.getByRole("status")).toHaveTextContent("đang chờ");
+    expect(
+      window.localStorage.getItem(
+        pendingOwnerControlKey({
+          account: ownerWallet,
+          chainId: 84532,
+          contract: contractAddress,
+        }),
+      ),
+    ).toBe(transactionHash);
   });
 
   it("uses unpause when the authoritative chain state is paused", async () => {
@@ -162,13 +200,28 @@ describe("OwnerControls", () => {
     expect(screen.getByRole("alert")).toHaveTextContent("khóa an toàn");
   });
 
-  it("re-reads pause and price after a successful receipt", async () => {
+  it("restores, verifies and audits a successful transaction", async () => {
+    window.localStorage.setItem(
+      pendingOwnerControlKey({
+        account: ownerWallet,
+        chainId: 84532,
+        contract: contractAddress,
+      }),
+      transactionHash,
+    );
     mocks.receipt.data = { status: "success" };
     renderControls();
 
+    await waitFor(() =>
+      expect(mocks.record).toHaveBeenCalledWith(transactionHash),
+    );
     await waitFor(() => expect(mocks.paused.refetch).toHaveBeenCalledOnce());
     expect(mocks.mintPrice.refetch).toHaveBeenCalledOnce();
     expect(mocks.balance.refetch).toHaveBeenCalledOnce();
+    expect(mocks.invalidateQueries).toHaveBeenCalledWith({
+      queryKey: ["admin-audit"],
+    });
+    expect(screen.getByRole("status")).toHaveTextContent("ghi audit");
   });
 
   it("requires an explicit balance and recipient confirmation before withdrawing", async () => {
@@ -214,5 +267,25 @@ describe("OwnerControls", () => {
       "không suy đoán thành công",
     );
     expect(screen.queryByText("Giao dịch Owner đã included.")).toBeNull();
+  });
+
+  it("retains failed audit evidence and allows an explicit retry", async () => {
+    const user = userEvent.setup();
+    const key = pendingOwnerControlKey({
+      account: ownerWallet,
+      chainId: 84532,
+      contract: contractAddress,
+    });
+    window.localStorage.setItem(key, transactionHash);
+    mocks.receipt.data = { status: "success" };
+    mocks.record.mockRejectedValueOnce(new Error("unavailable"));
+    renderControls();
+
+    const retry = await screen.findByRole("button", {
+      name: "Đối soát và ghi audit lại",
+    });
+    expect(window.localStorage.getItem(key)).toBe(transactionHash);
+    await user.click(retry);
+    await waitFor(() => expect(mocks.record).toHaveBeenCalledTimes(2));
   });
 });

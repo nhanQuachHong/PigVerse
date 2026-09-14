@@ -113,6 +113,11 @@ const messages = {
     "admin.ownerControlsWalletError":
       "Ví từ chối hoặc giao dịch không thể gửi. Chain chưa được coi là đã thay đổi.",
     "admin.ownerControlsIncluded": "Giao dịch Owner đã included.",
+    "admin.ownerControlsRecording": "Đang xác minh chain và ghi audit…",
+    "admin.ownerControlsAudited": "Giao dịch đã được xác minh và ghi audit.",
+    "admin.ownerControlsRetryAudit": "Đối soát và ghi audit lại",
+    "admin.ownerControlsAuditError":
+      "Chưa ghi được audit. Transaction hash vẫn được giữ để thử lại.",
     "admin.ownerControlsReceiptError":
       "Chưa thể xác định receipt từ RPC; không suy đoán thành công.",
     "admin.ownerControlsDone": "Hoàn tất",
@@ -332,6 +337,12 @@ const messages = {
     "admin.ownerControlsWalletError":
       "The wallet rejected or could not submit the transaction. Chain state is not treated as changed.",
     "admin.ownerControlsIncluded": "The Owner transaction was included.",
+    "admin.ownerControlsRecording": "Verifying chain evidence and audit…",
+    "admin.ownerControlsAudited":
+      "The transaction was verified and recorded in the audit log.",
+    "admin.ownerControlsRetryAudit": "Reconcile and audit again",
+    "admin.ownerControlsAuditError":
+      "The audit record is not complete. The transaction hash is retained for retry.",
     "admin.ownerControlsReceiptError":
       "The RPC receipt cannot be resolved; success is not inferred.",
     "admin.ownerControlsDone": "Done",

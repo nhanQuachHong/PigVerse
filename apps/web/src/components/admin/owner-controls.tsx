@@ -1,7 +1,15 @@
 "use client";
 
-import { type FormEvent, useEffect, useState } from "react";
-import { formatEther, parseEther, type Address, type Hash } from "viem";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  type FormEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
+import { formatEther, parseEther, type Address } from "viem";
 import {
   useBalance,
   useConnection,
@@ -10,7 +18,15 @@ import {
   useWriteContract,
 } from "wagmi";
 
+import { adminAuditQueryKey } from "../../lib/admin-audit";
+import { recordAdminOwnerControl } from "../../lib/admin-owner-controls";
 import { genesisAbi } from "../../lib/genesis-contract";
+import {
+  PENDING_OWNER_CONTROL_EVENT,
+  pendingOwnerControlKey,
+  readPendingOwnerControl,
+  writePendingOwnerControl,
+} from "../../lib/pending-owner-control";
 import { targetChain } from "../../lib/web3-config";
 import { useLocale } from "../i18n/locale-provider";
 import { Button } from "../ui/button";
@@ -28,13 +44,17 @@ export function OwnerControls({
   ownerWallet: Address;
 }) {
   const { t } = useLocale();
+  const queryClient = useQueryClient();
   const connection = useConnection();
   const writeContract = useWriteContract();
-  const [hash, setHash] = useState<Hash>();
   const [action, setAction] = useState<OwnerAction>();
   const [priceInput, setPriceInput] = useState<string>();
   const [error, setError] = useState(false);
   const [confirmWithdraw, setConfirmWithdraw] = useState(false);
+  const [recording, setRecording] = useState(false);
+  const [recorded, setRecorded] = useState(false);
+  const [recordError, setRecordError] = useState(false);
+  const attemptedHash = useRef<string | undefined>(undefined);
   const enabled = Boolean(contractAddress);
   const paused = useReadContract({
     abi: genesisAbi,
@@ -55,6 +75,26 @@ export function OwnerControls({
     chainId: targetChain.id,
     query: { enabled },
   });
+  const storageKey = contractAddress
+    ? pendingOwnerControlKey({
+        account: ownerWallet,
+        chainId: targetChain.id,
+        contract: contractAddress,
+      })
+    : null;
+  const subscribe = useCallback((notify: () => void) => {
+    window.addEventListener(PENDING_OWNER_CONTROL_EVENT, notify);
+    window.addEventListener("storage", notify);
+    return () => {
+      window.removeEventListener(PENDING_OWNER_CONTROL_EVENT, notify);
+      window.removeEventListener("storage", notify);
+    };
+  }, []);
+  const getSnapshot = useCallback(
+    () => (storageKey ? readPendingOwnerControl(storageKey) : undefined),
+    [storageKey],
+  );
+  const hash = useSyncExternalStore(subscribe, getSnapshot, () => undefined);
   const receipt = useWaitForTransactionReceipt({
     chainId: targetChain.id,
     confirmations: 1,
@@ -81,12 +121,36 @@ export function OwnerControls({
     priceInput ??
     (mintPrice.data === undefined ? "" : formatEther(mintPrice.data));
 
+  const record = useCallback(
+    async (transactionHash: `0x${string}`) => {
+      setRecording(true);
+      setRecordError(false);
+      try {
+        await recordAdminOwnerControl(transactionHash);
+        setRecorded(true);
+        void queryClient.invalidateQueries({ queryKey: adminAuditQueryKey });
+        void refetchPaused();
+        void refetchMintPrice();
+        void refetchBalance();
+      } catch {
+        setRecordError(true);
+      } finally {
+        setRecording(false);
+      }
+    },
+    [queryClient, refetchBalance, refetchMintPrice, refetchPaused],
+  );
+
   useEffect(() => {
-    if (receipt.data?.status !== "success") return;
-    void refetchPaused();
-    void refetchMintPrice();
-    void refetchBalance();
-  }, [receipt.data?.status, refetchBalance, refetchMintPrice, refetchPaused]);
+    if (
+      hash &&
+      receipt.data?.status === "success" &&
+      attemptedHash.current !== hash
+    ) {
+      attemptedHash.current = hash;
+      void record(hash);
+    }
+  }, [hash, receipt.data?.status, record]);
 
   const sendPause = async () => {
     if (!canWrite || !contractAddress || paused.data === undefined) return;
@@ -109,7 +173,7 @@ export function OwnerControls({
             functionName: "pause",
           });
       setAction(nextAction);
-      setHash(transactionHash);
+      if (storageKey) writePendingOwnerControl(storageKey, transactionHash);
     } catch {
       setError(true);
     }
@@ -130,7 +194,7 @@ export function OwnerControls({
         functionName: "setMintPrice",
       });
       setAction("price");
-      setHash(transactionHash);
+      if (storageKey) writePendingOwnerControl(storageKey, transactionHash);
     } catch {
       setError(true);
     }
@@ -155,7 +219,7 @@ export function OwnerControls({
       });
       setAction("withdraw");
       setConfirmWithdraw(false);
-      setHash(transactionHash);
+      if (storageKey) writePendingOwnerControl(storageKey, transactionHash);
     } catch {
       setError(true);
     }
@@ -163,9 +227,12 @@ export function OwnerControls({
 
   const clearTransaction = () => {
     setAction(undefined);
-    setHash(undefined);
     setError(false);
     setConfirmWithdraw(false);
+    setRecorded(false);
+    setRecordError(false);
+    attemptedHash.current = undefined;
+    if (storageKey) writePendingOwnerControl(storageKey, undefined);
   };
 
   return (
@@ -327,7 +394,11 @@ export function OwnerControls({
             <Icon name="refresh" size={18} />
             <span>
               {receipt.data?.status === "success"
-                ? t("admin.ownerControlsIncluded")
+                ? recording
+                  ? t("admin.ownerControlsRecording")
+                  : recorded
+                    ? t("admin.ownerControlsAudited")
+                    : t("admin.ownerControlsIncluded")
                 : receipt.data?.status === "reverted"
                   ? t("admin.publicationReceiptFailed")
                   : receipt.isError
@@ -343,10 +414,30 @@ export function OwnerControls({
             </a>
           </div>
         )}
-        {hash && (receipt.data?.status || receipt.isError) && (
+        {hash &&
+          (receipt.isError ||
+            (receipt.data?.status === "success" && recordError)) && (
+            <Button
+              disabled={recording}
+              onClick={() => {
+                attemptedHash.current = hash;
+                void record(hash);
+              }}
+              size="sm"
+              variant="secondary"
+            >
+              {t("admin.ownerControlsRetryAudit")}
+            </Button>
+          )}
+        {hash && (recorded || receipt.data?.status === "reverted") && (
           <Button onClick={clearTransaction} size="sm" variant="ghost">
             {t("admin.ownerControlsDone")}
           </Button>
+        )}
+        {recordError && (
+          <p className="pv-admin-error" role="alert">
+            {t("admin.ownerControlsAuditError")}
+          </p>
         )}
         {error && (
           <p className="pv-admin-error" role="alert">
@@ -354,7 +445,7 @@ export function OwnerControls({
           </p>
         )}
         <p className="pv-admin-publication__finality">
-          {action
+          {action || hash
             ? t("admin.ownerControlsSubmitted")
             : t("admin.ownerControlsSafety")}
         </p>
