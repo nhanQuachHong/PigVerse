@@ -143,9 +143,11 @@ verification remain pending.
 
 **Status:** IN DEVELOPMENT — application-wide CSP, clickjacking, MIME-sniffing,
 referrer, browser-capability, cross-origin isolation and HSTS response headers are
-implemented and verified against a production Next.js server. Nonce/hash-based
-script CSP, dependency/secret scans, upload hardening and the complete threat and
-contract review remain pending.
+implemented and verified against a production Next.js server. A redacting
+repository secret gate and high-severity production dependency audit are wired
+into CI, and the living threat/risk review is recorded in `SECURITY_REVIEW.md`.
+Nonce/hash-based script CSP, upload hardening and the complete contract review
+remain pending; open HIGH findings prevent M10 completion.
 
 **Goal:** Remove critical/high security blockers.
 
