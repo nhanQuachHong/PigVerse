@@ -16,6 +16,25 @@ test("serves the browser security baseline", async ({ request }) => {
   expect(response.headers()["x-frame-options"]).toBe("DENY");
 });
 
+test("serves a redacted deployment health signal", async ({ request }) => {
+  const response = await request.get("/api/health");
+  const report = await response.json();
+
+  expect(response.status()).toBe(503);
+  expect(response.headers()["cache-control"]).toBe("no-store");
+  expect(report).toEqual({
+    checks: {
+      application: "ok",
+      chain: "error",
+      configuration: "error",
+      database: expect.stringMatching(/^(?:error|ok)$/),
+    },
+    status: "degraded",
+    timestamp: expect.any(String),
+  });
+  expect(JSON.stringify(report)).not.toMatch(/(?:postgres|rpc|token|secret)/iu);
+});
+
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() =>
     window.localStorage.setItem("pigverse-locale", "vi"),
