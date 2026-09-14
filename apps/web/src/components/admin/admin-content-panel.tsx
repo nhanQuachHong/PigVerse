@@ -3,6 +3,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import { type FormEvent, useEffect, useState } from "react";
+import type { Address } from "viem";
 
 import {
   type AdminContentClientError,
@@ -18,6 +19,7 @@ import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import { FormField, TextAreaField } from "../ui/form-field";
 import { Icon } from "../ui/icon";
+import { PublicationControl } from "./publication-control";
 
 function errorKey(error: unknown) {
   const code = (error as AdminContentClientError | undefined)?.code;
@@ -29,7 +31,15 @@ function errorKey(error: unknown) {
   return "admin.editorErrorGeneric" as const;
 }
 
-function DraftEditor({ slot }: { slot: AdminContentSlot }) {
+function DraftEditor({
+  contractAddress,
+  ownerWallet,
+  slot,
+}: {
+  contractAddress: Address | null;
+  ownerWallet: Address;
+  slot: AdminContentSlot;
+}) {
   const { t } = useLocale();
   const queryClient = useQueryClient();
   const initial: AdminDraftInput = {
@@ -82,104 +92,120 @@ function DraftEditor({ slot }: { slot: AdminContentSlot }) {
   };
 
   return (
-    <form className="pv-admin-editor" onSubmit={submit}>
-      <div className="pv-admin-editor__heading">
-        <div>
-          <p className="pv-eyebrow">
-            Token #{slot.tokenId} · {t("admin.editorRevision")}{" "}
-            {draft.expectedRevision}
-          </p>
-          <h3>{t("admin.editorTitle")}</h3>
-        </div>
-        <span
-          className={`pv-admin-chain-state pv-admin-chain-state--${slot.chainState}`}
-        >
-          {t(`admin.chain.${slot.chainState}`)}
-        </span>
-      </div>
-      {!editable && (
-        <div className="pv-admin-notice pv-admin-notice--warning" role="alert">
-          <Icon name="alert" size={20} />
-          <p>
-            {slot.chainState === "minted"
-              ? t("admin.editorLocked")
-              : t("admin.editorChainUnavailable")}
-          </p>
-        </div>
-      )}
-      <p className="pv-admin-editor__hint">{t("admin.editorDraftHint")}</p>
-      <div className="pv-admin-editor__grid">
-        <FormField
-          disabled={!editable || saving}
-          label={t("admin.editorNameVi")}
-          name={`name-vi-${slot.tokenId}`}
-          onChange={(event) => setField("nameVi", event.currentTarget.value)}
-          value={draft.nameVi}
-        />
-        <FormField
-          disabled={!editable || saving}
-          label={t("admin.editorNameEn")}
-          name={`name-en-${slot.tokenId}`}
-          onChange={(event) => setField("nameEn", event.currentTarget.value)}
-          value={draft.nameEn}
-        />
-        <TextAreaField
-          disabled={!editable || saving}
-          label={t("admin.editorDescriptionVi")}
-          name={`description-vi-${slot.tokenId}`}
-          onChange={(event) =>
-            setField("descriptionVi", event.currentTarget.value)
-          }
-          rows={4}
-          value={draft.descriptionVi}
-        />
-        <TextAreaField
-          disabled={!editable || saving}
-          label={t("admin.editorDescriptionEn")}
-          name={`description-en-${slot.tokenId}`}
-          onChange={(event) =>
-            setField("descriptionEn", event.currentTarget.value)
-          }
-          rows={4}
-          value={draft.descriptionEn}
-        />
-        <TextAreaField
-          disabled={!editable || saving}
-          label={t("admin.editorStoryVi")}
-          name={`story-vi-${slot.tokenId}`}
-          onChange={(event) => setField("storyVi", event.currentTarget.value)}
-          rows={7}
-          value={draft.storyVi}
-        />
-        <TextAreaField
-          disabled={!editable || saving}
-          label={t("admin.editorStoryEn")}
-          name={`story-en-${slot.tokenId}`}
-          onChange={(event) => setField("storyEn", event.currentTarget.value)}
-          rows={7}
-          value={draft.storyEn}
-        />
-      </div>
-      <div className="pv-admin-editor__actions">
-        <Button disabled={!editable || saving} type="submit">
-          {saving ? t("admin.editorSaving") : t("admin.editorSave")}
-        </Button>
-        {saved && (
-          <span className="pv-admin-editor__success" role="status">
-            <Icon name="check" size={18} /> {t("admin.editorSaved")}
+    <>
+      <form className="pv-admin-editor" onSubmit={submit}>
+        <div className="pv-admin-editor__heading">
+          <div>
+            <p className="pv-eyebrow">
+              Token #{slot.tokenId} · {t("admin.editorRevision")}{" "}
+              {draft.expectedRevision}
+            </p>
+            <h3>{t("admin.editorTitle")}</h3>
+          </div>
+          <span
+            className={`pv-admin-chain-state pv-admin-chain-state--${slot.chainState}`}
+          >
+            {t(`admin.chain.${slot.chainState}`)}
           </span>
+        </div>
+        {!editable && (
+          <div
+            className="pv-admin-notice pv-admin-notice--warning"
+            role="alert"
+          >
+            <Icon name="alert" size={20} />
+            <p>
+              {slot.chainState === "minted"
+                ? t("admin.editorLocked")
+                : t("admin.editorChainUnavailable")}
+            </p>
+          </div>
         )}
-        {saveError !== undefined && (
-          <span className="pv-admin-error" role="alert">
-            {t(errorKey(saveError))}
-          </span>
-        )}
-      </div>
-    </form>
+        <p className="pv-admin-editor__hint">{t("admin.editorDraftHint")}</p>
+        <div className="pv-admin-editor__grid">
+          <FormField
+            disabled={!editable || saving}
+            label={t("admin.editorNameVi")}
+            name={`name-vi-${slot.tokenId}`}
+            onChange={(event) => setField("nameVi", event.currentTarget.value)}
+            value={draft.nameVi}
+          />
+          <FormField
+            disabled={!editable || saving}
+            label={t("admin.editorNameEn")}
+            name={`name-en-${slot.tokenId}`}
+            onChange={(event) => setField("nameEn", event.currentTarget.value)}
+            value={draft.nameEn}
+          />
+          <TextAreaField
+            disabled={!editable || saving}
+            label={t("admin.editorDescriptionVi")}
+            name={`description-vi-${slot.tokenId}`}
+            onChange={(event) =>
+              setField("descriptionVi", event.currentTarget.value)
+            }
+            rows={4}
+            value={draft.descriptionVi}
+          />
+          <TextAreaField
+            disabled={!editable || saving}
+            label={t("admin.editorDescriptionEn")}
+            name={`description-en-${slot.tokenId}`}
+            onChange={(event) =>
+              setField("descriptionEn", event.currentTarget.value)
+            }
+            rows={4}
+            value={draft.descriptionEn}
+          />
+          <TextAreaField
+            disabled={!editable || saving}
+            label={t("admin.editorStoryVi")}
+            name={`story-vi-${slot.tokenId}`}
+            onChange={(event) => setField("storyVi", event.currentTarget.value)}
+            rows={7}
+            value={draft.storyVi}
+          />
+          <TextAreaField
+            disabled={!editable || saving}
+            label={t("admin.editorStoryEn")}
+            name={`story-en-${slot.tokenId}`}
+            onChange={(event) => setField("storyEn", event.currentTarget.value)}
+            rows={7}
+            value={draft.storyEn}
+          />
+        </div>
+        <div className="pv-admin-editor__actions">
+          <Button disabled={!editable || saving} type="submit">
+            {saving ? t("admin.editorSaving") : t("admin.editorSave")}
+          </Button>
+          {saved && (
+            <span className="pv-admin-editor__success" role="status">
+              <Icon name="check" size={18} /> {t("admin.editorSaved")}
+            </span>
+          )}
+          {saveError !== undefined && (
+            <span className="pv-admin-error" role="alert">
+              {t(errorKey(saveError))}
+            </span>
+          )}
+        </div>
+      </form>
+      <PublicationControl
+        contractAddress={contractAddress}
+        ownerWallet={ownerWallet}
+        slot={slot}
+      />
+    </>
   );
 }
 
-export function AdminContentPanel() {
+export function AdminContentPanel({
+  contractAddress,
+  ownerWallet,
+}: {
+  contractAddress: Address | null;
+  ownerWallet: Address;
+}) {
   const { t } = useLocale();
   const queryClient = useQueryClient();
   const content = useQuery(adminContentQuery);
@@ -276,7 +302,9 @@ export function AdminContentPanel() {
         </Card>
         <Card className="pv-admin-editor-card">
           <DraftEditor
+            contractAddress={contractAddress}
             key={`${selected.tokenId}-${selected.content?.revision ?? 0}`}
+            ownerWallet={ownerWallet}
             slot={selected}
           />
         </Card>

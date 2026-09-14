@@ -34,6 +34,10 @@ vi.mock("../../lib/admin-content", async (importOriginal) => {
   return { ...actual, updateAdminDraft: mocks.updateDraft };
 });
 
+vi.mock("./publication-control", () => ({
+  PublicationControl: () => <div data-testid="publication-control" />,
+}));
+
 function slots(): AdminContentSlot[] {
   return Array.from({ length: 10 }, (_, index) => ({
     chainState: index === 1 ? "minted" : "unminted",
@@ -45,7 +49,10 @@ function slots(): AdminContentSlot[] {
 function renderPanel() {
   return render(
     <LocaleProvider>
-      <AdminContentPanel />
+      <AdminContentPanel
+        contractAddress="0x1111111111111111111111111111111111111111"
+        ownerWallet="0x2222222222222222222222222222222222222222"
+      />
     </LocaleProvider>,
   );
 }

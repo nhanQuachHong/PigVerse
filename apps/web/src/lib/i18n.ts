@@ -118,6 +118,39 @@ const messages = {
     "admin.editorUnavailableTitle": "Không tải được nội dung Admin",
     "admin.editorUnavailable":
       "Database hoặc chain hiện không khả dụng. Hãy thử lại sau.",
+    "admin.publicationEyebrow": "Publication on-chain",
+    "admin.publicationTitle": "Công bố để mint",
+    "admin.publicationReadyHint":
+      "Backend kiểm tra asset package và revision trước khi ví Owner gửi giao dịch.",
+    "admin.publicationNotReady":
+      "Hoàn tất xử lý asset để đạt READY trước khi publish.",
+    "admin.publicationContractMissing":
+      "Contract Base Sepolia chưa được cấu hình an toàn.",
+    "admin.publicationWrongWallet":
+      "Kết nối đúng ví Owner của phiên để gửi giao dịch.",
+    "admin.publicationWrongNetwork": "Chuyển ví sang Base Sepolia để tiếp tục.",
+    "admin.publicationPublish": "Publish on-chain",
+    "admin.publicationUnpublish": "Unpublish on-chain",
+    "admin.publicationPreparing": "Đang kiểm tra và mở ví…",
+    "admin.publicationPending": "Giao dịch đang chờ hoặc đang được đối soát.",
+    "admin.publicationRecording": "Đang đối soát chain và ghi audit…",
+    "admin.publicationPublished": "Publish đã được ghi nhận ở block included.",
+    "admin.publicationUnpublished":
+      "Unpublish đã được ghi nhận ở block included.",
+    "admin.publicationViewTransaction": "Xem giao dịch",
+    "admin.publicationRetryRecord": "Đối soát lại",
+    "admin.publicationResetFailed": "Xóa giao dịch thất bại",
+    "admin.publicationReceiptFailed": "Giao dịch đã revert on-chain.",
+    "admin.publicationFinality":
+      "Included không đồng nghĩa finality. Block hash được lưu để reconciliation phát hiện reorg.",
+    "admin.publicationErrorAssets": "Asset package chưa COMPLETE.",
+    "admin.publicationErrorMinted": "Token đã mint; thao tác bị từ chối.",
+    "admin.publicationErrorConflict":
+      "Publication hoặc content revision đã thay đổi. Hãy làm mới.",
+    "admin.publicationErrorChain":
+      "Không đọc được chain nên không ghi trạng thái thành công.",
+    "admin.publicationErrorGeneric":
+      "Không thể hoàn tất publication. Kiểm tra ví và thử lại.",
     "admin.chain.minted": "Đã mint · khóa",
     "admin.chain.unminted": "Chưa mint · có thể sửa",
     "admin.chain.unavailable": "Chain chưa xác định",
@@ -239,6 +272,41 @@ const messages = {
     "admin.editorUnavailableTitle": "Admin content unavailable",
     "admin.editorUnavailable":
       "The database or chain is currently unavailable. Please try again.",
+    "admin.publicationEyebrow": "On-chain publication",
+    "admin.publicationTitle": "Publish for minting",
+    "admin.publicationReadyHint":
+      "The backend verifies the asset package and revision before the Owner wallet sends a transaction.",
+    "admin.publicationNotReady":
+      "Complete asset processing and reach READY before publishing.",
+    "admin.publicationContractMissing":
+      "The Base Sepolia contract is not safely configured.",
+    "admin.publicationWrongWallet":
+      "Connect the session Owner wallet to send the transaction.",
+    "admin.publicationWrongNetwork":
+      "Switch the wallet to Base Sepolia to continue.",
+    "admin.publicationPublish": "Publish on-chain",
+    "admin.publicationUnpublish": "Unpublish on-chain",
+    "admin.publicationPreparing": "Checking state and opening wallet…",
+    "admin.publicationPending":
+      "The transaction is pending or awaiting reconciliation.",
+    "admin.publicationRecording": "Reconciling chain state and audit…",
+    "admin.publicationPublished": "Publish recorded at an included block.",
+    "admin.publicationUnpublished": "Unpublish recorded at an included block.",
+    "admin.publicationViewTransaction": "View transaction",
+    "admin.publicationRetryRecord": "Reconcile again",
+    "admin.publicationResetFailed": "Clear failed transaction",
+    "admin.publicationReceiptFailed": "The transaction reverted on-chain.",
+    "admin.publicationFinality":
+      "Included does not mean final. The block hash is retained so reconciliation can detect a reorg.",
+    "admin.publicationErrorAssets": "The asset package is not COMPLETE.",
+    "admin.publicationErrorMinted":
+      "The token is already minted, so the action was rejected.",
+    "admin.publicationErrorConflict":
+      "The publication or content revision changed. Refresh and try again.",
+    "admin.publicationErrorChain":
+      "Chain state is unavailable, so no success state was recorded.",
+    "admin.publicationErrorGeneric":
+      "Publication could not be completed. Check the wallet and try again.",
     "admin.chain.minted": "Minted · locked",
     "admin.chain.unminted": "Unminted · editable",
     "admin.chain.unavailable": "Chain unavailable",

@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useConnection, useSignMessage, useSwitchChain } from "wagmi";
 
 import { type AdminSession, adminSessionQuery } from "../../lib/admin-session";
-import { targetChain } from "../../lib/web3-config";
+import { targetChain, targetContractAddress } from "../../lib/web3-config";
 import { useLocale } from "../i18n/locale-provider";
 import { AdminContentPanel } from "./admin-content-panel";
 import { Button } from "../ui/button";
@@ -170,7 +170,10 @@ export function AdminAccessView() {
             <span>{t("admin.currentOwner")}</span>
           </Card>
         </div>
-        <AdminContentPanel />
+        <AdminContentPanel
+          contractAddress={targetContractAddress}
+          ownerWallet={session.data.walletAddress}
+        />
         {error && (
           <p className="pv-admin-error" role="alert">
             {t("admin.error")}
