@@ -141,6 +141,12 @@ verification remain pending.
 
 ## M10 — Security Hardening
 
+**Status:** IN DEVELOPMENT — application-wide CSP, clickjacking, MIME-sniffing,
+referrer, browser-capability, cross-origin isolation and HSTS response headers are
+implemented and verified against a production Next.js server. Nonce/hash-based
+script CSP, dependency/secret scans, upload hardening and the complete threat and
+contract review remain pending.
+
 **Goal:** Remove critical/high security blockers.
 
 **Scope:** admin auth, sessions, uploads, web security, secret management, contract review, owner operations.  
