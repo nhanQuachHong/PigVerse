@@ -6,13 +6,16 @@ export type AdminAuthFailureCategory =
   | "invalid_input"
   | "rate_limited"
   | "unavailable";
-export type AdminOperation = "owner_control";
+export type AdminOperation =
+  "owner_control" | "publication_inclusion" | "publication_prepare";
 export type AdminOperationFailureCategory =
+  | "asset_not_ready"
   | "authentication_required"
   | "chain_unavailable"
   | "conflict"
   | "invalid_input"
   | "request_denied"
+  | "token_already_minted"
   | "transaction_failed"
   | "transaction_invalid"
   | "unavailable";
@@ -81,16 +84,20 @@ export function logAdminOperationFailure(
   if (
     !safeCorrelationId.test(input.correlationId) ||
     ![
+      "asset_not_ready",
       "authentication_required",
       "chain_unavailable",
       "conflict",
       "invalid_input",
       "request_denied",
+      "token_already_minted",
       "transaction_failed",
       "transaction_invalid",
       "unavailable",
     ].includes(input.category) ||
-    input.operation !== "owner_control"
+    !["owner_control", "publication_inclusion", "publication_prepare"].includes(
+      input.operation,
+    )
   )
     throw new Error("Invalid operational log input");
   writeLog(

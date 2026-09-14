@@ -5,6 +5,7 @@ import type {
   PublicationInclusionDependencies,
   PublicationInclusionStore,
 } from "./publication-inclusion";
+import type { logAdminOperationFailure } from "./operational-log";
 import type { PublicationSnapshot } from "./publication-reader";
 import type { PublicationTransactionObservation } from "./publication-transaction-reader";
 
@@ -115,59 +116,119 @@ describe("Admin publication inclusion route", () => {
   it("returns 202 for pending transactions without writing a projection", async () => {
     const { createPublicationInclusionHandler } = await loadHandler();
     const current = runtime();
+    const logFailure = vi.fn<typeof logAdminOperationFailure>();
     current.readTransaction.mockResolvedValueOnce({ status: "pending" });
-    const response = await createPublicationInclusionHandler(() => current)(
-      request(),
-      context,
-    );
+    const response = await createPublicationInclusionHandler(
+      () => current,
+      () => "correlation-1",
+      logFailure,
+    )(request(), context);
 
     expect(response.status).toBe(202);
     await expect(response.json()).resolves.toMatchObject({
       code: "TRANSACTION_PENDING",
     });
     expect(current.store.recordInclusion).not.toHaveBeenCalled();
+    expect(logFailure).not.toHaveBeenCalled();
   });
 
   it("rejects calldata for a different token and malformed hashes", async () => {
     const { createPublicationInclusionHandler } = await loadHandler();
     const wrongToken = runtime();
+    const logFailure = vi.fn<typeof logAdminOperationFailure>();
     wrongToken.readTransaction.mockResolvedValueOnce({
       ...included,
       call: { ...included.call, tokenId: 4 },
     });
     const wrongTokenResponse = await createPublicationInclusionHandler(
       () => wrongToken,
+      () => "correlation-1",
+      logFailure,
     )(request(), context);
     expect(wrongTokenResponse.status).toBe(400);
     await expect(wrongTokenResponse.json()).resolves.toMatchObject({
       code: "TRANSACTION_INVALID",
     });
+    expect(logFailure).toHaveBeenLastCalledWith({
+      category: "transaction_invalid",
+      correlationId: "correlation-1",
+      operation: "publication_inclusion",
+    });
 
-    const malformedResponse = await createPublicationInclusionHandler(runtime)(
-      request({ transactionHash: "0x1234" }),
-      context,
-    );
+    const malformedResponse = await createPublicationInclusionHandler(
+      runtime,
+      () => "correlation-2",
+      logFailure,
+    )(request({ transactionHash: "0x1234" }), context);
     expect(malformedResponse.status).toBe(400);
     await expect(malformedResponse.json()).resolves.toMatchObject({
       code: "INVALID_INPUT",
+    });
+    expect(logFailure).toHaveBeenLastCalledWith({
+      category: "invalid_input",
+      correlationId: "correlation-2",
+      operation: "publication_inclusion",
     });
   });
 
   it("checks Origin and current session before transaction reads", async () => {
     const { createPublicationInclusionHandler } = await loadHandler();
     const denied = runtime();
+    const logFailure = vi.fn<typeof logAdminOperationFailure>();
     const deniedResponse = await createPublicationInclusionHandler(
       () => denied,
+      () => "correlation-1",
+      logFailure,
     )(request(undefined, "https://evil.example"), context);
     expect(deniedResponse.status).toBe(403);
     expect(denied.authenticate).not.toHaveBeenCalled();
+    expect(logFailure).toHaveBeenLastCalledWith({
+      category: "request_denied",
+      correlationId: "correlation-1",
+      operation: "publication_inclusion",
+    });
 
     const unauthenticated = runtime();
     unauthenticated.authenticate.mockResolvedValueOnce(null);
     const unauthenticatedResponse = await createPublicationInclusionHandler(
       () => unauthenticated,
+      () => "correlation-2",
+      logFailure,
     )(request(), context);
     expect(unauthenticatedResponse.status).toBe(401);
     expect(unauthenticated.readTransaction).not.toHaveBeenCalled();
+    expect(logFailure).toHaveBeenLastCalledWith({
+      category: "authentication_required",
+      correlationId: "correlation-2",
+      operation: "publication_inclusion",
+    });
+  });
+
+  it("classifies chain outages without logging publication evidence", async () => {
+    const { createPublicationInclusionHandler } = await loadHandler();
+    const current = runtime();
+    const logFailure = vi.fn<typeof logAdminOperationFailure>();
+    current.readTransaction.mockResolvedValueOnce({ status: "unavailable" });
+    const response = await createPublicationInclusionHandler(
+      () => current,
+      () => "correlation-1",
+      logFailure,
+    )(request(), context);
+
+    expect(response.status).toBe(503);
+    expect(logFailure).toHaveBeenCalledWith({
+      category: "chain_unavailable",
+      correlationId: "correlation-1",
+      operation: "publication_inclusion",
+    });
+    expect(JSON.stringify(logFailure.mock.calls)).not.toContain(
+      transactionHash,
+    );
+    expect(JSON.stringify(logFailure.mock.calls)).not.toContain(
+      included.call.metadataIpfsUri,
+    );
+    expect(JSON.stringify(logFailure.mock.calls)).not.toContain(
+      session.walletAddress,
+    );
   });
 });

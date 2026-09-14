@@ -5,6 +5,7 @@ import type {
   AdminPublicationDependencies,
   PublicationCandidateStore,
 } from "./admin-publication";
+import type { logAdminOperationFailure } from "./operational-log";
 import type { PublicationSnapshot } from "./publication-reader";
 
 const session: AdminSession = {
@@ -129,14 +130,22 @@ describe("Admin publication prepare route", () => {
 
   it("maps readiness, chain and input failures without provider details", async () => {
     const { createPublicationPrepareHandler } = await loadHandler();
+    const logFailure = vi.fn<typeof logAdminOperationFailure>();
     const notReady = runtime();
     notReady.store.loadCurrent.mockResolvedValueOnce(null);
     const notReadyResponse = await createPublicationPrepareHandler(
       () => notReady,
+      () => "correlation-1",
+      logFailure,
     )(request(), context);
     expect(notReadyResponse.status).toBe(409);
     await expect(notReadyResponse.json()).resolves.toMatchObject({
       code: "ASSET_NOT_READY",
+    });
+    expect(logFailure).toHaveBeenLastCalledWith({
+      category: "asset_not_ready",
+      correlationId: "correlation-1",
+      operation: "publication_prepare",
     });
 
     const unavailable = runtime();
@@ -151,38 +160,85 @@ describe("Admin publication prepare route", () => {
     unavailable.readSnapshot.mockResolvedValueOnce(null);
     const unavailableResponse = await createPublicationPrepareHandler(
       () => unavailable,
+      () => "correlation-2",
+      logFailure,
     )(request(), context);
     expect(unavailableResponse.status).toBe(503);
     await expect(unavailableResponse.json()).resolves.toMatchObject({
       code: "CHAIN_STATE_UNAVAILABLE",
     });
+    expect(logFailure).toHaveBeenLastCalledWith({
+      category: "chain_unavailable",
+      correlationId: "correlation-2",
+      operation: "publication_prepare",
+    });
 
-    const invalidResponse = await createPublicationPrepareHandler(runtime)(
-      request({ action: "delete" }),
-      context,
-    );
+    const invalidResponse = await createPublicationPrepareHandler(
+      runtime,
+      () => "correlation-3",
+      logFailure,
+    )(request({ action: "delete" }), context);
     expect(invalidResponse.status).toBe(400);
     await expect(invalidResponse.json()).resolves.toMatchObject({
       code: "INVALID_INPUT",
+    });
+    expect(logFailure).toHaveBeenLastCalledWith({
+      category: "invalid_input",
+      correlationId: "correlation-3",
+      operation: "publication_prepare",
     });
   });
 
   it("caps request bodies and masks infrastructure failures", async () => {
     const { createPublicationPrepareHandler } = await loadHandler();
+    const logFailure = vi.fn<typeof logAdminOperationFailure>();
     const oversized = request({
       action: "publish",
       padding: "x".repeat(2_000),
     });
-    const oversizedResponse = await createPublicationPrepareHandler(runtime)(
-      oversized,
-      context,
-    );
+    const oversizedResponse = await createPublicationPrepareHandler(
+      runtime,
+      () => "correlation-1",
+      logFailure,
+    )(oversized, context);
     expect(oversizedResponse.status).toBe(413);
 
-    const failedResponse = await createPublicationPrepareHandler(() => {
-      throw new Error("rpc-token=secret");
-    })(request(), context);
+    const failedResponse = await createPublicationPrepareHandler(
+      () => {
+        throw new Error("rpc-token=secret");
+      },
+      () => "correlation-2",
+      logFailure,
+    )(request(), context);
     expect(failedResponse.status).toBe(503);
     expect(JSON.stringify(await failedResponse.json())).not.toContain("secret");
+    expect(logFailure).toHaveBeenLastCalledWith({
+      category: "unavailable",
+      correlationId: "correlation-2",
+      operation: "publication_prepare",
+    });
+    expect(JSON.stringify(logFailure.mock.calls)).not.toContain("secret");
+    expect(JSON.stringify(logFailure.mock.calls)).not.toContain(
+      prepared.metadataIpfsUri,
+    );
+  });
+
+  it("keeps the publication response stable when logging fails", async () => {
+    const { createPublicationPrepareHandler } = await loadHandler();
+    const current = runtime();
+    current.store.loadCurrent.mockResolvedValueOnce(null);
+    const response = await createPublicationPrepareHandler(
+      () => current,
+      () => "correlation-1",
+      () => {
+        throw new Error("logging unavailable");
+      },
+    )(request(), context);
+
+    expect(response.status).toBe(409);
+    await expect(response.json()).resolves.toMatchObject({
+      code: "ASSET_NOT_READY",
+      correlationId: "correlation-1",
+    });
   });
 });

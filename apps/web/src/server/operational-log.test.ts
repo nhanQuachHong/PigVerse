@@ -99,6 +99,25 @@ describe("operational logging", () => {
     });
   });
 
+  it("accepts only fixed publication operation names", () => {
+    const sink = vi.fn();
+    logAdminOperationFailure(
+      {
+        category: "asset_not_ready",
+        correlationId: "publication_1234",
+        operation: "publication_prepare",
+      },
+      { sink },
+    );
+
+    expect(JSON.parse(sink.mock.calls[0]?.[0] ?? "")).toMatchObject({
+      category: "asset_not_ready",
+      event: "ADMIN_OPERATION_FAILED",
+      level: "warning",
+      operation: "publication_prepare",
+    });
+  });
+
   it("rejects non-allowlisted Owner-control context", () => {
     const sink = vi.fn();
 
