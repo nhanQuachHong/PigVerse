@@ -125,10 +125,12 @@ audit events and session-protected list/update APIs pass local tests. A
 provider-neutral retry-safe asset pipeline, revision-bound PostgreSQL checkpoints,
 owner-signed publish/unpublish preparation, inclusion reconciliation and
 idempotent inclusion/audit persistence are implemented and locally verified. The
-bilingual 10-slot editor, guarded publication controls and paginated immutable
-audit history pass component, API and desktop/mobile visual tests. Concrete IPFS
-and backup-provider adapters, the Admin asset-processing route/UI, mint activity
-reconciliation and live database/deployed-chain verification remain pending.
+bilingual 10-slot editor, guarded publication controls, paginated immutable
+audit history and chain-reconciled mint activity view pass component, API and
+desktop/mobile visual tests. Verified successful mint observations atomically
+lock the current matching content revision. Concrete IPFS and backup-provider
+adapters, the Admin asset-processing route/UI and live database/deployed-chain
+verification remain pending.
 
 **Goal:** Manage and publish complete asset packages for the 10 unminted characters safely.
 

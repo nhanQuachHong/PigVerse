@@ -1,6 +1,6 @@
 # ADR 0010 — Revisioned Admin content and chain-checked writes
 
-Status: Draft storage and protected API implemented; asset processing and publication remain pending.
+Status: Revisioned storage, protected APIs, guarded publication and successful-mint lifecycle synchronization are implemented locally; provider-backed asset processing and live integration verification remain pending.
 
 Each Admin edit inserts an immutable `nft_contents` revision. A partial unique
 index permits only one current revision for each Base deployment and Genesis
@@ -31,5 +31,7 @@ No database transaction can atomically serialize against a blockchain block.
 The in-transaction recheck narrows the edit race; the contract's publication
 revision guard prevents a collector from minting different metadata than the
 revision selected, and later reconciliation must mark any externally observed
-mint as `MINTED_LOCKED`. Publication and reconciliation are separate required
-units before the content workflow is complete.
+mint as `MINTED_LOCKED`. Guarded publication and successful-mint lifecycle
+synchronization are now implemented as separate locally verified units. The
+content workflow remains incomplete until provider-backed asset processing and
+live database/deployed-chain verification are complete.
