@@ -18,6 +18,7 @@ describe("database migration foundation", () => {
       "0005_add_asset_checkpoint_version.sql",
       "0006_create_publication_inclusions.sql",
       "0007_create_mint_activity.sql",
+      "0008_create_owner_control_inclusions.sql",
     ]);
   });
 
@@ -96,5 +97,25 @@ describe("database migration foundation", () => {
     expect(source).toContain("observed_status = 'SUCCEEDED'");
     expect(source).toContain("observed_owner_wallet IS NOT NULL");
     expect(source).toContain("Current chain ownership remains authoritative");
+  });
+
+  it("records idempotent Owner control inclusions with action-specific evidence", async () => {
+    const source = await readFile(
+      new URL(
+        "../migrations/0008_create_owner_control_inclusions.sql",
+        import.meta.url,
+      ),
+      "utf8",
+    );
+
+    expect(source).toContain("PRIMARY KEY (deployment_key, transaction_hash)");
+    expect(source).toContain(
+      "action IN ('PAUSE', 'UNPAUSE', 'SET_MINT_PRICE', 'WITHDRAW')",
+    );
+    expect(source).toContain("action = 'SET_MINT_PRICE'");
+    expect(source).toContain("new_mint_price IS NOT NULL");
+    expect(source).toContain("action = 'WITHDRAW'");
+    expect(source).toContain("withdrawn_amount IS NOT NULL");
+    expect(source).toContain("inclusion does not imply product finality");
   });
 });
