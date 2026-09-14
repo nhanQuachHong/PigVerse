@@ -34,5 +34,6 @@ ownership handover. The harness accepts arbitrary metadata solely for testing;
 it is not a deployable product. Publication eligibility and paid mint proceeds
 are settled by the concrete contract decision in ADR 0005. The Admin UI reads
 pause and price from chain and asks the connected Owner wallet to sign direct
-transactions; live deployment verification and transaction audit/reconciliation
-remain pending.
+transactions. ADR 0012 records how included Owner transactions are independently
+verified and audited. Live deployment and finality/reorg verification remain
+pending.
