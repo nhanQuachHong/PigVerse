@@ -11,6 +11,7 @@ describe("health inspection", () => {
         checkChain: vi.fn().mockResolvedValue(true),
         checkDatabase: vi.fn().mockResolvedValue(true),
         configurationReady: true,
+        correlationId: () => "health_probe_ready",
         now: () => now,
       }),
     ).resolves.toEqual({
@@ -20,6 +21,7 @@ describe("health inspection", () => {
         configuration: "ok",
         database: "ok",
       },
+      correlationId: "health_probe_ready",
       status: "ok",
       timestamp: now.toISOString(),
     });
@@ -27,11 +29,14 @@ describe("health inspection", () => {
 
   it("fails closed without configuration and does not contact chain", async () => {
     const checkChain = vi.fn().mockResolvedValue(true);
+    const onFailure = vi.fn();
     const report = await inspectHealth({
       checkChain,
       checkDatabase: vi.fn().mockResolvedValue(true),
       configurationReady: false,
+      correlationId: () => "health_probe_config",
       now: () => now,
+      onFailure,
     });
 
     expect(report).toMatchObject({
@@ -39,6 +44,10 @@ describe("health inspection", () => {
       status: "degraded",
     });
     expect(checkChain).not.toHaveBeenCalled();
+    expect(onFailure).toHaveBeenCalledWith({
+      correlationId: "health_probe_config",
+      integration: "configuration",
+    });
   });
 
   it.each(["rejection", "false", "timeout"])(
@@ -59,6 +68,7 @@ describe("health inspection", () => {
         checkChain: vi.fn().mockResolvedValue(true),
         checkDatabase,
         configurationReady: true,
+        correlationId: () => "health_probe_failure",
         now: () => now,
         timeoutMs: failure === "timeout" ? 1 : 100,
       });

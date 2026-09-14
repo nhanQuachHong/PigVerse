@@ -9,6 +9,7 @@ describe("health route", () => {
         checkChain: vi.fn().mockResolvedValue(true),
         checkDatabase: vi.fn().mockResolvedValue(true),
         configurationReady: true,
+        correlationId: () => "health_route_ready",
         now: () => new Date("2026-09-14T15:30:00.000Z"),
       }),
       0,
@@ -16,6 +17,7 @@ describe("health route", () => {
 
     expect(response.status).toBe(200);
     expect(response.headers.get("cache-control")).toBe("no-store");
+    expect(response.headers.get("x-correlation-id")).toBe("health_route_ready");
     await expect(response.json()).resolves.toMatchObject({ status: "ok" });
   });
 
@@ -27,6 +29,7 @@ describe("health route", () => {
           .mockRejectedValue(new Error("https://rpc.example/private-token")),
         checkDatabase: vi.fn().mockResolvedValue(true),
         configurationReady: true,
+        correlationId: () => "health_route_failure",
         now: () => new Date("2026-09-14T15:30:00.000Z"),
       }),
       0,
@@ -46,6 +49,7 @@ describe("health route", () => {
         checkChain,
         checkDatabase,
         configurationReady: true,
+        correlationId: () => "health_route_cached",
       }),
       10_000,
     );

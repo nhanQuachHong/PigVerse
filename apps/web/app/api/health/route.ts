@@ -9,7 +9,10 @@ export const dynamic = "force-dynamic";
 
 function healthResponse(report: HealthReport) {
   return Response.json(report, {
-    headers: { "Cache-Control": "no-store" },
+    headers: {
+      "Cache-Control": "no-store",
+      "X-Correlation-ID": report.correlationId,
+    },
     status: report.status === "ok" ? 200 : 503,
   });
 }

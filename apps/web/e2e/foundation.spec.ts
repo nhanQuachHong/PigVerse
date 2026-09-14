@@ -22,6 +22,9 @@ test("serves a redacted deployment health signal", async ({ request }) => {
 
   expect(response.status()).toBe(503);
   expect(response.headers()["cache-control"]).toBe("no-store");
+  expect(response.headers()["x-correlation-id"]).toMatch(
+    /^[a-zA-Z0-9_-]{8,128}$/,
+  );
   expect(report).toEqual({
     checks: {
       application: "ok",
@@ -29,6 +32,7 @@ test("serves a redacted deployment health signal", async ({ request }) => {
       configuration: "error",
       database: expect.stringMatching(/^(?:error|ok)$/),
     },
+    correlationId: response.headers()["x-correlation-id"],
     status: "degraded",
     timestamp: expect.any(String),
   });

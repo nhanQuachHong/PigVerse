@@ -2,6 +2,7 @@ import { resolvePublicChainConfig } from "../lib/public-collection";
 import { readCurrentOwner } from "./current-owner";
 import { getDatabase } from "./database";
 import type { HealthDependencies } from "./health";
+import { logHealthIntegrationFailure } from "./operational-log";
 
 export function getHealthRuntime(): HealthDependencies {
   const configuration = resolvePublicChainConfig();
@@ -15,5 +16,6 @@ export function getHealthRuntime(): HealthDependencies {
       return rows.length === 1 && Number(rows[0]?.ready) === 1;
     },
     configurationReady: Boolean(configuration),
+    onFailure: logHealthIntegrationFailure,
   };
 }
