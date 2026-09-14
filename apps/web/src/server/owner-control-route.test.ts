@@ -6,6 +6,7 @@ import type {
   OwnerControlInclusionDependencies,
   OwnerControlInclusionStore,
 } from "./owner-control-inclusion";
+import type { logAdminOperationFailure } from "./operational-log";
 import type { OwnerTransactionObservation } from "./owner-transaction-reader";
 
 const appOrigin = "https://pigverse.example";
@@ -78,16 +79,20 @@ describe("Owner control inclusion route", () => {
 
   it("returns 202 for pending transactions without an audit write", async () => {
     const current = runtime();
+    const logFailure = vi.fn<typeof logAdminOperationFailure>();
     current.readTransaction.mockResolvedValueOnce({ status: "pending" });
-    const response = await createOwnerControlInclusionHandler(() => current)(
-      request(),
-    );
+    const response = await createOwnerControlInclusionHandler(
+      () => current,
+      () => "correlation-1",
+      logFailure,
+    )(request());
 
     expect(response.status).toBe(202);
     await expect(response.json()).resolves.toMatchObject({
       code: "TRANSACTION_PENDING",
     });
     expect(current.store.recordInclusion).not.toHaveBeenCalled();
+    expect(logFailure).not.toHaveBeenCalled();
   });
 
   it("rejects client-supplied action or malformed hashes", async () => {
@@ -110,33 +115,113 @@ describe("Owner control inclusion route", () => {
 
   it("checks Origin and current session before reading transaction data", async () => {
     const denied = runtime();
+    const logFailure = vi.fn<typeof logAdminOperationFailure>();
     const deniedResponse = await createOwnerControlInclusionHandler(
       () => denied,
+      () => "correlation-1",
+      logFailure,
     )(request(undefined, "https://evil.example"));
     expect(deniedResponse.status).toBe(403);
     expect(denied.authenticate).not.toHaveBeenCalled();
+    expect(logFailure).toHaveBeenLastCalledWith({
+      category: "request_denied",
+      correlationId: "correlation-1",
+      operation: "owner_control",
+    });
 
     const unauthenticated = runtime();
     unauthenticated.authenticate.mockResolvedValueOnce(null);
     const unauthenticatedResponse = await createOwnerControlInclusionHandler(
       () => unauthenticated,
+      () => "correlation-2",
+      logFailure,
     )(request());
     expect(unauthenticatedResponse.status).toBe(401);
     expect(unauthenticated.readTransaction).not.toHaveBeenCalled();
+    expect(logFailure).toHaveBeenLastCalledWith({
+      category: "authentication_required",
+      correlationId: "correlation-2",
+      operation: "owner_control",
+    });
+  });
+
+  it("classifies a chain-read outage without leaking request context", async () => {
+    const current = runtime();
+    const logFailure = vi.fn<typeof logAdminOperationFailure>();
+    current.readTransaction.mockResolvedValueOnce({ status: "unavailable" });
+    const response = await createOwnerControlInclusionHandler(
+      () => current,
+      () => "correlation-1",
+      logFailure,
+    )(request());
+
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toMatchObject({
+      code: "CHAIN_STATE_UNAVAILABLE",
+    });
+    expect(logFailure).toHaveBeenCalledWith({
+      category: "chain_unavailable",
+      correlationId: "correlation-1",
+      operation: "owner_control",
+    });
+    expect(JSON.stringify(logFailure.mock.calls)).not.toContain(
+      transactionHash,
+    );
+    expect(JSON.stringify(logFailure.mock.calls)).not.toContain(
+      session.walletAddress,
+    );
   });
 
   it("returns only a stable unavailable code for unexpected failures", async () => {
     const current = runtime();
+    const logFailure = vi.fn<typeof logAdminOperationFailure>();
     current.readTransaction.mockRejectedValueOnce(
       new Error("provider secret detail"),
     );
-    const response = await createOwnerControlInclusionHandler(() => current)(
-      request(),
-    );
+    const response = await createOwnerControlInclusionHandler(
+      () => current,
+      () => "correlation-1",
+      logFailure,
+    )(request());
 
     expect(response.status).toBe(503);
     const body = await response.json();
     expect(body).toMatchObject({ code: "OWNER_CONTROL_UNAVAILABLE" });
     expect(JSON.stringify(body)).not.toContain("provider secret detail");
+    expect(logFailure).toHaveBeenCalledWith({
+      category: "unavailable",
+      correlationId: "correlation-1",
+      operation: "owner_control",
+    });
+    expect(JSON.stringify(logFailure.mock.calls)).not.toContain(
+      "provider secret detail",
+    );
+    expect(JSON.stringify(logFailure.mock.calls)).not.toContain(
+      transactionHash,
+    );
+    expect(JSON.stringify(logFailure.mock.calls)).not.toContain(
+      session.walletAddress,
+    );
+  });
+
+  it("keeps the API outcome stable when operational logging fails", async () => {
+    const current = runtime();
+    current.readTransaction.mockResolvedValueOnce({
+      call: included.call,
+      status: "failed",
+    });
+    const response = await createOwnerControlInclusionHandler(
+      () => current,
+      () => "correlation-1",
+      () => {
+        throw new Error("logging unavailable");
+      },
+    )(request());
+
+    expect(response.status).toBe(409);
+    await expect(response.json()).resolves.toMatchObject({
+      code: "TRANSACTION_FAILED",
+      correlationId: "correlation-1",
+    });
   });
 });

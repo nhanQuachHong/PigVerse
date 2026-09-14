@@ -6,6 +6,16 @@ export type AdminAuthFailureCategory =
   | "invalid_input"
   | "rate_limited"
   | "unavailable";
+export type AdminOperation = "owner_control";
+export type AdminOperationFailureCategory =
+  | "authentication_required"
+  | "chain_unavailable"
+  | "conflict"
+  | "invalid_input"
+  | "request_denied"
+  | "transaction_failed"
+  | "transaction_invalid"
+  | "unavailable";
 
 export type OperationalLogSink = (line: string) => void;
 
@@ -52,6 +62,48 @@ export function logAdminAuthFailure(
       event: "ADMIN_AUTH_FAILED",
       level: "warning",
       stage: input.stage,
+    },
+    options,
+  );
+}
+
+export function logAdminOperationFailure(
+  input: {
+    category: AdminOperationFailureCategory;
+    correlationId: string;
+    operation: AdminOperation;
+  },
+  options: {
+    now?: () => Date;
+    sink?: OperationalLogSink;
+  } = {},
+) {
+  if (
+    !safeCorrelationId.test(input.correlationId) ||
+    ![
+      "authentication_required",
+      "chain_unavailable",
+      "conflict",
+      "invalid_input",
+      "request_denied",
+      "transaction_failed",
+      "transaction_invalid",
+      "unavailable",
+    ].includes(input.category) ||
+    input.operation !== "owner_control"
+  )
+    throw new Error("Invalid operational log input");
+  writeLog(
+    {
+      category: input.category,
+      correlationId: input.correlationId,
+      event: "ADMIN_OPERATION_FAILED",
+      level:
+        input.category === "chain_unavailable" ||
+        input.category === "unavailable"
+          ? "error"
+          : "warning",
+      operation: input.operation,
     },
     options,
   );

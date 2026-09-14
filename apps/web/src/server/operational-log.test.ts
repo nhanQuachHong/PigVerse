@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import {
   logAdminAuthFailure,
+  logAdminOperationFailure,
   logHealthIntegrationFailure,
 } from "./operational-log";
 
@@ -72,5 +73,45 @@ describe("operational logging", () => {
       stage: "verify",
       timestamp: "2026-09-14T15:30:00.000Z",
     });
+  });
+
+  it("logs only allowlisted Owner-control failure context", () => {
+    const sink = vi.fn();
+    logAdminOperationFailure(
+      {
+        category: "chain_unavailable",
+        correlationId: "owner_control_1234",
+        operation: "owner_control",
+      },
+      {
+        now: () => new Date("2026-09-14T15:30:00.000Z"),
+        sink,
+      },
+    );
+
+    expect(JSON.parse(sink.mock.calls[0]?.[0] ?? "")).toEqual({
+      category: "chain_unavailable",
+      correlationId: "owner_control_1234",
+      event: "ADMIN_OPERATION_FAILED",
+      level: "error",
+      operation: "owner_control",
+      timestamp: "2026-09-14T15:30:00.000Z",
+    });
+  });
+
+  it("rejects non-allowlisted Owner-control context", () => {
+    const sink = vi.fn();
+
+    expect(() =>
+      logAdminOperationFailure(
+        {
+          category: "transaction_failed",
+          correlationId: "https://rpc.invalid/credential",
+          operation: "owner_control",
+        },
+        { sink },
+      ),
+    ).toThrow("Invalid operational log input");
+    expect(sink).not.toHaveBeenCalled();
   });
 });
