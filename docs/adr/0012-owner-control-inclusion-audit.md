@@ -33,6 +33,15 @@ The inclusion row and its append-only `audit_events` row are written in one
 database transaction. A deployment-and-transaction-hash lock makes exact retries
 idempotent and rejects conflicting evidence.
 
+The API emits a separate operational failure event for denied or unauthenticated
+requests, invalid input, chain unavailability, reverted/invalid transactions,
+reconciliation conflicts and unexpected unavailability. That event contains
+only the bounded correlation ID, fixed Owner-control operation, allowlisted
+category, severity and timestamp. It never contains wallet or transaction
+identifiers, price/withdrawal values, provider payloads or raw exceptions.
+`TRANSACTION_PENDING` remains an expected polling state and does not emit a
+failure event. Logging failure cannot alter the API response.
+
 ## Authority and finality boundary
 
 The contract's `onlyOwner` check is the authorization boundary for the mutation.
@@ -55,6 +64,7 @@ nonzero value, malformed calldata, pending/reverted/unavailable receipts,
 idempotent persistence, conflicting evidence, atomic audit writes, authenticated
 and same-origin route enforcement, response parsing, browser recovery and retry,
 and Admin UI state refresh. PostgreSQL migration structure, the production build
-and desktop/mobile visual baselines are also verified. A live Base Sepolia
-transaction, database migration rehearsal and reorg/finality worker remain
-release work.
+and desktop/mobile visual baselines are also verified. Route tests additionally
+cover safe failure classification, non-disclosure, quiet pending polling and
+logging-sink isolation. A live Base Sepolia transaction, database migration
+rehearsal and reorg/finality worker remain release work.

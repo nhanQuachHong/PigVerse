@@ -1,4 +1,4 @@
-# ADR 0014 — Redacted liveness and readiness signals
+# ADR 0014 — Redacted operational signals
 
 Status: Accepted local foundation for M15; hosted monitoring and alerting remain
 pending.
@@ -31,6 +31,14 @@ failure cannot change the health response. Liveness and readiness are separate
 so a provider outage does not cause an orchestrator to restart a healthy
 application process.
 
+The same narrow logger boundary covers Admin authentication and Owner-control
+API failures. Authentication events accept only a fixed stage and failure
+category. Owner-control events accept only the fixed operation and an allowlisted
+category; they exclude wallet addresses, transaction hashes, action values and
+raw errors. A pending transaction is normal polling state and is not logged as a
+failure. These events are diagnostic signals, not authorization decisions or
+substitutes for the append-only chain-evidence audit.
+
 ## Boundaries and follow-up
 
 This signal detects reachability, not full business correctness, provider
@@ -47,7 +55,8 @@ SEC-SECRETS-001 and SEC-LOG-001.
 
 Unit and route tests cover ready, missing configuration, false, rejected and
 timed-out integrations, cache/coalescing behavior, correlation propagation,
-structured allowlists and response/log redaction. Playwright verifies the emitted
-degraded response and safe JSON events from the optimized server when deployment
-configuration is intentionally absent. Live provider and hosted monitoring
-verification remain pending.
+structured allowlists, Admin auth and Owner-control failure classification,
+response/log redaction and logging-sink isolation. Playwright verifies the
+emitted degraded response and safe JSON events from the optimized server when
+deployment configuration is intentionally absent. Live provider and hosted
+monitoring verification remain pending.

@@ -31,6 +31,7 @@ chain ownership. RPC, IPFS and backup providers are external trust boundaries.
 | Known production dependency advisory | CI runs `pnpm audit --prod --audit-level high`. The 2026-09-14 local registry result reported no known vulnerabilities. | Time-bound pass |
 | Health failure log disclosure | Readiness failures emit only a bounded correlation ID and allowlisted integration category; raw exception/provider content never enters the structured logger. | Verified locally |
 | Admin authentication log disclosure | Auth failures emit only bounded correlation ID, fixed stage and allowlisted category; wallet, nonce, message, signature, cookie and raw exception data never enter the logger. | Verified locally |
+| Owner-control failure log disclosure | Owner-control API failures emit only bounded correlation ID, fixed operation and allowlisted category; wallet, transaction hash, price, withdrawal amount and raw exception data never enter the logger. Pending polling is not logged as a failure. | Verified locally |
 
 Primary implementation evidence includes:
 
@@ -42,6 +43,7 @@ Primary implementation evidence includes:
 - `apps/web/src/server/publication-transaction-reader.ts`
 - `apps/web/src/server/mint-transaction-reader.ts`
 - `apps/web/src/server/owner-transaction-reader.ts`
+- `apps/web/src/server/operational-log.ts`
 - `apps/web/src/lib/security-headers.ts`
 - `scripts/verify-secrets.mjs`
 
