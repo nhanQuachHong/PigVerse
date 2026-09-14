@@ -15,6 +15,7 @@ export type PublicationInclusion = {
   expectedPublicationRevision: bigint;
   metadataIpfsUri: `ipfs://${string}` | null;
   observedPublicationRevision: bigint;
+  observedTokenState: "minted" | "unminted";
   tokenId: number;
   transactionHash: `0x${string}`;
 };
@@ -125,13 +126,14 @@ export async function recordPublicationInclusion(
   const stored = await dependencies.store.recordInclusion({
     action: observation.call.action,
     actorWallet,
-    blockHash: observation.blockHash,
+    blockHash: observation.blockHash.toLowerCase() as `0x${string}`,
     blockNumber: BigInt(observation.block),
     correlationId: input.correlationId,
     deploymentKey: dependencies.deploymentKey,
     expectedPublicationRevision: observation.call.expectedPublicationRevision,
     metadataIpfsUri: targetUri,
     observedPublicationRevision: observedRevision,
+    observedTokenState: snapshot.tokenState,
     tokenId: observation.call.tokenId,
     transactionHash,
   });

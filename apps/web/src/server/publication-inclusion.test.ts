@@ -81,6 +81,7 @@ describe("publication inclusion recording", () => {
         blockNumber: 2748n,
         expectedPublicationRevision: 4n,
         observedPublicationRevision: 5n,
+        observedTokenState: "unminted",
       }),
     );
   });

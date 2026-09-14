@@ -16,6 +16,7 @@ describe("database migration foundation", () => {
       "0003_create_genesis_content.sql",
       "0004_add_asset_integrity.sql",
       "0005_add_asset_checkpoint_version.sql",
+      "0006_create_publication_inclusions.sql",
     ]);
   });
 
@@ -58,5 +59,25 @@ describe("database migration foundation", () => {
 
     expect(source).toContain("checkpoint_version integer NOT NULL DEFAULT 0");
     expect(source).toContain("checkpoint_version >= 0");
+  });
+
+  it("records idempotent publication inclusions without claiming finality", async () => {
+    const source = await readFile(
+      new URL(
+        "../migrations/0006_create_publication_inclusions.sql",
+        import.meta.url,
+      ),
+      "utf8",
+    );
+
+    expect(source).toContain("transaction_hash char(66) PRIMARY KEY");
+    expect(source).toContain(
+      "UNIQUE (deployment_key, token_id, observed_publication_revision)",
+    );
+    expect(source).toContain("block_hash char(66) NOT NULL");
+    expect(source).toContain(
+      "observed_publication_revision = expected_publication_revision + 1",
+    );
+    expect(source).toContain("do not imply finality");
   });
 });
