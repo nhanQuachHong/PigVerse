@@ -6,11 +6,11 @@ Sepolia deployment and explorer verification are not yet completed.
 ## Read-only network simulation evidence
 
 The production Cancun artifact constructor executed successfully through
-`eth_call` at Base Sepolia block `46717194` (chain ID `84532`), returning 7,669
+`eth_call` at Base Sepolia block `46815991` (chain ID `84532`), returning 7,790
 bytes of runtime code. Init-code hash:
-`0xc36b894eac5d7a68207364d88562cfdba94df5b35a7d119dbcaa82a703e67457`.
+`0xa4fadea3bb06c57361d8c79028b92bba95565f54d0deb4f91dfea1df6c6aa7ab`.
 Runtime hash:
-`0xfb930ae14eaf7f0811cba634cf3e8fc531b3e83f5dc28bc08bcbc8e5cc18f90c`.
+`0xe2601bbfaa74415596f918f5bd17a529712b213a5aaaacef6e44880e52fe7d71`.
 
 Repeat with `pnpm --filter @pigverse/contracts simulate:sepolia`. This compiles
 production then performs a read-only constructor call via the public endpoint
@@ -39,15 +39,38 @@ owner address, a funded deployment signer and RPC configuration. Keep signer
 material in the deployment operator's secret store; never put it in parameters,
 documentation or Git. Do not use this test-price module for Mainnet.
 
-`ignition/deploy-sepolia.ts` explicitly connects to `baseSepolia` and checks the
-provider chain ID and `GENESIS_OWNER_ADDRESS` before invoking Ignition. Its
-preflight rejects Mainnet, local chains and invalid/zero owners. The production
-profile (Solidity 0.8.34, Cancun EVM target, optimizer 200 runs) passes all 25 local contract tests
-with `pnpm --filter @pigverse/contracts test:production`. Use
+Store the RPC URL and deployment signer interactively in Hardhat's encrypted
+keystore; these commands prompt for values and do not take them as command-line
+arguments:
+
+```text
+pnpm --dir packages/contracts exec hardhat keystore set BASE_SEPOLIA_RPC_URL
+pnpm --dir packages/contracts exec hardhat keystore set BASE_SEPOLIA_DEPLOYER_PRIVATE_KEY
+```
+
+The deployment signer may differ from the configured Owner. Fund only the signer
+with enough Base Sepolia ETH for deployment gas, rerun the read-only simulation,
+then execute the guarded entry point:
+
+```text
+pnpm --filter @pigverse/contracts simulate:sepolia
+pnpm --filter @pigverse/contracts deploy:sepolia
+```
+
+Do not type a signing key into chat, source files, shell history or command-line
+arguments. `pnpm verify:secrets` must pass before and after deployment.
+
+`ignition/deploy-sepolia.ts` explicitly connects to `baseSepolia`, checks the
+provider chain ID, validates `GENESIS_OWNER_ADDRESS` and refuses an unfunded
+signer before invoking Ignition. After deployment it independently reads and
+requires the approved Owner, price zero, maximum supply ten, total supply zero
+and unpaused state before printing a redaction-safe JSON record. Its preflight
+rejects Mainnet, local chains and invalid/zero owners. The production profile
+(Solidity 0.8.34, Cancun EVM target, optimizer 200 runs) passes all 25 local
+contract tests with `pnpm --filter @pigverse/contracts test:production`. Use
 `build:production` to compile the same profile. External signer setup and
-verification of the target network's supported EVM revision remain pending.
-Do not bypass this entry
-point by deploying the module directly to another network.
+verification of the target network's supported EVM revision remain pending. Do
+not bypass this entry point by deploying the module directly to another network.
 
 Both compiler profiles explicitly target Cancun rather than inheriting the
 compiler's Osaka default. This fixes generated-opcode expectations across
