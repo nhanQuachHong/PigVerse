@@ -27,7 +27,7 @@ This roadmap covers the approved product through production release. Completing 
 
 ## M2 — Genesis Smart Contract
 
-**Status:** IN DEVELOPMENT — concrete publication-bound mint and owner withdrawal pass local integration tests alongside core invariants; adversarial integration tests, deployment verification and backend publication synchronization remain pending.
+**Status:** IN DEVELOPMENT — concrete publication-bound mint and owner withdrawal pass local and adversarial integration tests alongside core invariants. The authenticated Admin UI reads pause, mint price and contract balance from chain, sends pause/unpause/price/withdraw transactions through the connected Owner wallet, and requires an explicit recipient-and-balance confirmation for withdrawal. Live deployment verification and Owner-transaction audit/reconciliation remain pending.
 
 **Goal:** Implement and verify the 10-token exact-mint contract.
 

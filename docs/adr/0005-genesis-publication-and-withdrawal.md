@@ -1,6 +1,7 @@
 # ADR 0005 — Publication-bound mint and owner withdrawal
 
-Status: Implemented locally; deployment and adversarial integration review pending.
+Status: Implemented locally in the contract and Owner UI; live deployment and
+Owner-transaction audit/reconciliation remain pending.
 
 Authority: the approved unified Owner/Admin matrix in
 `OWNER_ADMIN_ROLE_DECISION.md` supersedes the separate-role premise of ADR 0004
@@ -27,6 +28,10 @@ mint and withdraw share OpenZeppelin's reentrancy guard. There is no transfer
 to the owner during mint, so a recipient failure does not block collectors.
 
 Local tests cover revision races, unpublish, post-mint locks, authorization,
-price/pause parity between owner and user, and withdrawal balance accounting.
-Malicious receiver/owner integration tests, deployment configuration and the
-backend asset-readiness workflow remain outstanding. Mainnet is not authorized.
+price/pause parity between owner and user, withdrawal balance accounting and a
+malicious receiver that rejects payment before later recovery. The Admin UI
+shows the contract balance and requires a second confirmation with the exact
+Owner recipient before asking that wallet to sign `withdraw()`; it cannot choose
+another beneficiary. Live deployment configuration, provider-backed asset
+readiness and Owner-transaction audit/reconciliation remain outstanding. Mainnet
+is not authorized.

@@ -11,8 +11,10 @@ an accidental transaction cannot permanently eliminate pause/price controls.
 This does not resolve owner custody or lost-key recovery (OD-022/OD-023).
 
 `pause`, `unpause` and `setMintPrice` are checked on-chain with `onlyOwner`.
-Backend Application Admin status confers no contract authority. Pausing gates
-mint only; ERC-721 reads, approvals and transfers remain available.
+An authenticated Admin session confers no contract authority by itself; the
+current Owner wallet must sign and on-chain `onlyOwner` remains the enforcement
+boundary. Pausing gates mint only; ERC-721 reads, approvals and transfers remain
+available.
 
 Price is an unsigned integer in native currency wei. Each mint must pay exactly
 the current price: underpayment, overpayment and a stale nonmatching price
@@ -29,5 +31,8 @@ BR-004/005/010, NFR-SEC-004 and SEC-CONTRACT-001.
 `GenesisMintControls` is abstract. Its composed test harness verifies owner
 authorization, current payment enforcement, transfer while paused, and
 ownership handover. The harness accepts arbitrary metadata solely for testing;
-it is not a deployable product. Publication eligibility and handling paid mint
-proceeds must be settled in the concrete application contract before deployment.
+it is not a deployable product. Publication eligibility and paid mint proceeds
+are settled by the concrete contract decision in ADR 0005. The Admin UI reads
+pause and price from chain and asks the connected Owner wallet to sign direct
+transactions; live deployment verification and transaction audit/reconciliation
+remain pending.
