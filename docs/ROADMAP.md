@@ -188,6 +188,13 @@ remain pending; open HIGH findings prevent M10 completion.
 
 ## M15 — Reliability & Observability
 
+**Status:** IN DEVELOPMENT — separate process-liveness and redacted deployment-
+readiness endpoints are implemented. Readiness checks configuration, current
+on-chain Owner access and PostgreSQL within bounded time, coalesces concurrent
+probes and reports only `ok/error`; optimized-server tests verify degraded
+behavior without leaking integration details. Structured failure logging,
+metrics/alerts, provider retry/failover and controlled failure drills remain.
+
 **Goal:** Production-grade failure handling and visibility.
 
 **Scope:** `NFR-REL-*`, `NFR-OPS-004..006`.  
