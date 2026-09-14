@@ -1,6 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { logHealthIntegrationFailure } from "./operational-log";
+import {
+  logAdminAuthFailure,
+  logHealthIntegrationFailure,
+} from "./operational-log";
 
 describe("operational logging", () => {
   it("writes a bounded machine-readable health event", () => {
@@ -45,5 +48,29 @@ describe("operational logging", () => {
       ),
     ).toThrow("Invalid operational log input");
     expect(sink).not.toHaveBeenCalled();
+  });
+
+  it("logs only allowlisted Admin authentication context", () => {
+    const sink = vi.fn();
+    logAdminAuthFailure(
+      {
+        category: "authorization_denied",
+        correlationId: "admin_auth_1234",
+        stage: "verify",
+      },
+      {
+        now: () => new Date("2026-09-14T15:30:00.000Z"),
+        sink,
+      },
+    );
+
+    expect(JSON.parse(sink.mock.calls[0]?.[0] ?? "")).toEqual({
+      category: "authorization_denied",
+      correlationId: "admin_auth_1234",
+      event: "ADMIN_AUTH_FAILED",
+      level: "warning",
+      stage: "verify",
+      timestamp: "2026-09-14T15:30:00.000Z",
+    });
   });
 });

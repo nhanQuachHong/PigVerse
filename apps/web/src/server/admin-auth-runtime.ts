@@ -63,9 +63,18 @@ export function hasExpectedOrigin(request: Request, expectedOrigin: string) {
   return request.headers.get("origin") === expectedOrigin;
 }
 
-export function adminAuthJson(body: unknown, init: ResponseInit = {}) {
+export function adminAuthJson(
+  body: unknown,
+  init: ResponseInit = {},
+  correlationId?: string,
+) {
   const headers = new Headers(init.headers);
   headers.set("Cache-Control", "no-store");
+  if (correlationId) {
+    if (!/^[a-zA-Z0-9_-]{8,128}$/u.test(correlationId))
+      throw new Error("Invalid response correlation ID");
+    headers.set("X-Correlation-ID", correlationId);
+  }
   return Response.json(body, { ...init, headers });
 }
 
