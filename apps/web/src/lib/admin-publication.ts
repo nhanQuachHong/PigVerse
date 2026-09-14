@@ -51,7 +51,10 @@ async function publicationRequest(
   } catch {
     throw new AdminPublicationClientError("INVALID_RESPONSE");
   }
-  if (!response.ok) {
+  if (
+    !response.ok ||
+    (payload && typeof payload === "object" && "code" in payload)
+  ) {
     const code =
       payload && typeof payload === "object" && "code" in payload
         ? String(payload.code)

@@ -100,6 +100,16 @@ describe("Admin publication API client", () => {
 
     vi.stubGlobal(
       "fetch",
+      vi.fn(async () =>
+        Response.json({ code: "TRANSACTION_PENDING" }, { status: 202 }),
+      ),
+    );
+    await expect(recordAdminPublication(3, transactionHash)).rejects.toEqual(
+      new AdminPublicationClientError("TRANSACTION_PENDING"),
+    );
+
+    vi.stubGlobal(
+      "fetch",
       vi.fn(async () => new Response("provider-token=secret", { status: 503 })),
     );
     await expect(prepareAdminPublication(3, "publish")).rejects.toEqual(
