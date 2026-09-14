@@ -2,7 +2,13 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import type { Hash } from "viem";
 import {
   useConnection,
@@ -13,6 +19,7 @@ import {
 } from "wagmi";
 
 import { genesisAbi } from "../../lib/genesis-contract";
+import { reportMintTransaction } from "../../lib/mint-activity-client";
 import {
   PENDING_MINT_EVENT,
   pendingMintKey,
@@ -42,6 +49,7 @@ export function MintPanel({ detail }: { detail: PublicNftDetail }) {
   const writeContract = useWriteContract();
   const [preparing, setPreparing] = useState(false);
   const [error, setError] = useState<string>();
+  const reportedObservation = useRef<string | undefined>(undefined);
   const vi = locale === "vi";
   const { deployment, token } = detail;
   const correctNetwork = connection.chainId === targetChain.id;
@@ -85,6 +93,22 @@ export function MintPanel({ detail }: { detail: PublicNftDetail }) {
   useEffect(() => {
     if (succeeded || reverted) router.refresh();
   }, [reverted, router, succeeded]);
+
+  useEffect(() => {
+    if (!hash) return;
+    const receiptState = succeeded
+      ? "success"
+      : reverted
+        ? "reverted"
+        : receipt.isError
+          ? "uncertain"
+          : "pending";
+    const observationKey = `${hash}:${receiptState}`;
+    if (reportedObservation.current === observationKey) return;
+    reportedObservation.current = observationKey;
+    // Operational activity never controls the collector's receipt-derived UI.
+    void reportMintTransaction(hash).catch(() => undefined);
+  }, [hash, receipt.isError, reverted, succeeded]);
 
   const connectWallet = () => {
     window.dispatchEvent(new Event("pigverse:open-wallet"));

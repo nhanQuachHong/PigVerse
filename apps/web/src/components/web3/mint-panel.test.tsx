@@ -25,6 +25,11 @@ const mocks = vi.hoisted(() => ({
   switchMutate: vi.fn(),
   writeData: undefined as `0x${string}` | undefined,
   writeMutateAsync: vi.fn(),
+  reportMintTransaction: vi.fn(),
+}));
+
+vi.mock("../../lib/mint-activity-client", () => ({
+  reportMintTransaction: mocks.reportMintTransaction,
 }));
 
 vi.mock("next/navigation", () => ({
@@ -91,6 +96,8 @@ describe("MintPanel", () => {
     mocks.refresh.mockReset();
     mocks.switchMutate.mockReset();
     mocks.writeMutateAsync.mockReset();
+    mocks.reportMintTransaction.mockReset();
+    mocks.reportMintTransaction.mockResolvedValue(undefined);
   });
 
   it("never offers mint when deployment state is unverified", () => {
@@ -158,6 +165,9 @@ describe("MintPanel", () => {
         `pigverse:mint:84532:${contract}:4:${mocks.connection.address}`,
       ),
     ).toBe(transactionHash);
+    await waitFor(() =>
+      expect(mocks.reportMintTransaction).toHaveBeenCalledWith(transactionHash),
+    );
   });
 
   it("does not submit when the fresh contract state is paused", async () => {
@@ -204,7 +214,7 @@ describe("MintPanel", () => {
     ).toBeNull();
   });
 
-  it("restores a known hash and only celebrates an authoritative success", () => {
+  it("restores a known hash, reports it and only celebrates an authoritative success", async () => {
     const transactionHash = `0x${"b".repeat(64)}`;
     window.localStorage.setItem(
       `pigverse:mint:84532:${contract}:4:${mocks.connection.address}`,
@@ -218,6 +228,9 @@ describe("MintPanel", () => {
     expect(screen.getByRole("link", { name: "NFT của tôi" })).toHaveAttribute(
       "href",
       "/my-nfts",
+    );
+    await waitFor(() =>
+      expect(mocks.reportMintTransaction).toHaveBeenCalledWith(transactionHash),
     );
   });
 
@@ -252,5 +265,19 @@ describe("MintPanel", () => {
       "Giao dịch đã thất bại; quyền sở hữu không thay đổi",
     );
     expect(screen.queryByText("Mint đã xác nhận!")).toBeNull();
+  });
+
+  it("keeps receipt-derived success when activity reporting is unavailable", () => {
+    const transactionHash = `0x${"e".repeat(64)}`;
+    window.localStorage.setItem(
+      `pigverse:mint:84532:${contract}:4:${mocks.connection.address}`,
+      transactionHash,
+    );
+    mocks.receipt.data = { status: "success" };
+    mocks.reportMintTransaction.mockRejectedValue(new Error("API unavailable"));
+    renderPanel();
+
+    expect(screen.getByText("Mint đã xác nhận!")).toBeVisible();
+    expect(screen.queryByRole("alert")).toBeNull();
   });
 });
