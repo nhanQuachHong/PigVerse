@@ -17,6 +17,7 @@ import {
 
 import type { AdminContentSlot } from "../../lib/admin-content";
 import { adminContentQuery } from "../../lib/admin-content";
+import { adminAuditQueryKey } from "../../lib/admin-audit";
 import {
   type AdminPublicationClientError,
   type PublicationAction,
@@ -135,6 +136,7 @@ export function PublicationControl({
                 : candidate,
             ),
         );
+        void queryClient.invalidateQueries({ queryKey: adminAuditQueryKey });
         if (storageKey) writePendingPublication(storageKey, undefined);
       } catch (cause) {
         setError(cause);

@@ -16,6 +16,7 @@ const mocks = vi.hoisted(() => ({
     refetch: vi.fn(),
   },
   setQueryData: vi.fn(),
+  invalidateQueries: vi.fn(),
   updateDraft: vi.fn(),
 }));
 
@@ -24,7 +25,10 @@ vi.mock("@tanstack/react-query", async (importOriginal) => {
   return {
     ...actual,
     useQuery: () => mocks.query,
-    useQueryClient: () => ({ setQueryData: mocks.setQueryData }),
+    useQueryClient: () => ({
+      invalidateQueries: mocks.invalidateQueries,
+      setQueryData: mocks.setQueryData,
+    }),
   };
 });
 
@@ -67,6 +71,7 @@ describe("AdminContentPanel", () => {
     mocks.query.isPending = false;
     mocks.query.refetch.mockReset();
     mocks.setQueryData.mockReset();
+    mocks.invalidateQueries.mockReset();
     mocks.updateDraft.mockReset();
   });
 
@@ -123,6 +128,9 @@ describe("AdminContentPanel", () => {
       }),
     );
     expect(mocks.setQueryData).toHaveBeenCalled();
+    expect(mocks.invalidateQueries).toHaveBeenCalledWith({
+      queryKey: ["admin-audit"],
+    });
     expect(screen.getByRole("status")).toHaveTextContent("Đã lưu");
   });
 

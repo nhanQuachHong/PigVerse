@@ -51,12 +51,33 @@ test("authenticated Admin editor matches its visual baseline", async ({
       },
     });
   });
+  await page.route("**/api/admin/audit?**", async (route) => {
+    await route.fulfill({
+      json: {
+        events: [
+          {
+            action: "NFT_DRAFT_UPDATED",
+            actorWallet: "0x2222222222222222222222222222222222222222",
+            auditEventId: "7",
+            correlationId: "correlation_7",
+            createdAt: "2026-09-13T00:00:07.000Z",
+            safeContext: { fromRevision: 1, toRevision: 2 },
+            target: { id: "7", tokenId: 5, type: "NFT_CONTENT" },
+          },
+        ],
+        nextCursor: null,
+      },
+    });
+  });
   await page.goto("/admin");
   await expect(
     page.getByRole("heading", { name: "Admin Dashboard", level: 1 }),
   ).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "Bản nháp 10 nhân vật", level: 2 }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Lịch sử thay đổi", level: 2 }),
   ).toBeVisible();
   await expect
     .poll(() =>

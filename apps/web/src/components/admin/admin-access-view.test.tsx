@@ -9,6 +9,10 @@ vi.mock("./admin-content-panel", () => ({
   AdminContentPanel: () => <div>Protected content editor</div>,
 }));
 
+vi.mock("./admin-audit-panel", () => ({
+  AdminAuditPanel: () => <div>Protected audit history</div>,
+}));
+
 const owner = "0x1111111111111111111111111111111111111111" as const;
 const other = "0x2222222222222222222222222222222222222222" as const;
 

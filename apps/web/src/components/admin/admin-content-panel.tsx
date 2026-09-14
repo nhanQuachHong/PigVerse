@@ -12,6 +12,7 @@ import {
   adminContentQuery,
   updateAdminDraft,
 } from "../../lib/admin-content";
+import { adminAuditQueryKey } from "../../lib/admin-audit";
 import { CHARACTER_CATALOG } from "../../lib/character-catalog";
 import { type AdminSession, adminSessionQuery } from "../../lib/admin-session";
 import { useLocale } from "../i18n/locale-provider";
@@ -83,6 +84,7 @@ function DraftEditor({
         ...current,
         expectedRevision: content.revision,
       }));
+      void queryClient.invalidateQueries({ queryKey: adminAuditQueryKey });
       setSaved(true);
     } catch (error) {
       setSaveError(error);

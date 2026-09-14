@@ -25,13 +25,17 @@ const mocks = vi.hoisted(() => ({
   record: vi.fn(),
   send: vi.fn(),
   setQueryData: vi.fn(),
+  invalidateQueries: vi.fn(),
 }));
 
 vi.mock("@tanstack/react-query", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@tanstack/react-query")>();
   return {
     ...actual,
-    useQueryClient: () => ({ setQueryData: mocks.setQueryData }),
+    useQueryClient: () => ({
+      invalidateQueries: mocks.invalidateQueries,
+      setQueryData: mocks.setQueryData,
+    }),
   };
 });
 
@@ -97,6 +101,7 @@ describe("PublicationControl", () => {
     mocks.record.mockReset();
     mocks.send.mockReset();
     mocks.setQueryData.mockReset();
+    mocks.invalidateQueries.mockReset();
     mocks.receipt.data = undefined;
     mocks.receipt.isError = false;
     mocks.prepare.mockResolvedValue({
@@ -188,6 +193,9 @@ describe("PublicationControl", () => {
       expect(mocks.record).toHaveBeenCalledWith(3, transactionHash),
     );
     expect(mocks.setQueryData).toHaveBeenCalled();
+    expect(mocks.invalidateQueries).toHaveBeenCalledWith({
+      queryKey: ["admin-audit"],
+    });
     expect(window.localStorage.getItem(key)).toBeNull();
     expect(screen.getByRole("status")).toHaveTextContent("được ghi nhận");
   });

@@ -7,6 +7,7 @@ import { useConnection, useSignMessage, useSwitchChain } from "wagmi";
 import { type AdminSession, adminSessionQuery } from "../../lib/admin-session";
 import { targetChain, targetContractAddress } from "../../lib/web3-config";
 import { useLocale } from "../i18n/locale-provider";
+import { AdminAuditPanel } from "./admin-audit-panel";
 import { AdminContentPanel } from "./admin-content-panel";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
@@ -174,6 +175,7 @@ export function AdminAccessView() {
           contractAddress={targetContractAddress}
           ownerWallet={session.data.walletAddress}
         />
+        <AdminAuditPanel />
         {error && (
           <p className="pv-admin-error" role="alert">
             {t("admin.error")}
