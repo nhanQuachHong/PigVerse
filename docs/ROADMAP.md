@@ -121,10 +121,14 @@ privileged workflows assigned to later milestones remain pending.
 
 **Status:** IN DEVELOPMENT — environment-bound immutable content revisions,
 optimistic stale-edit detection, in-transaction chain mint rechecks, atomic draft
-audit events and session-protected list/update APIs pass local tests. Asset
-provider adapters, processing/retry, publish/unpublish, reconciliation and Admin
-history UI remain pending; the bilingual 10-slot draft editor passes component
-and desktop/mobile visual tests.
+audit events and session-protected list/update APIs pass local tests. A
+provider-neutral retry-safe asset pipeline, revision-bound PostgreSQL checkpoints,
+owner-signed publish/unpublish preparation, inclusion reconciliation and
+idempotent inclusion/audit persistence are implemented and locally verified. The
+bilingual 10-slot editor, guarded publication controls and paginated immutable
+audit history pass component, API and desktop/mobile visual tests. Concrete IPFS
+and backup-provider adapters, the Admin asset-processing route/UI, mint activity
+reconciliation and live database/deployed-chain verification remain pending.
 
 **Goal:** Manage and publish complete asset packages for the 10 unminted characters safely.
 
