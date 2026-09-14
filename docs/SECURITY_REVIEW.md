@@ -30,6 +30,7 @@ chain ownership. RPC, IPFS and backup providers are external trust boundaries.
 | Committed credentials | `verify:secrets` scans tracked and non-ignored candidate files, redacts values in findings and is part of `verify`; CI runs it. Blank examples remain valid. | Verified locally |
 | Known production dependency advisory | CI runs `pnpm audit --prod --audit-level high`. The 2026-09-14 local registry result reported no known vulnerabilities. | Time-bound pass |
 | Health failure log disclosure | Readiness failures emit only a bounded correlation ID and allowlisted integration category; raw exception/provider content never enters the structured logger. | Verified locally |
+| Admin authentication log disclosure | Auth failures emit only bounded correlation ID, fixed stage and allowlisted category; wallet, nonce, message, signature, cookie and raw exception data never enter the logger. | Verified locally |
 
 Primary implementation evidence includes:
 

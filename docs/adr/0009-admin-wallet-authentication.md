@@ -29,3 +29,11 @@ fixed-window limits keyed by hashed address/nonce. Production ingress should add
 a distributed/IP rate limit because process-local controls do not coordinate
 across instances. This remains a deployment hardening item, not an authorization
 fallback.
+
+Challenge, verification and session responses carry a bounded correlation ID.
+Denied origin, invalid input, rate-limit, authorization and integration failures
+emit an allowlisted structured event containing only correlation ID, stage and
+safe category. Wallet address, nonce, signed message, signature, session cookie,
+raw exception and provider configuration never enter this logger. Logging-sink
+failure cannot change the authentication response. Malformed JSON is classified
+as invalid input rather than an integration outage.
