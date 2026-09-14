@@ -261,6 +261,15 @@ export class PostgresMintActivityStore implements MintActivityStore {
           `;
       const row = rows[0];
       if (!row) throw new Error("Mint activity write returned no record");
+      if (normalized.status === "SUCCEEDED")
+        await transaction`
+          UPDATE nft_contents
+          SET lifecycle_state = 'MINTED_LOCKED', updated_at = now()
+          WHERE deployment_key = ${normalized.deploymentKey}
+            AND token_id = ${normalized.tokenId}
+            AND is_current
+            AND lifecycle_state <> 'MINTED_LOCKED'
+        `;
       return { record: fromRow(row), status: "recorded" } as const;
     });
   }

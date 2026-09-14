@@ -97,6 +97,14 @@ describe("Postgres mint activity store", () => {
           values.includes(evidence.transactionHash),
       ),
     ).toBe(true);
+    expect(
+      harness.calls.some(
+        ({ text, values }) =>
+          text.startsWith("UPDATE nft_contents") &&
+          values.includes(evidence.deploymentKey) &&
+          values.includes(evidence.tokenId),
+      ),
+    ).toBe(true);
   });
 
   it("updates evidence without creating a duplicate logical observation", async () => {
@@ -126,6 +134,41 @@ describe("Postgres mint activity store", () => {
       ),
     ).toHaveLength(1);
   });
+
+  it.each(["PENDING", "REVERTED", "UNKNOWN"] as const)(
+    "does not lock content for a %s observation",
+    async (status) => {
+      const harness = sqlHarness({
+        writtenRows: [
+          {
+            ...row,
+            block_hash: status === "REVERTED" ? evidence.blockHash : null,
+            block_number: status === "REVERTED" ? "2748" : null,
+            observed_owner_wallet: null,
+            observed_status: status,
+            safe_error_category: status === "REVERTED" ? "EVM_REVERT" : null,
+            transfer_log_index: null,
+          },
+        ],
+      });
+      const store = new PostgresMintActivityStore(harness.sql);
+      await store.upsert({
+        ...evidence,
+        blockHash: status === "REVERTED" ? evidence.blockHash : null,
+        blockNumber: status === "REVERTED" ? evidence.blockNumber : null,
+        observedOwnerWallet: null,
+        safeErrorCategory: status === "REVERTED" ? "EVM_REVERT" : null,
+        status,
+        transferLogIndex: null,
+      });
+
+      expect(
+        harness.calls.some(({ text }) =>
+          text.startsWith("UPDATE nft_contents"),
+        ),
+      ).toBe(false);
+    },
+  );
 
   it("rejects a reused transaction identity with a different token", async () => {
     const harness = sqlHarness({ existingRows: [row] });
