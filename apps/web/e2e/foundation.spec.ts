@@ -69,6 +69,52 @@ test("authenticated Admin editor matches its visual baseline", async ({
       },
     });
   });
+  await page.route("**/api/admin/mint-activity?**", async (route) => {
+    const senderWallet = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+    const blockHash = `0x${"d".repeat(64)}`;
+    const activity = (
+      id: number,
+      status: "PENDING" | "REVERTED" | "SUCCEEDED" | "UNKNOWN",
+    ) => {
+      const included = status === "SUCCEEDED" || status === "REVERTED";
+      return {
+        blockHash: included ? blockHash : null,
+        blockNumber: included ? "2748" : null,
+        expectedPublicationRevision: "4",
+        finality: status === "SUCCEEDED" ? "included" : null,
+        firstSeenAt: "2026-09-13T00:00:00.000Z",
+        lastObservedAt: "2026-09-13T00:01:00.000Z",
+        mintObservationId: String(id),
+        observedOwnerWallet:
+          status === "SUCCEEDED"
+            ? "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+            : null,
+        reconciliation: status === "UNKNOWN" ? "unavailable" : "current",
+        safeErrorCategory:
+          status === "REVERTED"
+            ? "EVM_REVERT"
+            : status === "UNKNOWN"
+              ? "TRANSACTION_NOT_FOUND"
+              : null,
+        senderWallet,
+        status,
+        tokenId: id,
+        transactionHash: `0x${String(id).repeat(64)}`,
+        transferLogIndex: status === "SUCCEEDED" ? 7 : null,
+      };
+    };
+    await route.fulfill({
+      json: {
+        activities: [
+          activity(1, "SUCCEEDED"),
+          activity(2, "REVERTED"),
+          activity(3, "PENDING"),
+          activity(4, "UNKNOWN"),
+        ],
+        nextCursor: null,
+      },
+    });
+  });
   await page.goto("/admin");
   await expect(
     page.getByRole("heading", { name: "Admin Dashboard", level: 1 }),
@@ -79,6 +125,14 @@ test("authenticated Admin editor matches its visual baseline", async ({
   await expect(
     page.getByRole("heading", { name: "Lịch sử thay đổi", level: 2 }),
   ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Hoạt động mint", level: 2 }),
+  ).toBeVisible();
+  const dimensions = await page.evaluate(() => ({
+    clientWidth: document.documentElement.clientWidth,
+    scrollWidth: document.documentElement.scrollWidth,
+  }));
+  expect(dimensions.scrollWidth).toBe(dimensions.clientWidth);
   await expect
     .poll(() =>
       page

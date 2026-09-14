@@ -1193,6 +1193,83 @@
 .pv-admin-audit__state p {
   margin: 0;
 }
+.pv-admin-activity {
+  margin-top: var(--pv-space-10);
+}
+.pv-admin-activity__description {
+  max-width: 52rem;
+  margin: var(--pv-space-3) 0 0;
+  color: var(--pv-color-ink-muted);
+  font-size: var(--pv-text-sm);
+}
+.pv-admin-activity__list {
+  display: grid;
+  gap: var(--pv-space-3);
+  margin: var(--pv-space-5) 0 var(--pv-space-4);
+  padding: 0;
+  list-style: none;
+}
+.pv-admin-activity__row {
+  display: grid;
+  grid-template-columns: 8rem minmax(9rem, 1fr) minmax(11rem, 1fr) auto;
+  align-items: center;
+  gap: var(--pv-space-4);
+  padding: var(--pv-space-4) var(--pv-space-5);
+}
+.pv-admin-activity__status {
+  justify-self: start;
+  padding: 0.4rem 0.65rem;
+  border-radius: var(--pv-radius-pill);
+  background: var(--pv-color-blue-50);
+  color: var(--pv-color-blue-500);
+  font-size: var(--pv-text-xs);
+  font-weight: 800;
+}
+.pv-admin-activity__status--succeeded {
+  background: var(--pv-color-green-50);
+  color: var(--pv-color-green-600);
+}
+.pv-admin-activity__status--reverted {
+  background: var(--pv-color-pink-50);
+  color: var(--pv-color-red-600);
+}
+.pv-admin-activity__status--unknown {
+  background: var(--pv-color-amber-50);
+  color: var(--pv-color-amber-700);
+}
+.pv-admin-activity__identity,
+.pv-admin-activity__evidence,
+.pv-admin-activity__time {
+  display: grid;
+  gap: var(--pv-space-1);
+  min-width: 0;
+}
+.pv-admin-activity__identity code,
+.pv-admin-activity__evidence,
+.pv-admin-activity__time {
+  color: var(--pv-color-ink-muted);
+  font-size: var(--pv-text-xs);
+}
+.pv-admin-activity__identity code {
+  font-family: inherit;
+}
+.pv-admin-activity__evidence a {
+  overflow: hidden;
+  color: var(--pv-color-pink-600);
+  font-weight: 800;
+  text-decoration: underline;
+  text-overflow: ellipsis;
+  text-underline-offset: 0.15em;
+  white-space: nowrap;
+}
+.pv-admin-activity__time {
+  justify-items: end;
+  text-align: right;
+}
+.pv-admin-activity__warning {
+  color: var(--pv-color-amber-700);
+  font-weight: 750;
+}
 
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -1417,5 +1494,12 @@
   .pv-admin-audit__meta {
     grid-column: 2;
     justify-items: start;
+  }
+  .pv-admin-activity__row {
+    grid-template-columns: 1fr 1fr;
+  }
+  .pv-admin-activity__time {
+    justify-items: start;
+    text-align: left;
   }
 }

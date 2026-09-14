@@ -9,6 +9,7 @@ import { targetChain, targetContractAddress } from "../../lib/web3-config";
 import { useLocale } from "../i18n/locale-provider";
 import { AdminAuditPanel } from "./admin-audit-panel";
 import { AdminContentPanel } from "./admin-content-panel";
+import { AdminMintActivityPanel } from "./admin-mint-activity-panel";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import { Icon } from "../ui/icon";
@@ -175,6 +176,7 @@ export function AdminAccessView() {
           contractAddress={targetContractAddress}
           ownerWallet={session.data.walletAddress}
         />
+        <AdminMintActivityPanel />
         <AdminAuditPanel />
         {error && (
           <p className="pv-admin-error" role="alert">
