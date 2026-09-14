@@ -6,6 +6,7 @@
   "scripts": {
     "build": "hardhat compile",
     "build:production": "hardhat compile --build-profile production",
+    "deploy:sepolia": "hardhat --network baseSepolia --build-profile production run ignition/deploy-sepolia.ts",
     "simulate:sepolia": "pnpm build:production && node ignition/simulate-sepolia.mjs",
     "test:production": "hardhat test --build-profile production",
     "test": "hardhat test",
