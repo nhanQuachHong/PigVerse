@@ -84,6 +84,7 @@ export async function recordPublicationInclusion(
   input: {
     actorWallet: string;
     correlationId: string;
+    tokenId: number;
     transactionHash: string;
   },
   dependencies: PublicationInclusionDependencies,
@@ -91,6 +92,9 @@ export async function recordPublicationInclusion(
   if (
     !isAddress(input.actorWallet) ||
     /^0x0{40}$/iu.test(input.actorWallet) ||
+    !Number.isInteger(input.tokenId) ||
+    input.tokenId < 1 ||
+    input.tokenId > 10 ||
     !/^0x[0-9a-f]{64}$/iu.test(input.transactionHash) ||
     !/^[a-zA-Z0-9_-]{8,128}$/u.test(input.correlationId)
   )
@@ -106,6 +110,8 @@ export async function recordPublicationInclusion(
   if (observation.status === "invalid") return fail("TRANSACTION_INVALID");
   if (observation.status === "pending") return fail("TRANSACTION_PENDING");
   if (observation.status === "failed") return fail("TRANSACTION_FAILED");
+  if (observation.call.tokenId !== input.tokenId)
+    return fail("TRANSACTION_INVALID");
 
   const snapshot = await dependencies.readSnapshot(observation.call.tokenId);
   if (!snapshot) return fail("CHAIN_STATE_UNAVAILABLE");

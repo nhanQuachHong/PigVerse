@@ -59,6 +59,7 @@ function dependencies() {
 const input = {
   actorWallet,
   correlationId: "correlation-1",
+  tokenId: 3,
   transactionHash,
 };
 
