@@ -3,6 +3,7 @@
 import { type FormEvent, useEffect, useState } from "react";
 import { formatEther, parseEther, type Address, type Hash } from "viem";
 import {
+  useBalance,
   useConnection,
   useReadContract,
   useWaitForTransactionReceipt,
@@ -17,7 +18,7 @@ import { Card } from "../ui/card";
 import { FormField } from "../ui/form-field";
 import { Icon } from "../ui/icon";
 
-type OwnerAction = "pause" | "price" | "unpause";
+type OwnerAction = "pause" | "price" | "unpause" | "withdraw";
 
 export function OwnerControls({
   contractAddress,
@@ -33,6 +34,7 @@ export function OwnerControls({
   const [action, setAction] = useState<OwnerAction>();
   const [priceInput, setPriceInput] = useState<string>();
   const [error, setError] = useState(false);
+  const [confirmWithdraw, setConfirmWithdraw] = useState(false);
   const enabled = Boolean(contractAddress);
   const paused = useReadContract({
     abi: genesisAbi,
@@ -46,6 +48,11 @@ export function OwnerControls({
     address: contractAddress ?? undefined,
     chainId: targetChain.id,
     functionName: "mintPrice",
+    query: { enabled },
+  });
+  const contractBalance = useBalance({
+    address: contractAddress ?? undefined,
+    chainId: targetChain.id,
     query: { enabled },
   });
   const receipt = useWaitForTransactionReceipt({
@@ -65,9 +72,11 @@ export function OwnerControls({
     correctNetwork &&
     !hash &&
     !writeContract.isPending;
-  const chainUnavailable = paused.isError || mintPrice.isError;
+  const chainUnavailable =
+    paused.isError || mintPrice.isError || contractBalance.isError;
   const refetchPaused = paused.refetch;
   const refetchMintPrice = mintPrice.refetch;
+  const refetchBalance = contractBalance.refetch;
   const displayedPrice =
     priceInput ??
     (mintPrice.data === undefined ? "" : formatEther(mintPrice.data));
@@ -76,7 +85,8 @@ export function OwnerControls({
     if (receipt.data?.status !== "success") return;
     void refetchPaused();
     void refetchMintPrice();
-  }, [receipt.data?.status, refetchMintPrice, refetchPaused]);
+    void refetchBalance();
+  }, [receipt.data?.status, refetchBalance, refetchMintPrice, refetchPaused]);
 
   const sendPause = async () => {
     if (!canWrite || !contractAddress || paused.data === undefined) return;
@@ -126,10 +136,36 @@ export function OwnerControls({
     }
   };
 
+  const sendWithdraw = async () => {
+    if (
+      !canWrite ||
+      !contractAddress ||
+      contractBalance.data === undefined ||
+      contractBalance.data.value === 0n
+    )
+      return;
+    setError(false);
+    try {
+      const transactionHash = await writeContract.mutateAsync({
+        abi: genesisAbi,
+        account: connection.address,
+        address: contractAddress,
+        chainId: targetChain.id,
+        functionName: "withdraw",
+      });
+      setAction("withdraw");
+      setConfirmWithdraw(false);
+      setHash(transactionHash);
+    } catch {
+      setError(true);
+    }
+  };
+
   const clearTransaction = () => {
     setAction(undefined);
     setHash(undefined);
     setError(false);
+    setConfirmWithdraw(false);
   };
 
   return (
@@ -140,10 +176,15 @@ export function OwnerControls({
           <h2>{t("admin.ownerControlsTitle")}</h2>
         </div>
         <Button
-          disabled={paused.isFetching || mintPrice.isFetching}
+          disabled={
+            paused.isFetching ||
+            mintPrice.isFetching ||
+            contractBalance.isFetching
+          }
           onClick={() => {
             void refetchPaused();
             void refetchMintPrice();
+            void refetchBalance();
           }}
           size="sm"
           variant="ghost"
@@ -161,6 +202,14 @@ export function OwnerControls({
                 : paused.data
                   ? t("admin.ownerControlsPaused")
                   : t("admin.ownerControlsActive")}
+            </strong>
+          </span>
+          <span>
+            {t("admin.ownerControlsBalance")}
+            <strong>
+              {contractBalance.data === undefined
+                ? t("admin.ownerControlsUnknown")
+                : `${formatEther(contractBalance.data.value)} ETH`}
             </strong>
           </span>
           <span>
@@ -222,6 +271,56 @@ export function OwnerControls({
               {t("admin.ownerControlsSetPrice")}
             </Button>
           </form>
+          <div>
+            <p>{t("admin.ownerControlsWithdrawHint")}</p>
+            {!confirmWithdraw ? (
+              <Button
+                disabled={
+                  !canWrite ||
+                  contractBalance.data === undefined ||
+                  contractBalance.data.value === 0n
+                }
+                onClick={() => setConfirmWithdraw(true)}
+                type="button"
+                variant="secondary"
+              >
+                {t("admin.ownerControlsWithdraw")}
+              </Button>
+            ) : (
+              <div
+                aria-label={t("admin.ownerControlsWithdrawConfirmButton")}
+                className="pv-owner-controls__confirmation"
+                role="group"
+              >
+                <p>
+                  {t("admin.ownerControlsWithdrawConfirm")} {ownerWallet}
+                </p>
+                <strong>
+                  {formatEther(contractBalance.data?.value ?? 0n)} ETH
+                </strong>
+                <div>
+                  <Button
+                    disabled={
+                      !canWrite ||
+                      contractBalance.data === undefined ||
+                      contractBalance.data.value === 0n
+                    }
+                    onClick={sendWithdraw}
+                    type="button"
+                  >
+                    {t("admin.ownerControlsWithdrawConfirmButton")}
+                  </Button>
+                  <Button
+                    onClick={() => setConfirmWithdraw(false)}
+                    type="button"
+                    variant="ghost"
+                  >
+                    {t("admin.ownerControlsWithdrawCancel")}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
         {hash && (
           <div className="pv-admin-publication__transaction" role="status">

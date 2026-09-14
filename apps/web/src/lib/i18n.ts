@@ -89,6 +89,7 @@ const messages = {
     "admin.ownerControlsRefresh": "Đọc lại từ chain",
     "admin.ownerControlsMintState": "Trạng thái mint",
     "admin.ownerControlsCurrentPrice": "Giá mint hiện tại",
+    "admin.ownerControlsBalance": "Số dư contract",
     "admin.ownerControlsUnknown": "Chưa xác định",
     "admin.ownerControlsActive": "Đang mở",
     "admin.ownerControlsPaused": "Đang tạm dừng",
@@ -98,6 +99,13 @@ const messages = {
       "Pause chỉ chặn giao dịch mint mới; nội dung công khai vẫn hiển thị.",
     "admin.ownerControlsNewPrice": "Giá mint mới · ETH",
     "admin.ownerControlsSetPrice": "Cập nhật giá on-chain",
+    "admin.ownerControlsWithdrawHint":
+      "Withdraw toàn bộ số dư về Owner hiện tại; không thể chọn địa chỉ nhận khác.",
+    "admin.ownerControlsWithdraw": "Withdraw số dư",
+    "admin.ownerControlsWithdrawConfirm":
+      "Xác nhận gửi toàn bộ số dư contract về Owner:",
+    "admin.ownerControlsWithdrawConfirmButton": "Xác nhận withdraw",
+    "admin.ownerControlsWithdrawCancel": "Hủy",
     "admin.ownerControlsWrongWallet":
       "Kết nối đúng ví Owner của phiên để dùng contract controls.",
     "admin.ownerControlsChainError":
@@ -300,6 +308,7 @@ const messages = {
     "admin.ownerControlsRefresh": "Read from chain",
     "admin.ownerControlsMintState": "Mint state",
     "admin.ownerControlsCurrentPrice": "Current mint price",
+    "admin.ownerControlsBalance": "Contract balance",
     "admin.ownerControlsUnknown": "Unknown",
     "admin.ownerControlsActive": "Active",
     "admin.ownerControlsPaused": "Paused",
@@ -309,6 +318,13 @@ const messages = {
       "Pause blocks only new mint transactions; public content stays visible.",
     "admin.ownerControlsNewPrice": "New mint price · ETH",
     "admin.ownerControlsSetPrice": "Update price on-chain",
+    "admin.ownerControlsWithdrawHint":
+      "Withdraw the full balance to the current Owner; no alternate recipient can be entered.",
+    "admin.ownerControlsWithdraw": "Withdraw balance",
+    "admin.ownerControlsWithdrawConfirm":
+      "Confirm sending the full contract balance to Owner:",
+    "admin.ownerControlsWithdrawConfirmButton": "Confirm withdrawal",
+    "admin.ownerControlsWithdrawCancel": "Cancel",
     "admin.ownerControlsWrongWallet":
       "Connect the session Owner wallet to use contract controls.",
     "admin.ownerControlsChainError":

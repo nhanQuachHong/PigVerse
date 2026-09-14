@@ -15,6 +15,12 @@ const mocks = vi.hoisted(() => ({
     chainId: 84532,
     status: "connected",
   },
+  balance: {
+    data: { value: 250000000000000000n } as { value: bigint } | undefined,
+    isError: false,
+    isFetching: false,
+    refetch: vi.fn(),
+  },
   mintPrice: {
     data: 0n as bigint | undefined,
     isError: false,
@@ -39,6 +45,7 @@ vi.mock("wagmi", async (importOriginal) => {
   const actual = await importOriginal<typeof import("wagmi")>();
   return {
     ...actual,
+    useBalance: () => mocks.balance,
     useConnection: () => mocks.connection,
     useReadContract: ({ functionName }: { functionName: string }) =>
       functionName === "paused" ? mocks.paused : mocks.mintPrice,
@@ -66,6 +73,10 @@ describe("OwnerControls", () => {
     mocks.connection.address = ownerWallet;
     mocks.connection.chainId = 84532;
     mocks.connection.status = "connected";
+    mocks.balance.data = { value: 250000000000000000n };
+    mocks.balance.isError = false;
+    mocks.balance.isFetching = false;
+    mocks.balance.refetch.mockReset();
     mocks.paused.data = false;
     mocks.paused.isError = false;
     mocks.paused.isFetching = false;
@@ -157,6 +168,39 @@ describe("OwnerControls", () => {
 
     await waitFor(() => expect(mocks.paused.refetch).toHaveBeenCalledOnce());
     expect(mocks.mintPrice.refetch).toHaveBeenCalledOnce();
+    expect(mocks.balance.refetch).toHaveBeenCalledOnce();
+  });
+
+  it("requires an explicit balance and recipient confirmation before withdrawing", async () => {
+    const user = userEvent.setup();
+    renderControls();
+
+    await user.click(screen.getByRole("button", { name: "Withdraw số dư" }));
+
+    expect(mocks.write).not.toHaveBeenCalled();
+    const confirmation = screen.getByRole("group", {
+      name: "Xác nhận withdraw",
+    });
+    expect(confirmation).toHaveTextContent(ownerWallet);
+    expect(confirmation).toHaveTextContent("0.25 ETH");
+
+    await user.click(screen.getByRole("button", { name: "Xác nhận withdraw" }));
+    expect(mocks.write).toHaveBeenCalledWith(
+      expect.objectContaining({
+        account: ownerWallet,
+        address: contractAddress,
+        functionName: "withdraw",
+      }),
+    );
+  });
+
+  it("does not offer withdrawal when the contract balance is zero", () => {
+    mocks.balance.data = { value: 0n };
+    renderControls();
+
+    expect(
+      screen.getByRole("button", { name: "Withdraw số dư" }),
+    ).toBeDisabled();
   });
 
   it("keeps an unresolvable receipt visible without claiming success", async () => {

@@ -12,4 +12,5 @@ export const genesisAbi = parseAbi([
   "function unpublish(uint256 tokenId, uint256 expectedRevision)",
   "function unpause()",
   "function setMintPrice(uint256 newPrice)",
+  "function withdraw()",
 ]);
