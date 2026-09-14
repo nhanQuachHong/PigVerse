@@ -17,6 +17,7 @@ describe("database migration foundation", () => {
       "0004_add_asset_integrity.sql",
       "0005_add_asset_checkpoint_version.sql",
       "0006_create_publication_inclusions.sql",
+      "0007_create_mint_activity.sql",
     ]);
   });
 
@@ -79,5 +80,21 @@ describe("database migration foundation", () => {
       "observed_publication_revision = expected_publication_revision + 1",
     );
     expect(source).toContain("do not imply finality");
+  });
+
+  it("deduplicates rebuildable mint activity without becoming ownership truth", async () => {
+    const source = await readFile(
+      new URL("../migrations/0007_create_mint_activity.sql", import.meta.url),
+      "utf8",
+    );
+
+    expect(source).toContain("UNIQUE (deployment_key, transaction_hash)");
+    expect(source).toContain("mint_activity_transfer_event_idx");
+    expect(source).toContain(
+      "observed_status IN ('PENDING', 'SUCCEEDED', 'REVERTED', 'UNKNOWN')",
+    );
+    expect(source).toContain("observed_status = 'SUCCEEDED'");
+    expect(source).toContain("observed_owner_wallet IS NOT NULL");
+    expect(source).toContain("Current chain ownership remains authoritative");
   });
 });
