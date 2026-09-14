@@ -17,9 +17,10 @@
     "test": "pnpm -r --if-present test",
     "test:e2e": "pnpm --filter @pigverse/web test:e2e",
     "typecheck": "pnpm -r --if-present typecheck",
-    "verify": "pnpm verify:config && pnpm verify:assets && pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "verify": "pnpm verify:config && pnpm verify:assets && pnpm verify:secrets && pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
     "verify:assets": "node scripts/verify-assets.mjs",
-    "verify:config": "node scripts/verify-config-examples.mjs"
+    "verify:config": "node scripts/verify-config-examples.mjs",
+    "verify:secrets": "node --test scripts/secret-scan.test.mjs && node scripts/verify-secrets.mjs"
   },
   "devDependencies": {
     "@eslint/js": "9.39.5",
