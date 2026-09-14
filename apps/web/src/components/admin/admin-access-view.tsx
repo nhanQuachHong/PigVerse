@@ -10,6 +10,7 @@ import { useLocale } from "../i18n/locale-provider";
 import { AdminAuditPanel } from "./admin-audit-panel";
 import { AdminContentPanel } from "./admin-content-panel";
 import { AdminMintActivityPanel } from "./admin-mint-activity-panel";
+import { OwnerControls } from "./owner-controls";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import { Icon } from "../ui/icon";
@@ -172,6 +173,10 @@ export function AdminAccessView() {
             <span>{t("admin.currentOwner")}</span>
           </Card>
         </div>
+        <OwnerControls
+          contractAddress={targetContractAddress}
+          ownerWallet={session.data.walletAddress}
+        />
         <AdminContentPanel
           contractAddress={targetContractAddress}
           ownerWallet={session.data.walletAddress}

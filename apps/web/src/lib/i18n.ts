@@ -84,9 +84,37 @@ const messages = {
     "admin.identityRule": "Mỗi nhân vật là duy nhất",
     "admin.activeNetwork": "Mạng mục tiêu",
     "admin.currentOwner": "Owner hiện tại",
+    "admin.ownerControlsEyebrow": "FR-CONTRACT-001/002 · Chain trực tiếp",
+    "admin.ownerControlsTitle": "Điều khiển mint của Owner",
+    "admin.ownerControlsRefresh": "Đọc lại từ chain",
+    "admin.ownerControlsMintState": "Trạng thái mint",
+    "admin.ownerControlsCurrentPrice": "Giá mint hiện tại",
+    "admin.ownerControlsUnknown": "Chưa xác định",
+    "admin.ownerControlsActive": "Đang mở",
+    "admin.ownerControlsPaused": "Đang tạm dừng",
+    "admin.ownerControlsPause": "Tạm dừng mint",
+    "admin.ownerControlsUnpause": "Mở lại mint",
+    "admin.ownerControlsPauseHint":
+      "Pause chỉ chặn giao dịch mint mới; nội dung công khai vẫn hiển thị.",
+    "admin.ownerControlsNewPrice": "Giá mint mới · ETH",
+    "admin.ownerControlsSetPrice": "Cập nhật giá on-chain",
+    "admin.ownerControlsWrongWallet":
+      "Kết nối đúng ví Owner của phiên để dùng contract controls.",
+    "admin.ownerControlsChainError":
+      "Không đọc được pause/price từ chain; thao tác đã bị khóa an toàn.",
+    "admin.ownerControlsWalletError":
+      "Ví từ chối hoặc giao dịch không thể gửi. Chain chưa được coi là đã thay đổi.",
+    "admin.ownerControlsIncluded": "Giao dịch Owner đã included.",
+    "admin.ownerControlsReceiptError":
+      "Chưa thể xác định receipt từ RPC; không suy đoán thành công.",
+    "admin.ownerControlsDone": "Hoàn tất",
+    "admin.ownerControlsSubmitted":
+      "Chỉ chain quyết định kết quả; trạng thái được đọc lại sau receipt thành công.",
+    "admin.ownerControlsSafety":
+      "Giao dịch được ký trực tiếp bởi ví Owner. Pigverse không nhận hoặc lưu private key.",
     "admin.workflowsPending": "Workflow quản trị đang được triển khai an toàn",
     "admin.workflowsPendingDescription":
-      "Quản lý nội dung, publish, pause, giá mint và withdraw sẽ chỉ xuất hiện khi API có guard phiên, audit log và kiểm thử tương ứng.",
+      "Xử lý tài sản và withdraw sẽ chỉ xuất hiện khi có guard, audit và kiểm thử tương ứng.",
     "admin.editorEyebrow": "M9 · Nội dung Genesis",
     "admin.editorSectionTitle": "Bản nháp 10 nhân vật",
     "admin.editorRefresh": "Làm mới từ chain",
@@ -267,9 +295,37 @@ const messages = {
     "admin.identityRule": "Each character is unique",
     "admin.activeNetwork": "Target network",
     "admin.currentOwner": "Current Owner",
+    "admin.ownerControlsEyebrow": "FR-CONTRACT-001/002 · Direct chain",
+    "admin.ownerControlsTitle": "Owner mint controls",
+    "admin.ownerControlsRefresh": "Read from chain",
+    "admin.ownerControlsMintState": "Mint state",
+    "admin.ownerControlsCurrentPrice": "Current mint price",
+    "admin.ownerControlsUnknown": "Unknown",
+    "admin.ownerControlsActive": "Active",
+    "admin.ownerControlsPaused": "Paused",
+    "admin.ownerControlsPause": "Pause minting",
+    "admin.ownerControlsUnpause": "Unpause minting",
+    "admin.ownerControlsPauseHint":
+      "Pause blocks only new mint transactions; public content stays visible.",
+    "admin.ownerControlsNewPrice": "New mint price · ETH",
+    "admin.ownerControlsSetPrice": "Update price on-chain",
+    "admin.ownerControlsWrongWallet":
+      "Connect the session Owner wallet to use contract controls.",
+    "admin.ownerControlsChainError":
+      "Pause or price could not be read from chain, so controls are safely locked.",
+    "admin.ownerControlsWalletError":
+      "The wallet rejected or could not submit the transaction. Chain state is not treated as changed.",
+    "admin.ownerControlsIncluded": "The Owner transaction was included.",
+    "admin.ownerControlsReceiptError":
+      "The RPC receipt cannot be resolved; success is not inferred.",
+    "admin.ownerControlsDone": "Done",
+    "admin.ownerControlsSubmitted":
+      "Only the chain decides the outcome; state is read again after a successful receipt.",
+    "admin.ownerControlsSafety":
+      "The Owner wallet signs directly. Pigverse never receives or stores a private key.",
     "admin.workflowsPending": "Admin workflows are being built safely",
     "admin.workflowsPendingDescription":
-      "Content management, publishing, pause, mint price and withdrawal controls will appear only with guarded APIs, audit records and matching tests.",
+      "Asset processing and withdrawal will appear only with matching guards, audit records and tests.",
     "admin.editorEyebrow": "M9 · Genesis content",
     "admin.editorSectionTitle": "Ten character drafts",
     "admin.editorRefresh": "Refresh from chain",
