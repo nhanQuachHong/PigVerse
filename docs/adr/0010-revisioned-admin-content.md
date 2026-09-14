@@ -27,6 +27,14 @@ contract ownership. Writes additionally require the exact configured Origin,
 use server-generated correlation IDs, enforce bounded request bodies and return
 stable safe error codes.
 
+Publication prepare and inclusion failures emit separate structured operational
+events containing only the bounded correlation ID, fixed operation and allowlisted
+category. Wallet/transaction identifiers, token/content identifiers, metadata
+URIs, request values, provider payloads and raw exceptions are excluded. Pending
+inclusion remains normal polling state and emits no failure event. A logging-sink
+failure cannot change the protected API result. These signals do not replace
+the successful chain-evidence audit record.
+
 No database transaction can atomically serialize against a blockchain block.
 The in-transaction recheck narrows the edit race; the contract's publication
 revision guard prevents a collector from minting different metadata than the

@@ -32,6 +32,7 @@ chain ownership. RPC, IPFS and backup providers are external trust boundaries.
 | Health failure log disclosure | Readiness failures emit only a bounded correlation ID and allowlisted integration category; raw exception/provider content never enters the structured logger. | Verified locally |
 | Admin authentication log disclosure | Auth failures emit only bounded correlation ID, fixed stage and allowlisted category; wallet, nonce, message, signature, cookie and raw exception data never enter the logger. | Verified locally |
 | Owner-control failure log disclosure | Owner-control API failures emit only bounded correlation ID, fixed operation and allowlisted category; wallet, transaction hash, price, withdrawal amount and raw exception data never enter the logger. Pending polling is not logged as a failure. | Verified locally |
+| Publication failure log disclosure | Publication prepare/inclusion failures emit only bounded correlation ID, fixed operation and allowlisted category; wallet, transaction hash, token/content identifiers, metadata URI and raw exception data never enter the logger. Pending inclusion polling is not logged as a failure. | Verified locally |
 
 Primary implementation evidence includes:
 
