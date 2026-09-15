@@ -21,6 +21,9 @@ const mocks = vi.hoisted(() => ({
     data: undefined as { status: "reverted" | "success" } | undefined,
     isError: false,
   },
+  rawReceipt: {
+    data: undefined as { status: "reverted" | "success" } | undefined,
+  },
   refresh: vi.fn(),
   switchMutate: vi.fn(),
   writeData: undefined as `0x${string}` | undefined,
@@ -43,6 +46,7 @@ vi.mock("wagmi", async (importOriginal) => {
     useConnection: () => mocks.connection,
     usePublicClient: () => mocks.publicClient,
     useSwitchChain: () => ({ isPending: false, mutate: mocks.switchMutate }),
+    useTransactionReceipt: () => mocks.rawReceipt,
     useWaitForTransactionReceipt: () => mocks.receipt,
     useWriteContract: () => ({
       data: mocks.writeData,
@@ -90,6 +94,7 @@ describe("MintPanel", () => {
     mocks.connection.status = "connected";
     mocks.receipt.data = undefined;
     mocks.receipt.isError = false;
+    mocks.rawReceipt.data = undefined;
     mocks.writeData = undefined;
     mocks.publicClient.readContract.mockReset();
     mocks.publicClient.simulateContract.mockReset();
@@ -258,7 +263,7 @@ describe("MintPanel", () => {
       `pigverse:mint:84532:${contract}:4:${mocks.connection.address}`,
       transactionHash,
     );
-    mocks.receipt.data = { status: "reverted" };
+    mocks.rawReceipt.data = { status: "reverted" };
     renderPanel();
 
     expect(screen.getByRole("alert")).toHaveTextContent(

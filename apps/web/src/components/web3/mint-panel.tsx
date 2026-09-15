@@ -14,6 +14,7 @@ import {
   useConnection,
   usePublicClient,
   useSwitchChain,
+  useTransactionReceipt,
   useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
@@ -86,9 +87,23 @@ export function MintPanel({ detail }: { detail: PublicNftDetail }) {
     hash,
     query: { enabled: Boolean(hash) },
   });
-  const succeeded = receipt.data?.status === "success";
-  const reverted = receipt.data?.status === "reverted";
-  const pending = Boolean(hash) && !receipt.data && !receipt.isError;
+  // Wagmi's wait action throws after observing a reverted receipt while it
+  // attempts to derive a revert reason. Read the raw receipt in parallel so a
+  // known on-chain revert is never mislabeled as an unknown provider outcome.
+  const rawReceipt = useTransactionReceipt({
+    chainId: targetChain.id,
+    hash,
+    query: {
+      enabled: Boolean(hash),
+      refetchInterval: (query) => (query.state.data ? false : 4_000),
+      retry: false,
+    },
+  });
+  const succeeded =
+    receipt.data?.status === "success" || rawReceipt.data?.status === "success";
+  const reverted = rawReceipt.data?.status === "reverted";
+  const uncertain = receipt.isError && !reverted;
+  const pending = Boolean(hash) && !succeeded && !reverted && !uncertain;
 
   useEffect(() => {
     if (succeeded || reverted) router.refresh();
@@ -100,7 +115,7 @@ export function MintPanel({ detail }: { detail: PublicNftDetail }) {
       ? "success"
       : reverted
         ? "reverted"
-        : receipt.isError
+        : uncertain
           ? "uncertain"
           : "pending";
     const observationKey = `${hash}:${receiptState}`;
@@ -108,7 +123,7 @@ export function MintPanel({ detail }: { detail: PublicNftDetail }) {
     reportedObservation.current = observationKey;
     // Operational activity never controls the collector's receipt-derived UI.
     void reportMintTransaction(hash).catch(() => undefined);
-  }, [hash, receipt.isError, reverted, succeeded]);
+  }, [hash, reverted, succeeded, uncertain]);
 
   const connectWallet = () => {
     window.dispatchEvent(new Event("pigverse:open-wallet"));
@@ -283,9 +298,9 @@ export function MintPanel({ detail }: { detail: PublicNftDetail }) {
             : "Price and availability are re-read from the contract before wallet confirmation."}
         </p>
       </div>
-      {pending || (Boolean(hash) && receipt.isError) ? (
+      {pending || (Boolean(hash) && uncertain) ? (
         <Button aria-busy={pending || undefined} disabled size="lg">
-          {receipt.isError
+          {uncertain
             ? vi
               ? "Kết quả chưa xác định"
               : "Outcome unknown"
@@ -333,7 +348,7 @@ export function MintPanel({ detail }: { detail: PublicNftDetail }) {
           rel="noreferrer"
           target="_blank"
         >
-          {receipt.isError
+          {uncertain
             ? vi
               ? "Chưa xác định kết quả · Xem giao dịch"
               : "Outcome unknown · View transaction"
