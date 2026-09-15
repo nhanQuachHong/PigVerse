@@ -160,9 +160,12 @@ into CI, and the living threat/risk review is recorded in `SECURITY_REVIEW.md`.
 A per-request nonce now protects production framework scripts without
 `unsafe-inline` or `unsafe-eval`, with wallet and visual regression coverage.
 Admin authentication rate limits now use atomic PostgreSQL counters shared
-across application instances. Inline style compatibility, live multi-instance
-rate-limit verification, upload hardening and the complete contract review remain
-pending; open HIGH findings prevent M10 completion.
+across application instances. A zero-warning Solidity static-analysis gate and
+focused contract review now cover deployable source, pinned dependencies and 25
+production-profile adversarial tests. Inline style compatibility, live
+multi-instance rate-limit verification, upload hardening, independent review and
+deployed-bytecode verification remain pending; open HIGH findings prevent M10
+completion.
 
 **Goal:** Remove critical/high security blockers.
 

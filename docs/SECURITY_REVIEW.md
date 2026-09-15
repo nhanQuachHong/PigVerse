@@ -29,7 +29,7 @@ chain ownership. RPC, IPFS and backup providers are external trust boundaries.
 | Audit duplication or split writes | Publication, mint and Owner inclusion stores use deployment-scoped identifiers, database transactions and idempotency/conflict checks. | Verified locally |
 | XSS/clickjacking/browser capability abuse | React renders text; each document request receives a fresh script nonce, Next.js applies it to framework scripts, and `script-src` denies untrusted inline/remote/eval execution. Frame denial, MIME, referrer, permissions, cross-origin and HSTS headers are asserted against the optimized server. | Nonce script policy verified locally |
 | Committed credentials | `verify:secrets` scans tracked and non-ignored candidate files, redacts values in findings and is part of `verify`; CI runs it. Blank examples remain valid. | Verified locally |
-| Known production dependency advisory | CI runs `pnpm audit --prod --audit-level high`. The 2026-09-14 local registry result reported no known vulnerabilities. | Time-bound pass |
+| Known production dependency advisory | CI runs `pnpm audit --prod --audit-level high`. The 2026-09-15 local registry result reported no known vulnerabilities. | Time-bound pass |
 | Health failure log disclosure | Readiness failures emit only a bounded correlation ID and allowlisted integration category; raw exception/provider content never enters the structured logger. | Verified locally |
 | Admin authentication log disclosure | Auth failures emit only bounded correlation ID, fixed stage and allowlisted category; wallet, nonce, message, signature, cookie and raw exception data never enter the logger. | Verified locally |
 | Owner-control failure log disclosure | Owner-control API failures emit only bounded correlation ID, fixed operation and allowlisted category; wallet, transaction hash, price, withdrawal amount and raw exception data never enter the logger. Pending polling is not logged as a failure. | Verified locally |
@@ -41,12 +41,15 @@ chain ownership. RPC, IPFS and backup providers are external trust boundaries.
 | Public NFT-detail degradation log disclosure | Degraded detail reads use the same bounded public-read event without token ID, owner, metadata, contract/provider or raw exception data; invalid Genesis IDs remain non-alerting 404 responses. | Verified locally |
 | My NFTs degradation log disclosure | Unavailable ownership reads emit only bounded correlation ID, fixed surface and allowlisted category; queried wallet, owned tokens, ownership state and provider/error data never enter the logger. Invalid wallet input remains non-alerting. | Verified locally |
 | Asset-pipeline failure log disclosure | Every safe pipeline error and unexpected failure emits only bounded correlation ID and an allowlisted code; artwork bytes, bilingual content, token/content identifiers, CIDs, backup references, provider payloads and raw exceptions never enter the logger. | Verified locally |
+| Contract implementation defects | Focused source/dependency review, zero-warning Solhint gate and 25 production-profile adversarial tests cover supply, metadata, authorization, payment, pause and callback boundaries. See `CONTRACT_SECURITY_REVIEW.md`. | Verified locally; independent/live review pending |
 
 Primary implementation evidence includes:
 
 - `packages/contracts/contracts/GenesisNFTCore.sol`
 - `packages/contracts/contracts/GenesisMintControls.sol`
 - `packages/contracts/contracts/PigverseGenesis.sol`
+- `packages/contracts/.solhint.json`
+- `docs/CONTRACT_SECURITY_REVIEW.md`
 - `apps/web/src/server/admin-auth.ts`
 - `apps/web/src/server/admin-auth-store.ts`
 - `apps/web/src/server/publication-transaction-reader.ts`

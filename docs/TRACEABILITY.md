@@ -16,8 +16,8 @@
 | FR-ADMIN-003 | BR-011,012 | Admin UI/API, Content, Chain Recheck | AT-PUBLISH-001,002 | M1/M9 |
 | FR-ADMIN-004 | BR-010,013 | Audit Module | AT-AUDIT-001 | M1/M9 |
 | FR-ADMIN-005 | BR-009,013 | Mint Activity/Reconciliation | AT-ACTIVITY-001 | M1/M9 |
-| FR-CONTRACT-001 | BR-005,010 | Genesis Contract | AT-OWNER-001, AT-MINT-003 | M2 |
-| FR-CONTRACT-002 | BR-004,010 | Genesis Contract | AT-OWNER-002, AT-MINT-005 | M2 |
+| FR-CONTRACT-001 | BR-005,010 | Genesis Contract | AT-OWNER-001, AT-MINT-003 + focused source/static review; live deployment pending | M2/M10 |
+| FR-CONTRACT-002 | BR-004,010 | Genesis Contract | AT-OWNER-002, AT-MINT-005 + focused source/static review; live deployment pending | M2/M10 |
 | FR-I18N-001 | BR-007 | i18n, Content | AT-I18N-001 | M1/M3-M9/M13 |
 | FR-RECOVERY-001 | BR-009,014,015 | Reconciliation, Recovery, Ops | Chain snapshot unit/CLI foundation; AT-RECOVERY-001,002 pending live content drill | M14 |
 | FR-LICENSE-001 | BR-016 | Public UI/Content | AT-LICENSE-001 | M1/M4/M7/M13 |
