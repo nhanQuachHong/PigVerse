@@ -42,3 +42,13 @@ ownership.
 Only a currently authorized Admin session may query the paginated activity
 view. Collector wallets sign and submit their own mint transactions; the backend
 never receives or custodies a private key.
+
+Both activity endpoints return a bounded correlation ID in the response body
+and `X-Correlation-ID` header. Public ingestion failures emit a distinct
+`MINT_ACTIVITY_FAILED` event with only a fixed stage, allowlisted category,
+severity, correlation ID and timestamp. Admin authorization, invalid pagination,
+unexpected failures and degraded reconciliation use the redacted privileged-
+operation event. Wallet addresses, transaction/block identifiers, token/content
+identifiers, revisions, values and raw provider/error data are excluded. Known
+pending and not-yet-visible transactions are expected observation states and do
+not emit failure events. A logging-sink failure cannot change the API result.

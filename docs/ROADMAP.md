@@ -195,11 +195,12 @@ probes and reports only `ok/error`; optimized-server tests verify degraded
 behavior without leaking integration details. Structured failure logging with
 correlation IDs and allowlisted integration names is implemented for health
 failures, Admin authentication failures, Owner-control API failures and both
-stages of the publication API. Inclusion polling does not warn while a
-transaction is merely pending, and privileged-operation events exclude wallet,
-transaction, token/content, value, URI and provider-error data. Broader content/
-asset/mint failure instrumentation, metrics/alerts, provider retry/failover and
-controlled failure drills remain.
+stages of the publication API. Mint-activity ingestion and Admin reconciliation
+now propagate correlation IDs and emit separate redacted failure/degradation
+events. Inclusion polling and not-yet-visible mint transactions do not warn, and
+operation events exclude wallet, transaction, token/content, value, URI and
+provider-error data. Broader content/asset failure instrumentation, metrics/
+alerts, provider retry/failover and controlled failure drills remain.
 
 **Goal:** Production-grade failure handling and visibility.
 
