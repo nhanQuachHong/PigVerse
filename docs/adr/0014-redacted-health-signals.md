@@ -41,12 +41,13 @@ transactions are normal observation states and are not logged as failures.
 These events are diagnostic signals, not authorization decisions or substitutes
 for the append-only chain-evidence audit.
 
-Public collection API degradation uses a separate `PUBLIC_READ_DEGRADED` event
-with only the bounded correlation ID, fixed `collection` surface, allowlisted
-configuration/chain category, severity and timestamp. The response carries the
-same ID in its body and header. Contract/Owner addresses, NFT state, metadata,
-RPC endpoint/provider payload and raw exceptions never enter this event, and a
-logging-sink failure cannot change the honest degraded response.
+Public collection and NFT-detail API degradation use a separate
+`PUBLIC_READ_DEGRADED` event with only the bounded correlation ID, fixed surface,
+allowlisted configuration/chain category, severity and timestamp. Responses
+carry the same ID in their body and header. Contract/Owner addresses, token IDs,
+NFT state, metadata, RPC endpoint/provider payload and raw exceptions never
+enter this event, and a logging-sink failure cannot change the honest degraded
+response. An invalid Genesis ID is a normal non-alerting 404.
 
 ## Boundaries and follow-up
 
@@ -66,7 +67,7 @@ Unit and route tests cover ready, missing configuration, false, rejected and
 timed-out integrations, cache/coalescing behavior, correlation propagation,
 structured allowlists, Admin auth/content/audit, Owner-control, publication and
 mint-activity failure classification, response/log redaction, correlation
-propagation, public collection degradation and logging-sink isolation.
+propagation, public collection/detail degradation and logging-sink isolation.
 Playwright verifies the emitted degraded response and safe JSON events from the
 optimized server when deployment configuration is intentionally absent. Live
 provider and hosted monitoring verification remain pending.

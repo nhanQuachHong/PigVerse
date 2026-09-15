@@ -202,9 +202,11 @@ operation events exclude wallet, transaction, token/content, value, URI and
 provider-error data. Admin content list/update routes now carry the same redacted
 correlation and failure contract, as does the paginated Admin audit route.
 The public collection API now propagates correlation IDs and emits a distinct
-redacted degradation event when configuration or chain state is unavailable.
-NFT-detail/My-NFT and asset failure instrumentation, metrics/alerts, provider
-retry/failover and controlled failure drills remain.
+redacted degradation event when configuration or chain state is unavailable;
+the NFT-detail API now follows the same contract while treating out-of-domain
+IDs as ordinary non-alerting 404 responses. My-NFT and asset failure
+instrumentation, metrics/alerts, provider retry/failover and controlled failure
+drills remain.
 
 **Goal:** Production-grade failure handling and visibility.
 
