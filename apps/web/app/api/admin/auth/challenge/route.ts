@@ -12,7 +12,7 @@ import {
   hasExpectedOrigin,
 } from "../../../../../src/server/admin-auth-runtime";
 import {
-  FixedWindowRateLimiter,
+  PostgresFixedWindowRateLimiter,
   type RateLimiter,
 } from "../../../../../src/server/rate-limit";
 import {
@@ -27,7 +27,11 @@ type ChallengeRuntime = AdminAuthDependencies & {
 
 export function createChallengeHandler(
   getRuntime: () => ChallengeRuntime,
-  limiter: RateLimiter = new FixedWindowRateLimiter(10, 5 * 60 * 1000),
+  limiter: RateLimiter = new PostgresFixedWindowRateLimiter(
+    "admin_auth_challenge",
+    10,
+    5 * 60 * 1000,
+  ),
   observability: {
     createCorrelationId?: () => string;
     logFailure?: typeof logAdminAuthFailure;
@@ -67,7 +71,9 @@ export function createChallengeHandler(
       const body = JSON.parse(source) as { address?: unknown };
       if (typeof body.address !== "string")
         throw new AdminAuthError("AUTH_INVALID");
-      if (!limiter.consume(hashCredential(body.address.toLowerCase()))) {
+      if (
+        !(await limiter.consume(hashCredential(body.address.toLowerCase())))
+      ) {
         report("rate_limited");
         return response({ message: "Too many requests" }, { status: 429 });
       }

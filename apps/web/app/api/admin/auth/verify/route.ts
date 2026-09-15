@@ -13,7 +13,7 @@ import {
   hasExpectedOrigin,
 } from "../../../../../src/server/admin-auth-runtime";
 import {
-  FixedWindowRateLimiter,
+  PostgresFixedWindowRateLimiter,
   type RateLimiter,
 } from "../../../../../src/server/rate-limit";
 import {
@@ -25,7 +25,11 @@ type VerifyRuntime = AdminAuthDependencies & { appOrigin: string };
 
 export function createVerifyHandler(
   getRuntime: () => VerifyRuntime,
-  limiter: RateLimiter = new FixedWindowRateLimiter(5, 5 * 60 * 1000),
+  limiter: RateLimiter = new PostgresFixedWindowRateLimiter(
+    "admin_auth_verify",
+    5,
+    5 * 60 * 1000,
+  ),
   observability: {
     createCorrelationId?: () => string;
     logFailure?: typeof logAdminAuthFailure;
@@ -69,7 +73,7 @@ export function createVerifyHandler(
         typeof body.signature !== "string"
       )
         throw new AdminAuthError("AUTH_INVALID");
-      if (!limiter.consume(hashCredential(body.nonce))) {
+      if (!(await limiter.consume(hashCredential(body.nonce)))) {
         report("rate_limited");
         return response({ message: "Too many requests" }, { status: 429 });
       }

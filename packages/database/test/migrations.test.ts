@@ -19,7 +19,24 @@ describe("database migration foundation", () => {
       "0006_create_publication_inclusions.sql",
       "0007_create_mint_activity.sql",
       "0008_create_owner_control_inclusions.sql",
+      "0009_create_admin_auth_rate_limits.sql",
     ]);
+  });
+
+  it("shares bounded Admin authentication limits across instances", async () => {
+    const source = await readFile(
+      new URL(
+        "../migrations/0009_create_admin_auth_rate_limits.sql",
+        import.meta.url,
+      ),
+      "utf8",
+    );
+
+    expect(source).toContain("PRIMARY KEY (scope, key_hash)");
+    expect(source).toContain("key_hash char(64)");
+    expect(source).toContain("admin_auth_rate_limits_expiry_idx");
+    expect(source).not.toContain("wallet_address");
+    expect(source).not.toContain("nonce");
   });
 
   it("encodes Genesis content, durability and audit invariants", async () => {

@@ -6,6 +6,7 @@ import { createSessionHandlers } from "../../app/api/admin/auth/session/route";
 import { createVerifyHandler } from "../../app/api/admin/auth/verify/route";
 import { MemoryAdminAuthStore } from "./admin-auth-store";
 import { logAdminAuthFailure } from "./operational-log";
+import { FixedWindowRateLimiter } from "./rate-limit";
 
 const appOrigin = "https://pigverse.example";
 const now = new Date("2026-09-13T00:00:00.000Z");
@@ -16,6 +17,7 @@ const logFailure = vi.fn<typeof logAdminAuthFailure>();
 
 describe("Admin auth route boundary", () => {
   let owner: `0x${string}` | null;
+  let limiter: FixedWindowRateLimiter;
   let store: MemoryAdminAuthStore;
   let runtime: () => {
     appOrigin: string;
@@ -29,6 +31,7 @@ describe("Admin auth route boundary", () => {
 
   beforeEach(() => {
     logFailure.mockReset();
+    limiter = new FixedWindowRateLimiter(100, 5 * 60 * 1000);
     owner = account.address;
     store = new MemoryAdminAuthStore();
     runtime = () => ({
@@ -50,7 +53,7 @@ describe("Admin auth route boundary", () => {
   it("rejects cross-origin challenge issuance", async () => {
     const response = await createChallengeHandler(
       runtime,
-      undefined,
+      limiter,
       observability(),
     )(
       new Request(`${appOrigin}/api/admin/auth/challenge`, {
@@ -99,7 +102,7 @@ describe("Admin auth route boundary", () => {
   it("classifies invalid verification without logging signed material", async () => {
     const response = await createVerifyHandler(
       runtime,
-      undefined,
+      limiter,
       observability(),
     )(
       new Request(`${appOrigin}/api/admin/auth/verify`, {
@@ -126,7 +129,7 @@ describe("Admin auth route boundary", () => {
   it("classifies malformed authentication JSON as invalid input", async () => {
     const challenge = await createChallengeHandler(
       runtime,
-      undefined,
+      limiter,
       observability(),
     )(
       new Request(`${appOrigin}/api/admin/auth/challenge`, {
@@ -137,7 +140,7 @@ describe("Admin auth route boundary", () => {
     );
     const verify = await createVerifyHandler(
       runtime,
-      undefined,
+      limiter,
       observability(),
     )(
       new Request(`${appOrigin}/api/admin/auth/verify`, {
@@ -189,7 +192,7 @@ describe("Admin auth route boundary", () => {
   it("sets only an opaque HttpOnly strict session after owner verification", async () => {
     const challengeResponse = await createChallengeHandler(
       runtime,
-      undefined,
+      limiter,
       observability(),
     )(
       new Request(`${appOrigin}/api/admin/auth/challenge`, {
@@ -202,7 +205,7 @@ describe("Admin auth route boundary", () => {
     const signature = await account.signMessage({ message: challenge.message });
     const verifyResponse = await createVerifyHandler(
       runtime,
-      undefined,
+      limiter,
       observability(),
     )(
       new Request(`${appOrigin}/api/admin/auth/verify`, {
@@ -236,7 +239,7 @@ describe("Admin auth route boundary", () => {
   it("fails a prior-owner session closed after ownership transfer", async () => {
     const challenge = await createChallengeHandler(
       runtime,
-      undefined,
+      limiter,
       observability(),
     )(
       new Request(`${appOrigin}/api/admin/auth/challenge`, {
@@ -248,7 +251,7 @@ describe("Admin auth route boundary", () => {
     const signature = await account.signMessage({ message: challenge.message });
     const verified = await createVerifyHandler(
       runtime,
-      undefined,
+      limiter,
       observability(),
     )(
       new Request(`${appOrigin}/api/admin/auth/verify`, {
