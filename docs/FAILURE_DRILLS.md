@@ -17,6 +17,7 @@ The gate exercises controlled failures across these boundaries:
 | Admin authentication | invalid, replayed, unauthorized, rate-limited or unavailable verification | stable denial and redacted structured event |
 | Mint reconciliation | unavailable/invalid transaction evidence and persistence conflict | fail-closed status and redacted event |
 | Public chain reads | missing configuration, unavailable ownership/detail/collection state and unexpected resolver failure | honest degraded/503 response and redacted event |
+| RPC read transport | transient network/408/425/429/5xx failure, exhausted retry, permanent HTTP failure, contract revert and malformed response | one bounded retry only for transient transport failure; stable redacted failure otherwise |
 | Asset pipeline | IPFS/backup failure, invalid provider result, chain failure, integrity conflict and unexpected checkpoint-store failure | durable safe error or rethrow plus allowlisted event |
 
 Tests assert that logging failure cannot change the product/API outcome and that
