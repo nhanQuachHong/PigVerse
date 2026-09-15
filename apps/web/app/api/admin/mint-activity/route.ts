@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import type { AdminSession } from "../../../../src/server/admin-auth-store";
 import {
   adminAuthJson,
@@ -9,6 +11,10 @@ import {
   type MintActivityDependencies,
 } from "../../../../src/server/mint-activity";
 import { getMintActivityRuntime } from "../../../../src/server/mint-activity-runtime";
+import {
+  type AdminOperationFailureCategory,
+  logAdminOperationFailure,
+} from "../../../../src/server/operational-log";
 
 type AdminMintActivityRuntime = MintActivityDependencies & {
   authenticate: (request: Request) => Promise<AdminSession | null>;
@@ -23,16 +29,37 @@ function getRuntime(): AdminMintActivityRuntime {
 
 export function createAdminMintActivityHandler(
   resolveRuntime: () => AdminMintActivityRuntime,
+  createCorrelationId: () => string = randomUUID,
+  logFailure: typeof logAdminOperationFailure = logAdminOperationFailure,
 ) {
   return async function GET(request: Request) {
+    const correlationId = createCorrelationId();
+    const reportFailure = (category: AdminOperationFailureCategory) => {
+      try {
+        logFailure({
+          category,
+          correlationId,
+          operation: "admin_mint_activity",
+        });
+      } catch {
+        // Observability must not change the API outcome.
+      }
+    };
     try {
       const runtime = resolveRuntime();
       const session = await runtime.authenticate(request);
-      if (!session)
+      if (!session) {
+        reportFailure("authentication_required");
         return adminAuthJson(
-          { code: "ADMIN_AUTH_REQUIRED", message: "Admin access required" },
+          {
+            code: "ADMIN_AUTH_REQUIRED",
+            correlationId,
+            message: "Admin access required",
+          },
           { status: 401 },
+          correlationId,
         );
+      }
       const url = new URL(request.url);
       const result = await listMintActivity(
         {
@@ -41,19 +68,45 @@ export function createAdminMintActivityHandler(
         },
         runtime,
       );
-      return adminAuthJson(result);
+      if (
+        result.activities.some(
+          (activity) => activity.reconciliation === "unavailable",
+        )
+      )
+        reportFailure("chain_unavailable");
+      else if (
+        result.activities.some(
+          (activity) => activity.reconciliation === "conflict",
+        )
+      )
+        reportFailure("conflict");
+      return adminAuthJson(
+        { ...result, correlationId },
+        undefined,
+        correlationId,
+      );
     } catch (error) {
-      if (error instanceof MintActivityError)
+      if (error instanceof MintActivityError) {
+        reportFailure("invalid_input");
         return adminAuthJson(
-          { code: "INVALID_INPUT", message: "Invalid activity page" },
+          {
+            code: "INVALID_INPUT",
+            correlationId,
+            message: "Invalid activity page",
+          },
           { status: 400 },
+          correlationId,
         );
+      }
+      reportFailure("unavailable");
       return adminAuthJson(
         {
           code: "MINT_ACTIVITY_UNAVAILABLE",
+          correlationId,
           message: "Mint activity is unavailable",
         },
         { status: 503 },
+        correlationId,
       );
     }
   };

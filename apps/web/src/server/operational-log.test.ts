@@ -4,6 +4,7 @@ import {
   logAdminAuthFailure,
   logAdminOperationFailure,
   logHealthIntegrationFailure,
+  logMintActivityFailure,
 } from "./operational-log";
 
 describe("operational logging", () => {
@@ -115,6 +116,24 @@ describe("operational logging", () => {
       event: "ADMIN_OPERATION_FAILED",
       level: "warning",
       operation: "publication_prepare",
+    });
+  });
+
+  it("logs mint ingestion failures under a distinct safe event", () => {
+    const sink = vi.fn();
+    logMintActivityFailure(
+      {
+        category: "transaction_invalid",
+        correlationId: "mint_activity_1234",
+        stage: "ingestion",
+      },
+      { sink },
+    );
+
+    expect(JSON.parse(sink.mock.calls[0]?.[0] ?? "")).toMatchObject({
+      category: "transaction_invalid",
+      event: "MINT_ACTIVITY_FAILED",
+      stage: "ingestion",
     });
   });
 

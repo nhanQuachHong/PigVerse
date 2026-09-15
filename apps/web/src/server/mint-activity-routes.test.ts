@@ -6,6 +6,10 @@ import type {
   MintActivityRecord,
   MintActivityStore,
 } from "./mint-activity-store";
+import type {
+  logAdminOperationFailure,
+  logMintActivityFailure,
+} from "./operational-log";
 import type { MintTransactionObservation } from "./mint-transaction-reader";
 
 const appOrigin = "https://pigverse.example";
@@ -64,15 +68,21 @@ describe("mint activity route boundaries", () => {
   it("ingests only same-origin hashes after deriving transaction evidence", async () => {
     const store = storeFixture();
     const readTransaction = vi.fn().mockResolvedValue(pendingObservation);
-    const response = await createMintActivityIngestionHandler(() => ({
-      appOrigin,
-      readTransaction,
-      store,
-    }))(postRequest());
+    const logFailure = vi.fn<typeof logMintActivityFailure>();
+    const response = await createMintActivityIngestionHandler(
+      () => ({
+        appOrigin,
+        readTransaction,
+        store,
+      }),
+      () => "correlation-1",
+      logFailure,
+    )(postRequest());
     const body = await response.json();
 
     expect(response.status).toBe(200);
     expect(response.headers.get("cache-control")).toBe("no-store");
+    expect(response.headers.get("x-correlation-id")).toBe("correlation-1");
     expect(readTransaction).toHaveBeenCalledWith(transactionHash);
     expect(store.upsert).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -83,30 +93,47 @@ describe("mint activity route boundaries", () => {
       }),
     );
     expect(body.activity).toMatchObject({ status: "PENDING", tokenId: 3 });
+    expect(body.correlationId).toBe("correlation-1");
+    expect(logFailure).not.toHaveBeenCalled();
   });
 
   it("denies cross-origin ingestion before chain or database access", async () => {
     const store = storeFixture();
     const readTransaction = vi.fn();
-    const response = await createMintActivityIngestionHandler(() => ({
-      appOrigin,
-      readTransaction,
-      store,
-    }))(postRequest(undefined, "https://evil.example"));
+    const logFailure = vi.fn<typeof logMintActivityFailure>();
+    const response = await createMintActivityIngestionHandler(
+      () => ({
+        appOrigin,
+        readTransaction,
+        store,
+      }),
+      () => "correlation-1",
+      logFailure,
+    )(postRequest(undefined, "https://evil.example"));
 
     expect(response.status).toBe(403);
     expect(readTransaction).not.toHaveBeenCalled();
     expect(store.find).not.toHaveBeenCalled();
+    expect(logFailure).toHaveBeenCalledWith({
+      category: "request_denied",
+      correlationId: "correlation-1",
+      stage: "ingestion",
+    });
   });
 
   it("does not accept client-supplied status, token or wallet fields", async () => {
     const store = storeFixture();
     const readTransaction = vi.fn();
-    const response = await createMintActivityIngestionHandler(() => ({
-      appOrigin,
-      readTransaction,
-      store,
-    }))(
+    const logFailure = vi.fn<typeof logMintActivityFailure>();
+    const response = await createMintActivityIngestionHandler(
+      () => ({
+        appOrigin,
+        readTransaction,
+        store,
+      }),
+      () => "correlation-1",
+      logFailure,
+    )(
       postRequest({
         status: "SUCCEEDED",
         tokenId: 1,
@@ -118,34 +145,63 @@ describe("mint activity route boundaries", () => {
     expect(response.status).toBe(400);
     expect(readTransaction).not.toHaveBeenCalled();
     expect(store.find).not.toHaveBeenCalled();
+    expect(logFailure).toHaveBeenCalledWith({
+      category: "invalid_input",
+      correlationId: "correlation-1",
+      stage: "ingestion",
+    });
+    expect(JSON.stringify(logFailure.mock.calls)).not.toContain(
+      transactionHash,
+    );
+    expect(JSON.stringify(logFailure.mock.calls)).not.toContain(ownerWallet);
   });
 
   it("returns accepted without persisting a hash not yet visible to RPC", async () => {
     const store = storeFixture();
-    const response = await createMintActivityIngestionHandler(() => ({
-      appOrigin,
-      readTransaction: vi.fn().mockResolvedValue({ status: "unknown" }),
-      store,
-    }))(postRequest());
+    const logFailure = vi.fn<typeof logMintActivityFailure>();
+    const response = await createMintActivityIngestionHandler(
+      () => ({
+        appOrigin,
+        readTransaction: vi.fn().mockResolvedValue({ status: "unknown" }),
+        store,
+      }),
+      () => "correlation-1",
+      logFailure,
+    )(postRequest());
 
     expect(response.status).toBe(202);
-    await expect(response.json()).resolves.toEqual({ status: "not-visible" });
+    await expect(response.json()).resolves.toEqual({
+      correlationId: "correlation-1",
+      status: "not-visible",
+    });
     expect(store.upsert).not.toHaveBeenCalled();
+    expect(logFailure).not.toHaveBeenCalled();
   });
 
   it("denies unauthenticated Admin reads before listing or reconciling", async () => {
     const store = storeFixture({ records: [record] });
     const readTransaction = vi.fn();
-    const response = await createAdminMintActivityHandler(() => ({
-      authenticate: vi.fn().mockResolvedValue(null),
-      readTransaction,
-      store,
-    }))(new Request(`${appOrigin}/api/admin/mint-activity`));
+    const logFailure = vi.fn<typeof logAdminOperationFailure>();
+    const response = await createAdminMintActivityHandler(
+      () => ({
+        authenticate: vi.fn().mockResolvedValue(null),
+        readTransaction,
+        store,
+      }),
+      () => "correlation-1",
+      logFailure,
+    )(new Request(`${appOrigin}/api/admin/mint-activity`));
 
     expect(response.status).toBe(401);
     expect(response.headers.get("cache-control")).toBe("no-store");
+    expect(response.headers.get("x-correlation-id")).toBe("correlation-1");
     expect(store.list).not.toHaveBeenCalled();
     expect(readTransaction).not.toHaveBeenCalled();
+    expect(logFailure).toHaveBeenCalledWith({
+      category: "authentication_required",
+      correlationId: "correlation-1",
+      operation: "admin_mint_activity",
+    });
   });
 
   it("returns a paginated, chain-reconciled Admin activity page", async () => {
@@ -171,14 +227,21 @@ describe("mint activity route boundaries", () => {
       },
       status: "recorded",
     });
-    const response = await createAdminMintActivityHandler(() => ({
-      authenticate: vi.fn().mockResolvedValue(session),
-      readTransaction,
-      store,
-    }))(new Request(`${appOrigin}/api/admin/mint-activity?limit=10`));
+    const logFailure = vi.fn<typeof logAdminOperationFailure>();
+    const response = await createAdminMintActivityHandler(
+      () => ({
+        authenticate: vi.fn().mockResolvedValue(session),
+        readTransaction,
+        store,
+      }),
+      () => "correlation-1",
+      logFailure,
+    )(new Request(`${appOrigin}/api/admin/mint-activity?limit=10`));
     const body = await response.json();
 
     expect(response.status).toBe(200);
+    expect(response.headers.get("x-correlation-id")).toBe("correlation-1");
+    expect(body.correlationId).toBe("correlation-1");
     expect(body.activities).toEqual([
       expect.objectContaining({
         finality: "included",
@@ -189,5 +252,78 @@ describe("mint activity route boundaries", () => {
     expect(store.list).toHaveBeenCalledWith(
       expect.objectContaining({ limit: 11 }),
     );
+    expect(logFailure).not.toHaveBeenCalled();
+  });
+
+  it("signals a degraded Admin reconciliation without exposing activity data", async () => {
+    const store = storeFixture({ records: [record] });
+    store.find.mockResolvedValue(record);
+    const logFailure = vi.fn<typeof logAdminOperationFailure>();
+    const response = await createAdminMintActivityHandler(
+      () => ({
+        authenticate: vi.fn().mockResolvedValue(session),
+        readTransaction: vi.fn().mockResolvedValue({ status: "unavailable" }),
+        store,
+      }),
+      () => "correlation-1",
+      logFailure,
+    )(new Request(`${appOrigin}/api/admin/mint-activity?limit=10`));
+
+    expect(response.status).toBe(200);
+    expect(logFailure).toHaveBeenCalledWith({
+      category: "chain_unavailable",
+      correlationId: "correlation-1",
+      operation: "admin_mint_activity",
+    });
+    expect(JSON.stringify(logFailure.mock.calls)).not.toContain(
+      transactionHash,
+    );
+    expect(JSON.stringify(logFailure.mock.calls)).not.toContain(senderWallet);
+    expect(JSON.stringify(logFailure.mock.calls)).not.toContain(ownerWallet);
+  });
+
+  it("classifies ingestion outages without logging mint evidence", async () => {
+    const store = storeFixture();
+    const logFailure = vi.fn<typeof logMintActivityFailure>();
+    const response = await createMintActivityIngestionHandler(
+      () => ({
+        appOrigin,
+        readTransaction: vi.fn().mockResolvedValue({ status: "unavailable" }),
+        store,
+      }),
+      () => "correlation-1",
+      logFailure,
+    )(postRequest());
+
+    expect(response.status).toBe(503);
+    expect(logFailure).toHaveBeenCalledWith({
+      category: "chain_unavailable",
+      correlationId: "correlation-1",
+      stage: "ingestion",
+    });
+    expect(JSON.stringify(logFailure.mock.calls)).not.toContain(
+      transactionHash,
+    );
+    expect(JSON.stringify(logFailure.mock.calls)).not.toContain(senderWallet);
+  });
+
+  it("keeps mint ingestion responses stable when logging fails", async () => {
+    const response = await createMintActivityIngestionHandler(
+      () => ({
+        appOrigin,
+        readTransaction: vi.fn(),
+        store: storeFixture(),
+      }),
+      () => "correlation-1",
+      () => {
+        throw new Error("logging unavailable");
+      },
+    )(postRequest(undefined, "https://evil.example"));
+
+    expect(response.status).toBe(403);
+    await expect(response.json()).resolves.toMatchObject({
+      code: "REQUEST_DENIED",
+      correlationId: "correlation-1",
+    });
   });
 });

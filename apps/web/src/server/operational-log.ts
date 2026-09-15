@@ -7,7 +7,10 @@ export type AdminAuthFailureCategory =
   | "rate_limited"
   | "unavailable";
 export type AdminOperation =
-  "owner_control" | "publication_inclusion" | "publication_prepare";
+  | "admin_mint_activity"
+  | "owner_control"
+  | "publication_inclusion"
+  | "publication_prepare";
 export type AdminOperationFailureCategory =
   | "asset_not_ready"
   | "authentication_required"
@@ -17,6 +20,13 @@ export type AdminOperationFailureCategory =
   | "request_denied"
   | "token_already_minted"
   | "transaction_failed"
+  | "transaction_invalid"
+  | "unavailable";
+export type MintActivityFailureCategory =
+  | "chain_unavailable"
+  | "conflict"
+  | "invalid_input"
+  | "request_denied"
   | "transaction_invalid"
   | "unavailable";
 
@@ -95,9 +105,12 @@ export function logAdminOperationFailure(
       "transaction_invalid",
       "unavailable",
     ].includes(input.category) ||
-    !["owner_control", "publication_inclusion", "publication_prepare"].includes(
-      input.operation,
-    )
+    ![
+      "admin_mint_activity",
+      "owner_control",
+      "publication_inclusion",
+      "publication_prepare",
+    ].includes(input.operation)
   )
     throw new Error("Invalid operational log input");
   writeLog(
@@ -111,6 +124,46 @@ export function logAdminOperationFailure(
           ? "error"
           : "warning",
       operation: input.operation,
+    },
+    options,
+  );
+}
+
+export function logMintActivityFailure(
+  input: {
+    category: MintActivityFailureCategory;
+    correlationId: string;
+    stage: "ingestion";
+  },
+  options: {
+    now?: () => Date;
+    sink?: OperationalLogSink;
+  } = {},
+) {
+  if (
+    !safeCorrelationId.test(input.correlationId) ||
+    ![
+      "chain_unavailable",
+      "conflict",
+      "invalid_input",
+      "request_denied",
+      "transaction_invalid",
+      "unavailable",
+    ].includes(input.category) ||
+    input.stage !== "ingestion"
+  )
+    throw new Error("Invalid operational log input");
+  writeLog(
+    {
+      category: input.category,
+      correlationId: input.correlationId,
+      event: "MINT_ACTIVITY_FAILED",
+      level:
+        input.category === "chain_unavailable" ||
+        input.category === "unavailable"
+          ? "error"
+          : "warning",
+      stage: input.stage,
     },
     options,
   );
