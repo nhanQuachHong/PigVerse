@@ -1,3 +1,19 @@
+const assetPipelineErrorCodes = [
+  "ARTWORK_BACKUP_FAILED",
+  "ARTWORK_IPFS_FAILED",
+  "CHAIN_STATE_UNAVAILABLE",
+  "INCOMPLETE_CONTENT",
+  "INVALID_CANONICAL_ARTWORK",
+  "INVALID_CONTENT_BINDING",
+  "INVALID_PROVIDER_RESULT",
+  "METADATA_BACKUP_FAILED",
+  "METADATA_BUILD_FAILED",
+  "METADATA_INTEGRITY_MISMATCH",
+  "METADATA_IPFS_FAILED",
+  "TOKEN_ALREADY_MINTED",
+  "UNEXPECTED_FAILURE",
+] as const;
+
 export type HealthIntegration = "chain" | "configuration" | "database";
 export type AdminAuthStage = "challenge" | "session" | "verify";
 export type AdminAuthFailureCategory =
@@ -35,6 +51,8 @@ export type MintActivityFailureCategory =
 export type PublicReadFailureCategory =
   "chain_unavailable" | "configuration_unavailable" | "unavailable";
 export type PublicReadSurface = "collection" | "my_nfts" | "nft_detail";
+export type AssetPipelineOperationalErrorCode =
+  (typeof assetPipelineErrorCodes)[number];
 
 export type OperationalLogSink = (line: string) => void;
 
@@ -49,6 +67,40 @@ function writeLog(
     timestamp: (options.now?.() ?? new Date()).toISOString(),
   });
   (options.sink ?? console.error)(line);
+}
+
+export function logAssetPipelineFailure(
+  input: {
+    correlationId: string;
+    errorCode: AssetPipelineOperationalErrorCode;
+  },
+  options: {
+    now?: () => Date;
+    sink?: OperationalLogSink;
+  } = {},
+) {
+  if (
+    !safeCorrelationId.test(input.correlationId) ||
+    !assetPipelineErrorCodes.includes(input.errorCode)
+  )
+    throw new Error("Invalid operational log input");
+  writeLog(
+    {
+      correlationId: input.correlationId,
+      errorCode: input.errorCode,
+      event: "ASSET_PIPELINE_FAILED",
+      level: [
+        "INCOMPLETE_CONTENT",
+        "INVALID_CANONICAL_ARTWORK",
+        "INVALID_CONTENT_BINDING",
+        "METADATA_INTEGRITY_MISMATCH",
+        "TOKEN_ALREADY_MINTED",
+      ].includes(input.errorCode)
+        ? "warning"
+        : "error",
+    },
+    options,
+  );
 }
 
 export function logAdminAuthFailure(

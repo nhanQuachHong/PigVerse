@@ -11,6 +11,7 @@ import type {
 } from "./asset-pipeline";
 import type { TokenMutationState } from "./admin-content-store";
 import { getCanonicalArtwork } from "./canonical-artwork";
+import type { logAssetPipelineFailure } from "./operational-log";
 
 const content = {
   descriptionEn: "An explorer in the clouds.",
@@ -69,10 +70,23 @@ function dependencies(store = new MemoryAssetPackageStore()) {
   };
 }
 
+function runPipeline(
+  candidate: ReturnType<typeof input>,
+  runtime: ReturnType<typeof dependencies>,
+  logFailure: typeof logAssetPipelineFailure = vi.fn<
+    typeof logAssetPipelineFailure
+  >(),
+) {
+  return processAssetPackage(candidate, runtime, {
+    correlationId: "asset_pipeline_1234",
+    logFailure,
+  });
+}
+
 describe("provider-neutral asset pipeline", () => {
   it("reaches COMPLETE only after both IPFS and backup copies exist", async () => {
     const runtime = dependencies();
-    const result = await processAssetPackage(input(), runtime);
+    const result = await runPipeline(input(), runtime);
 
     expect(result).toMatchObject({
       assetPackage: {
@@ -98,12 +112,13 @@ describe("provider-neutral asset pipeline", () => {
 
   it("preserves completed checkpoints and safely retries a partial failure", async () => {
     const runtime = dependencies();
+    const logFailure = vi.fn<typeof logAssetPipelineFailure>();
     runtime.ipfs.put
       .mockResolvedValueOnce({ uri: "ipfs://bafyartwork" })
       .mockRejectedValueOnce(new Error("metadata provider unavailable"))
       .mockResolvedValueOnce({ uri: "ipfs://bafymetadata" });
 
-    const failed = await processAssetPackage(input(), runtime);
+    const failed = await runPipeline(input(), runtime, logFailure);
     expect(failed).toMatchObject({
       errorCode: "METADATA_IPFS_FAILED",
       assetPackage: {
@@ -113,8 +128,18 @@ describe("provider-neutral asset pipeline", () => {
         status: "ERROR",
       },
     });
+    expect(logFailure).toHaveBeenCalledWith({
+      correlationId: "asset_pipeline_1234",
+      errorCode: "METADATA_IPFS_FAILED",
+    });
+    expect(JSON.stringify(logFailure.mock.calls)).not.toContain(
+      "metadata provider unavailable",
+    );
+    expect(JSON.stringify(logFailure.mock.calls)).not.toContain(
+      content.descriptionEn,
+    );
 
-    const retried = await processAssetPackage(input(), runtime);
+    const retried = await runPipeline(input(), runtime, logFailure);
     expect(retried).toMatchObject({ status: "complete" });
     expect(runtime.ipfs.put).toHaveBeenCalledTimes(3);
     expect(
@@ -132,13 +157,13 @@ describe("provider-neutral asset pipeline", () => {
   it("rejects incomplete content and altered canonical artwork before providers", async () => {
     const runtime = dependencies();
     await expect(
-      processAssetPackage(
+      runPipeline(
         { ...input(), content: { ...content, storyVi: "" } },
         runtime,
       ),
     ).resolves.toMatchObject({ errorCode: "INCOMPLETE_CONTENT" });
     await expect(
-      processAssetPackage(
+      runPipeline(
         { ...input(), artworkBytes: new Uint8Array([1, 2, 3]) },
         runtime,
       ),
@@ -156,7 +181,7 @@ describe("provider-neutral asset pipeline", () => {
     });
     vi.spyOn(runtime.store, "loadOrCreate").mockResolvedValueOnce(mismatched);
 
-    await expect(processAssetPackage(input(), runtime)).resolves.toMatchObject({
+    await expect(runPipeline(input(), runtime)).resolves.toMatchObject({
       errorCode: "INVALID_CONTENT_BINDING",
     });
     expect(runtime.ipfs.put).not.toHaveBeenCalled();
@@ -167,7 +192,7 @@ describe("provider-neutral asset pipeline", () => {
     const unavailableRuntime = dependencies();
     unavailableRuntime.readTokenState.mockResolvedValue("unavailable");
     await expect(
-      processAssetPackage(input(), unavailableRuntime),
+      runPipeline(input(), unavailableRuntime),
     ).resolves.toMatchObject({ errorCode: "CHAIN_STATE_UNAVAILABLE" });
     expect(unavailableRuntime.ipfs.put).not.toHaveBeenCalled();
 
@@ -175,7 +200,7 @@ describe("provider-neutral asset pipeline", () => {
     raceRuntime.readTokenState
       .mockResolvedValueOnce("unminted")
       .mockResolvedValueOnce("minted");
-    const raced = await processAssetPackage(input(), raceRuntime);
+    const raced = await runPipeline(input(), raceRuntime);
     expect(raced).toMatchObject({
       assetPackage: { status: "ERROR" },
       errorCode: "TOKEN_ALREADY_MINTED",
@@ -187,13 +212,13 @@ describe("provider-neutral asset pipeline", () => {
     runtime.backup.put
       .mockResolvedValueOnce({ reference: "backup:artwork" })
       .mockRejectedValueOnce(new Error("metadata backup unavailable"));
-    const first = await processAssetPackage(input(), runtime);
+    const first = await runPipeline(input(), runtime);
     expect(first).toMatchObject({ errorCode: "METADATA_BACKUP_FAILED" });
 
     runtime.buildMetadata.mockResolvedValueOnce(
       encodeJson({ description: "changed nondeterministically" }),
     );
-    const retry = await processAssetPackage(input(), runtime);
+    const retry = await runPipeline(input(), runtime);
     expect(retry).toMatchObject({
       errorCode: "METADATA_INTEGRITY_MISMATCH",
     });
@@ -202,15 +227,37 @@ describe("provider-neutral asset pipeline", () => {
 
   it("does not mislabel checkpoint-store failures as provider failures", async () => {
     const runtime = dependencies();
+    const logFailure = vi.fn<typeof logAssetPipelineFailure>();
     vi.spyOn(runtime.store, "save").mockRejectedValueOnce(
       new Error("database unavailable"),
     );
 
-    await expect(processAssetPackage(input(), runtime)).rejects.toThrow(
+    await expect(runPipeline(input(), runtime, logFailure)).rejects.toThrow(
       "database unavailable",
     );
     expect(runtime.ipfs.put).toHaveBeenCalledTimes(1);
     expect(runtime.store.save).toHaveBeenCalledTimes(1);
+    expect(logFailure).toHaveBeenCalledWith({
+      correlationId: "asset_pipeline_1234",
+      errorCode: "UNEXPECTED_FAILURE",
+    });
+    expect(JSON.stringify(logFailure.mock.calls)).not.toContain(
+      "database unavailable",
+    );
+  });
+
+  it("keeps a safe pipeline error stable when logging fails", async () => {
+    const runtime = dependencies();
+    runtime.ipfs.put.mockRejectedValueOnce(new Error("provider unavailable"));
+
+    await expect(
+      runPipeline(input(), runtime, () => {
+        throw new Error("logging unavailable");
+      }),
+    ).resolves.toMatchObject({
+      errorCode: "ARTWORK_IPFS_FAILED",
+      status: "error",
+    });
   });
 
   it("rejects stale checkpoint writes", async () => {

@@ -5,6 +5,7 @@ import {
   getCanonicalArtwork,
   verifyCanonicalArtwork,
 } from "./canonical-artwork";
+import { logAssetPipelineFailure } from "./operational-log";
 
 export type AssetPackageStatus =
   | "PENDING"
@@ -141,7 +142,7 @@ async function safeTokenState(
   }
 }
 
-export async function processAssetPackage(
+async function processAssetPackageCore(
   input: AssetPipelineInput,
   dependencies: AssetPipelineDependencies,
 ): Promise<AssetPipelineResult> {
@@ -346,6 +347,36 @@ export async function processAssetPackage(
   assetPackage.status = "COMPLETE";
   assetPackage = await dependencies.store.save(assetPackage);
   return { assetPackage, status: "complete" };
+}
+
+export async function processAssetPackage(
+  input: AssetPipelineInput,
+  dependencies: AssetPipelineDependencies,
+  observability: {
+    correlationId: string;
+    logFailure?: typeof logAssetPipelineFailure;
+  },
+): Promise<AssetPipelineResult> {
+  const reportFailure = (
+    errorCode: Parameters<typeof logAssetPipelineFailure>[0]["errorCode"],
+  ) => {
+    try {
+      (observability.logFailure ?? logAssetPipelineFailure)({
+        correlationId: observability.correlationId,
+        errorCode,
+      });
+    } catch {
+      // Observability must not change or mask the pipeline outcome.
+    }
+  };
+  try {
+    const result = await processAssetPackageCore(input, dependencies);
+    if (result.status === "error") reportFailure(result.errorCode);
+    return result;
+  } catch (error) {
+    reportFailure("UNEXPECTED_FAILURE");
+    throw error;
+  }
 }
 
 export class MemoryAssetPackageStore implements AssetPackageStore {

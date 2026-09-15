@@ -3,12 +3,35 @@ import { describe, expect, it, vi } from "vitest";
 import {
   logAdminAuthFailure,
   logAdminOperationFailure,
+  logAssetPipelineFailure,
   logHealthIntegrationFailure,
   logMintActivityFailure,
   logPublicReadFailure,
 } from "./operational-log";
 
 describe("operational logging", () => {
+  it("logs only an allowlisted asset-pipeline error code", () => {
+    const sink = vi.fn();
+    logAssetPipelineFailure(
+      {
+        correlationId: "asset_pipeline_1234",
+        errorCode: "METADATA_IPFS_FAILED",
+      },
+      {
+        now: () => new Date("2026-09-15T06:00:00.000Z"),
+        sink,
+      },
+    );
+
+    expect(JSON.parse(sink.mock.calls[0]?.[0] ?? "")).toEqual({
+      correlationId: "asset_pipeline_1234",
+      errorCode: "METADATA_IPFS_FAILED",
+      event: "ASSET_PIPELINE_FAILED",
+      level: "error",
+      timestamp: "2026-09-15T06:00:00.000Z",
+    });
+  });
+
   it("writes a bounded machine-readable health event", () => {
     const sink = vi.fn();
     logHealthIntegrationFailure(
