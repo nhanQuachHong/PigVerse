@@ -262,3 +262,69 @@ test("stops before wallet submission when fresh chain state is paused", async ({
   ).toBeNull();
   await page.waitForLoadState("networkidle");
 });
+
+test("fails closed on RPC degradation and submits only after retry recovery", async ({
+  page,
+}) => {
+  let rpcAvailable = false;
+  await installInjectedWallet(page, {
+    account,
+    chainId: 84532,
+    transactionHash,
+  });
+  await page.route("https://sepolia.base.org/**", async (route) => {
+    const payload = route.request().postDataJSON() as {
+      id: number;
+      jsonrpc: "2.0";
+      method: string;
+      params?: readonly unknown[];
+    };
+    const outcome =
+      payload.method === "eth_call" && !rpcAvailable
+        ? { error: { code: -32_000, message: "fixture RPC unavailable" } }
+        : resolveBaseRpcFixture(payload.method, payload.params ?? []);
+    await route.fulfill({
+      json: { id: payload.id, jsonrpc: "2.0", ...outcome },
+    });
+  });
+  await page.route("**/api/mint-activity", (route) =>
+    route.fulfill({ status: 204 }),
+  );
+
+  await page.goto("/nft/4");
+  await chooseInjectedWallet(page);
+  await page.getByRole("button", { name: "Mint NFT" }).click();
+
+  await expect(page.locator(".pv-mint-panel__error")).toContainText(
+    "Giao dịch chưa được gửi hoặc trạng thái NFT đã thay đổi",
+  );
+  expect(
+    (await getInjectedWalletRequests(page)).filter(
+      ({ method }) => method === "eth_sendTransaction",
+    ),
+  ).toHaveLength(0);
+  expect(
+    await page.evaluate(
+      (key) => window.localStorage.getItem(key),
+      `pigverse:mint:84532:${contract}:4:${account}`,
+    ),
+  ).toBeNull();
+
+  rpcAvailable = true;
+  await page.getByRole("button", { name: "Mint NFT" }).click();
+  await expect(
+    page.getByRole("button", { name: "Đang chờ xác nhận…" }),
+  ).toBeVisible();
+  expect(
+    (await getInjectedWalletRequests(page)).filter(
+      ({ method }) => method === "eth_sendTransaction",
+    ),
+  ).toHaveLength(1);
+  expect(
+    await page.evaluate(
+      (key) => window.localStorage.getItem(key),
+      `pigverse:mint:84532:${contract}:4:${account}`,
+    ),
+  ).toBe(transactionHash);
+  await page.waitForLoadState("networkidle");
+});
