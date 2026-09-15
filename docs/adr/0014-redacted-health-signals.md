@@ -82,3 +82,8 @@ isolation, including provider-neutral asset-pipeline failures.
 Playwright verifies the emitted degraded response and safe JSON events from the
 optimized server when deployment configuration is intentionally absent. Live
 provider and hosted monitoring verification remain pending.
+
+`pnpm test:failure-drills` is the focused local regression gate for these
+failure contracts. It does not replace release-candidate drills against the
+selected hosted providers and alert routing; those remain pending until the
+provider decisions are resolved.

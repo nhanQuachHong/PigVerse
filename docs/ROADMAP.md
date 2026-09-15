@@ -208,13 +208,15 @@ IDs as ordinary non-alerting 404 responses. My NFTs now reports ownership-read
 degradation with the same redacted contract while invalid wallet input remains
 non-alerting. The provider-neutral asset pipeline now emits correlation-bound,
 allowlisted failure codes without asset/content/provider data. Provider-specific
-health, metrics/alerts, retry/failover and controlled failure drills remain.
+health, metrics/alerts and retry/failover remain. A deterministic 42-case local
+failure-drill gate covers readiness, authentication, mint reconciliation, public
+chain reads and the asset pipeline; hosted/live-provider drills remain pending.
 
 **Goal:** Production-grade failure handling and visibility.
 
 **Scope:** `NFR-REL-*`, `NFR-OPS-004..006`.  
 **Tasks:** structured logs; health; metrics/alerts; RPC/IPFS/storage timeout/retry; provider degraded states; correlation IDs.  
-**DoD:** controlled provider-failure drills produce correct degraded behavior and observable signals.
+**DoD:** controlled provider-failure drills produce correct degraded behavior and observable signals. The local deterministic gate passes; hosted/live-provider evidence remains required.
 
 ## M16 — Production Infrastructure & Mainnet Readiness
 
