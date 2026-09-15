@@ -9,11 +9,7 @@ import {
   useSyncExternalStore,
 } from "react";
 import type { Address, Hash } from "viem";
-import {
-  useConnection,
-  useSendTransaction,
-  useWaitForTransactionReceipt,
-} from "wagmi";
+import { useConnection, useSendTransaction } from "wagmi";
 
 import type { AdminContentSlot } from "../../lib/admin-content";
 import { adminContentQuery } from "../../lib/admin-content";
@@ -34,6 +30,7 @@ import { targetChain } from "../../lib/web3-config";
 import { useLocale } from "../i18n/locale-provider";
 import { Button } from "../ui/button";
 import { Icon } from "../ui/icon";
+import { useAuthoritativeReceipt } from "../web3/use-authoritative-receipt";
 
 function publicationErrorKey(error: unknown) {
   const code = (error as AdminPublicationClientError | undefined)?.code;
@@ -97,12 +94,7 @@ export function PublicationControl({
     [storageKey],
   );
   const hash = useSyncExternalStore(subscribe, getSnapshot, () => undefined);
-  const receipt = useWaitForTransactionReceipt({
-    chainId: targetChain.id,
-    confirmations: 1,
-    hash,
-    query: { enabled: Boolean(hash) },
-  });
+  const receiptState = useAuthoritativeReceipt(hash);
   const lifecycle = slot.content?.lifecycleState;
   const action: PublicationAction | null =
     lifecycle === "READY"
@@ -148,15 +140,11 @@ export function PublicationControl({
   );
 
   useEffect(() => {
-    if (
-      hash &&
-      receipt.data?.status === "success" &&
-      attemptedHash.current !== hash
-    ) {
+    if (hash && receiptState === "success" && attemptedHash.current !== hash) {
       attemptedHash.current = hash;
       void record(hash);
     }
-  }, [hash, receipt.data?.status, record]);
+  }, [hash, receiptState, record]);
 
   const begin = async () => {
     if (
@@ -233,9 +221,9 @@ export function PublicationControl({
           <span>
             {recording
               ? t("admin.publicationRecording")
-              : receipt.data?.status === "reverted"
+              : receiptState === "reverted"
                 ? t("admin.publicationReceiptFailed")
-                : receipt.isError
+                : receiptState === "uncertain"
                   ? t("admin.publicationErrorChain")
                   : t("admin.publicationPending")}
           </span>
@@ -284,8 +272,8 @@ export function PublicationControl({
           </Button>
         )}
         {hash &&
-          (receipt.isError ||
-            (receipt.data?.status === "success" && error !== undefined)) && (
+          (receiptState === "uncertain" ||
+            (receiptState === "success" && error !== undefined)) && (
             <Button
               disabled={recording}
               onClick={() => {
@@ -299,7 +287,7 @@ export function PublicationControl({
               {t("admin.publicationRetryRecord")}
             </Button>
           )}
-        {hash && receipt.data?.status === "reverted" && (
+        {hash && receiptState === "reverted" && (
           <Button
             onClick={resetFailed}
             size="sm"

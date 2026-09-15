@@ -34,10 +34,8 @@ const mocks = vi.hoisted(() => ({
     isFetching: false,
     refetch: vi.fn(),
   },
-  receipt: {
-    data: undefined as { status: "reverted" | "success" } | undefined,
-    isError: false,
-  },
+  receiptState: "idle" as
+    "idle" | "pending" | "reverted" | "success" | "uncertain",
   record: vi.fn(),
   invalidateQueries: vi.fn(),
   write: vi.fn(),
@@ -58,6 +56,10 @@ vi.mock("../../lib/admin-owner-controls", () => ({
   recordAdminOwnerControl: mocks.record,
 }));
 
+vi.mock("../web3/use-authoritative-receipt", () => ({
+  useAuthoritativeReceipt: () => mocks.receiptState,
+}));
+
 vi.mock("wagmi", async (importOriginal) => {
   const actual = await importOriginal<typeof import("wagmi")>();
   return {
@@ -66,7 +68,6 @@ vi.mock("wagmi", async (importOriginal) => {
     useConnection: () => mocks.connection,
     useReadContract: ({ functionName }: { functionName: string }) =>
       functionName === "paused" ? mocks.paused : mocks.mintPrice,
-    useWaitForTransactionReceipt: () => mocks.receipt,
     useWriteContract: () => ({
       isPending: mocks.writePending,
       mutateAsync: mocks.write,
@@ -103,8 +104,7 @@ describe("OwnerControls", () => {
     mocks.mintPrice.isError = false;
     mocks.mintPrice.isFetching = false;
     mocks.mintPrice.refetch.mockReset();
-    mocks.receipt.data = undefined;
-    mocks.receipt.isError = false;
+    mocks.receiptState = "idle";
     mocks.record.mockReset();
     mocks.record.mockResolvedValue({
       action: "pause",
@@ -209,7 +209,7 @@ describe("OwnerControls", () => {
       }),
       transactionHash,
     );
-    mocks.receipt.data = { status: "success" };
+    mocks.receiptState = "success";
     renderControls();
 
     await waitFor(() =>
@@ -258,7 +258,7 @@ describe("OwnerControls", () => {
 
   it("keeps an unresolvable receipt visible without claiming success", async () => {
     const user = userEvent.setup();
-    mocks.receipt.isError = true;
+    mocks.receiptState = "uncertain";
     renderControls();
 
     await user.click(screen.getByRole("button", { name: "Tạm dừng mint" }));
@@ -269,6 +269,23 @@ describe("OwnerControls", () => {
     expect(screen.queryByText("Giao dịch Owner đã included.")).toBeNull();
   });
 
+  it("keeps a reverted Owner transaction traceable until dismissed", async () => {
+    const user = userEvent.setup();
+    const key = pendingOwnerControlKey({
+      account: ownerWallet,
+      chainId: 84532,
+      contract: contractAddress,
+    });
+    window.localStorage.setItem(key, transactionHash);
+    mocks.receiptState = "reverted";
+    renderControls();
+
+    expect(screen.getByRole("status")).toHaveTextContent("revert on-chain");
+    expect(mocks.record).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "Hoàn tất" }));
+    expect(window.localStorage.getItem(key)).toBeNull();
+  });
+
   it("retains failed audit evidence and allows an explicit retry", async () => {
     const user = userEvent.setup();
     const key = pendingOwnerControlKey({
@@ -277,7 +294,7 @@ describe("OwnerControls", () => {
       contract: contractAddress,
     });
     window.localStorage.setItem(key, transactionHash);
-    mocks.receipt.data = { status: "success" };
+    mocks.receiptState = "success";
     mocks.record.mockRejectedValueOnce(new Error("unavailable"));
     renderControls();
 

@@ -17,13 +17,8 @@ const mocks = vi.hoisted(() => ({
     readContract: vi.fn(),
     simulateContract: vi.fn(),
   },
-  receipt: {
-    data: undefined as { status: "reverted" | "success" } | undefined,
-    isError: false,
-  },
-  rawReceipt: {
-    data: undefined as { status: "reverted" | "success" } | undefined,
-  },
+  receiptState: "idle" as
+    "idle" | "pending" | "reverted" | "success" | "uncertain",
   refresh: vi.fn(),
   switchMutate: vi.fn(),
   writeData: undefined as `0x${string}` | undefined,
@@ -39,6 +34,10 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ refresh: mocks.refresh }),
 }));
 
+vi.mock("./use-authoritative-receipt", () => ({
+  useAuthoritativeReceipt: () => mocks.receiptState,
+}));
+
 vi.mock("wagmi", async (importOriginal) => {
   const actual = await importOriginal<typeof import("wagmi")>();
   return {
@@ -46,8 +45,6 @@ vi.mock("wagmi", async (importOriginal) => {
     useConnection: () => mocks.connection,
     usePublicClient: () => mocks.publicClient,
     useSwitchChain: () => ({ isPending: false, mutate: mocks.switchMutate }),
-    useTransactionReceipt: () => mocks.rawReceipt,
-    useWaitForTransactionReceipt: () => mocks.receipt,
     useWriteContract: () => ({
       data: mocks.writeData,
       isPending: false,
@@ -92,9 +89,7 @@ describe("MintPanel", () => {
     mocks.connection.address = "0x2222222222222222222222222222222222222222";
     mocks.connection.chainId = 84532;
     mocks.connection.status = "connected";
-    mocks.receipt.data = undefined;
-    mocks.receipt.isError = false;
-    mocks.rawReceipt.data = undefined;
+    mocks.receiptState = "idle";
     mocks.writeData = undefined;
     mocks.publicClient.readContract.mockReset();
     mocks.publicClient.simulateContract.mockReset();
@@ -225,7 +220,7 @@ describe("MintPanel", () => {
       `pigverse:mint:84532:${contract}:4:${mocks.connection.address}`,
       transactionHash,
     );
-    mocks.receipt.data = { status: "success" };
+    mocks.receiptState = "success";
     renderPanel();
 
     expect(screen.getByText("Mint đã xác nhận!")).toBeVisible();
@@ -245,7 +240,7 @@ describe("MintPanel", () => {
       `pigverse:mint:84532:${contract}:4:${mocks.connection.address}`,
       transactionHash,
     );
-    mocks.receipt.isError = true;
+    mocks.receiptState = "uncertain";
     renderPanel();
 
     expect(screen.queryByText("Mint đã xác nhận!")).toBeNull();
@@ -263,7 +258,7 @@ describe("MintPanel", () => {
       `pigverse:mint:84532:${contract}:4:${mocks.connection.address}`,
       transactionHash,
     );
-    mocks.rawReceipt.data = { status: "reverted" };
+    mocks.receiptState = "reverted";
     renderPanel();
 
     expect(screen.getByRole("alert")).toHaveTextContent(
@@ -278,7 +273,7 @@ describe("MintPanel", () => {
       `pigverse:mint:84532:${contract}:4:${mocks.connection.address}`,
       transactionHash,
     );
-    mocks.receipt.data = { status: "success" };
+    mocks.receiptState = "success";
     mocks.reportMintTransaction.mockRejectedValue(new Error("API unavailable"));
     renderPanel();
 

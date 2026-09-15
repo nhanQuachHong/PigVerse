@@ -18,10 +18,8 @@ const mocks = vi.hoisted(() => ({
     status: "connected",
   },
   prepare: vi.fn(),
-  receipt: {
-    data: undefined as { status: "reverted" | "success" } | undefined,
-    isError: false,
-  },
+  receiptState: "idle" as
+    "idle" | "pending" | "reverted" | "success" | "uncertain",
   record: vi.fn(),
   send: vi.fn(),
   setQueryData: vi.fn(),
@@ -45,9 +43,12 @@ vi.mock("wagmi", async (importOriginal) => {
     ...actual,
     useConnection: () => mocks.connection,
     useSendTransaction: () => ({ mutateAsync: mocks.send }),
-    useWaitForTransactionReceipt: () => mocks.receipt,
   };
 });
+
+vi.mock("../web3/use-authoritative-receipt", () => ({
+  useAuthoritativeReceipt: () => mocks.receiptState,
+}));
 
 vi.mock("../../lib/admin-publication", async (importOriginal) => {
   const actual =
@@ -102,8 +103,7 @@ describe("PublicationControl", () => {
     mocks.send.mockReset();
     mocks.setQueryData.mockReset();
     mocks.invalidateQueries.mockReset();
-    mocks.receipt.data = undefined;
-    mocks.receipt.isError = false;
+    mocks.receiptState = "idle";
     mocks.prepare.mockResolvedValue({
       action: "publish",
       block: "0xabc",
@@ -186,7 +186,7 @@ describe("PublicationControl", () => {
       tokenId: 3,
     });
     window.localStorage.setItem(key, transactionHash);
-    mocks.receipt.data = { status: "success" };
+    mocks.receiptState = "success";
     renderControl();
 
     await waitFor(() =>
@@ -240,7 +240,7 @@ describe("PublicationControl", () => {
       tokenId: 3,
     });
     window.localStorage.setItem(key, transactionHash);
-    mocks.receipt.data = { status: "reverted" };
+    mocks.receiptState = "reverted";
     renderControl();
 
     expect(screen.getByRole("status")).toHaveTextContent("revert on-chain");

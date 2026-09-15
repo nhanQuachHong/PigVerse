@@ -14,8 +14,6 @@ import {
   useConnection,
   usePublicClient,
   useSwitchChain,
-  useTransactionReceipt,
-  useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
 
@@ -32,6 +30,7 @@ import { targetChain } from "../../lib/web3-config";
 import { useLocale } from "../i18n/locale-provider";
 import { Button } from "../ui/button";
 import { Icon } from "../ui/icon";
+import { useAuthoritativeReceipt } from "./use-authoritative-receipt";
 
 type PreflightFailure = "paused" | "unpublished";
 
@@ -81,29 +80,11 @@ export function MintPanel({ detail }: { detail: PublicNftDetail }) {
     () => undefined,
   );
   const hash = persistedHash as Hash | undefined;
-  const receipt = useWaitForTransactionReceipt({
-    chainId: targetChain.id,
-    confirmations: 1,
-    hash,
-    query: { enabled: Boolean(hash) },
-  });
-  // Wagmi's wait action throws after observing a reverted receipt while it
-  // attempts to derive a revert reason. Read the raw receipt in parallel so a
-  // known on-chain revert is never mislabeled as an unknown provider outcome.
-  const rawReceipt = useTransactionReceipt({
-    chainId: targetChain.id,
-    hash,
-    query: {
-      enabled: Boolean(hash),
-      refetchInterval: (query) => (query.state.data ? false : 4_000),
-      retry: false,
-    },
-  });
-  const succeeded =
-    receipt.data?.status === "success" || rawReceipt.data?.status === "success";
-  const reverted = rawReceipt.data?.status === "reverted";
-  const uncertain = receipt.isError && !reverted;
-  const pending = Boolean(hash) && !succeeded && !reverted && !uncertain;
+  const receiptState = useAuthoritativeReceipt(hash);
+  const succeeded = receiptState === "success";
+  const reverted = receiptState === "reverted";
+  const uncertain = receiptState === "uncertain";
+  const pending = receiptState === "pending";
 
   useEffect(() => {
     if (succeeded || reverted) router.refresh();

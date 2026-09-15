@@ -14,7 +14,6 @@ import {
   useBalance,
   useConnection,
   useReadContract,
-  useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
 
@@ -33,6 +32,7 @@ import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import { FormField } from "../ui/form-field";
 import { Icon } from "../ui/icon";
+import { useAuthoritativeReceipt } from "../web3/use-authoritative-receipt";
 
 type OwnerAction = "pause" | "price" | "unpause" | "withdraw";
 
@@ -95,12 +95,7 @@ export function OwnerControls({
     [storageKey],
   );
   const hash = useSyncExternalStore(subscribe, getSnapshot, () => undefined);
-  const receipt = useWaitForTransactionReceipt({
-    chainId: targetChain.id,
-    confirmations: 1,
-    hash,
-    query: { enabled: Boolean(hash) },
-  });
+  const receiptState = useAuthoritativeReceipt(hash);
   const connectedOwner =
     connection.status === "connected" &&
     !!connection.address &&
@@ -142,15 +137,11 @@ export function OwnerControls({
   );
 
   useEffect(() => {
-    if (
-      hash &&
-      receipt.data?.status === "success" &&
-      attemptedHash.current !== hash
-    ) {
+    if (hash && receiptState === "success" && attemptedHash.current !== hash) {
       attemptedHash.current = hash;
       void record(hash);
     }
-  }, [hash, receipt.data?.status, record]);
+  }, [hash, receiptState, record]);
 
   const sendPause = async () => {
     if (!canWrite || !contractAddress || paused.data === undefined) return;
@@ -393,15 +384,15 @@ export function OwnerControls({
           <div className="pv-admin-publication__transaction" role="status">
             <Icon name="refresh" size={18} />
             <span>
-              {receipt.data?.status === "success"
+              {receiptState === "success"
                 ? recording
                   ? t("admin.ownerControlsRecording")
                   : recorded
                     ? t("admin.ownerControlsAudited")
                     : t("admin.ownerControlsIncluded")
-                : receipt.data?.status === "reverted"
+                : receiptState === "reverted"
                   ? t("admin.publicationReceiptFailed")
-                  : receipt.isError
+                  : receiptState === "uncertain"
                     ? t("admin.ownerControlsReceiptError")
                     : t("admin.publicationPending")}
             </span>
@@ -415,8 +406,8 @@ export function OwnerControls({
           </div>
         )}
         {hash &&
-          (receipt.isError ||
-            (receipt.data?.status === "success" && recordError)) && (
+          (receiptState === "uncertain" ||
+            (receiptState === "success" && recordError)) && (
             <Button
               disabled={recording}
               onClick={() => {
@@ -429,7 +420,7 @@ export function OwnerControls({
               {t("admin.ownerControlsRetryAudit")}
             </Button>
           )}
-        {hash && (recorded || receipt.data?.status === "reverted") && (
+        {hash && (recorded || receiptState === "reverted") && (
           <Button onClick={clearTransaction} size="sm" variant="ghost">
             {t("admin.ownerControlsDone")}
           </Button>
