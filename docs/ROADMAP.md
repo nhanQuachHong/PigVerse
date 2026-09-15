@@ -204,9 +204,10 @@ correlation and failure contract, as does the paginated Admin audit route.
 The public collection API now propagates correlation IDs and emits a distinct
 redacted degradation event when configuration or chain state is unavailable;
 the NFT-detail API now follows the same contract while treating out-of-domain
-IDs as ordinary non-alerting 404 responses. My-NFT and asset failure
-instrumentation, metrics/alerts, provider retry/failover and controlled failure
-drills remain.
+IDs as ordinary non-alerting 404 responses. My NFTs now reports ownership-read
+degradation with the same redacted contract while invalid wallet input remains
+non-alerting. Asset failure instrumentation, metrics/alerts, provider retry/
+failover and controlled failure drills remain.
 
 **Goal:** Production-grade failure handling and visibility.
 
