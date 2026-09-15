@@ -9,7 +9,7 @@
     "recovery:inspect": "node --experimental-strip-types scripts/recovery-inspect.mjs",
     "start": "next start",
     "test": "vitest run",
-    "test:e2e": "playwright test",
+    "test:e2e": "playwright test && playwright test --config playwright.mint.config.ts",
     "test:e2e:update": "playwright test --update-snapshots",
     "typecheck": "next typegen && tsc --noEmit"
   },
