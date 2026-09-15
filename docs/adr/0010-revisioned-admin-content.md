@@ -25,7 +25,12 @@ configuration cannot silently repoint an existing content history.
 HTTP reads and writes revalidate the opaque Admin session against current
 contract ownership. Writes additionally require the exact configured Origin,
 use server-generated correlation IDs, enforce bounded request bodies and return
-stable safe error codes.
+stable safe error codes. Both list and update responses propagate the bounded
+correlation ID in their body and response header. Authentication, origin,
+validation, stale revision, minted-lock, chain and unexpected failures emit only
+that ID, a fixed operation, allowlisted category, severity and timestamp;
+bilingual content, wallet/token identifiers and raw chain/database errors are
+excluded. Logging failure cannot change the content API outcome.
 
 Publication prepare and inclusion failures emit separate structured operational
 events containing only the bounded correlation ID, fixed operation and allowlisted

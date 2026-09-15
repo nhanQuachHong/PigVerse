@@ -31,15 +31,15 @@ failure cannot change the health response. Liveness and readiness are separate
 so a provider outage does not cause an orchestrator to restart a healthy
 application process.
 
-The same narrow logger boundary covers Admin authentication, Owner-control,
-publication and mint-activity API failures. Authentication and public mint-
-ingestion events accept only a fixed stage and failure category. Privileged-
-operation events accept only a fixed operation and an allowlisted category; they
-exclude wallet addresses, transaction hashes, token/content identifiers, URIs,
-action values and raw errors. Pending or not-yet-visible transactions are normal
-observation states and are not logged as failures. These events are diagnostic
-signals, not authorization decisions or substitutes for the append-only chain-
-evidence audit.
+The same narrow logger boundary covers Admin authentication, content, Owner-
+control, publication and mint-activity API failures. Authentication and public
+mint-ingestion events accept only a fixed stage and failure category.
+Privileged-operation events accept only a fixed operation and an allowlisted
+category; they exclude wallet addresses, transaction hashes, token/content
+identifiers, URIs, action values and raw errors. Pending or not-yet-visible
+transactions are normal observation states and are not logged as failures.
+These events are diagnostic signals, not authorization decisions or substitutes
+for the append-only chain-evidence audit.
 
 ## Boundaries and follow-up
 
@@ -57,9 +57,9 @@ SEC-SECRETS-001 and SEC-LOG-001.
 
 Unit and route tests cover ready, missing configuration, false, rejected and
 timed-out integrations, cache/coalescing behavior, correlation propagation,
-structured allowlists, Admin auth, Owner-control, publication and mint-activity
-failure classification, response/log redaction, correlation propagation and
-logging-sink isolation. Playwright verifies the emitted degraded response and
-safe JSON events from the optimized server when deployment configuration is
+structured allowlists, Admin auth/content, Owner-control, publication and mint-
+activity failure classification, response/log redaction, correlation propagation
+and logging-sink isolation. Playwright verifies the emitted degraded response
+and safe JSON events from the optimized server when deployment configuration is
 intentionally absent. Live provider and hosted monitoring verification remain
 pending.
