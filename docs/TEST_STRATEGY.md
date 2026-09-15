@@ -34,6 +34,13 @@ Wallet state changes, locale switching, collection filters, mint states, stale s
 
 Run against Base Sepolia/local chain-compatible test environment with wallet automation or deterministic test harness. Cover public journey, connect, selected-token mint, failure/retry, My NFTs, Admin auth/content/publish.
 
+Keep the visual/public browser suite independent from the deterministic mint
+profile. The mint profile runs the optimized application against a local
+Base-Sepolia-compatible JSON-RPC fixture and injected EIP-1193 wallet so exact
+calldata/value, pending persistence and receipt restoration are reproducible on
+desktop and mobile. It supplements rather than replaces staging tests with named
+wallets and the deployed Base Sepolia contract.
+
 ### Security Tests
 
 Admin auth replay/expiry, unauthorized Admin, contract owner access control, input/XSS/upload rules, secret/config review.

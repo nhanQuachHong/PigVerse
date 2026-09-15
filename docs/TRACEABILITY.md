@@ -6,8 +6,8 @@
 | FR-PUBLIC-002 | BR-001,002,015 | Public Web, Public API, Chain Read | AT-PUBLIC-002 | M1/M3 |
 | FR-PUBLIC-003 | BR-001,007,011,015 | Public Web, Public API, IPFS, Chain Read | AT-PUBLIC-003 | M1/M4 |
 | FR-WALLET-001 | BR-006 | Wallet Connector | AT-WALLET-001 unit + deterministic injected-browser coverage; named live-wallet matrix pending | M1/M5 |
-| FR-MINT-001 | BR-001,002,003,004,005,008,009 | Contract, Wallet, Chain Client | AT-MINT-001,002,003,005 | M2/M5 |
-| FR-MINT-002 | BR-009,015 | Mint UX, Tx Resolver | AT-MINT-004 | M1/M5 |
+| FR-MINT-001 | BR-001,002,003,004,005,008,009 | Contract, Wallet, Chain Client | AT-MINT-001,002,003,005 unit/contract + deterministic exact-transaction browser coverage; live Base Sepolia pending | M2/M5 |
+| FR-MINT-002 | BR-009,015 | Mint UX, Tx Resolver | AT-MINT-004 unit + deterministic pending-restore/success browser coverage; live Base Sepolia pending | M1/M5 |
 | FR-MINT-003 | BR-005 | Contract, Public UI | AT-MINT-003 | M1/M2/M5 |
 | FR-WALLET-002 | BR-009,015 | My NFTs, Chain Read | AT-MYNFT-001,002 unit/API + deterministic connected-browser coverage; live transfer pending | M1/M6 |
 | FR-ADMIN-001 | BR-010,013 | Auth API, Admin Authorization, Session | AT-ADMIN-001,002,003 | M1/M8 |

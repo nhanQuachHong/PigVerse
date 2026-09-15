@@ -69,8 +69,11 @@ The current detail experience deliberately labels editorial content as pending a
 Base Sepolia network guard, exact-token preflight/submission, pending restoration
 and authoritative receipt outcomes are implemented locally. Deterministic
 production-browser EIP-1193 tests now cover approval, rejection, account change,
-disconnect and Base Sepolia switching on desktop/mobile; live deployed-chain and
-named real-wallet verification remain pending.
+disconnect and Base Sepolia switching on desktop/mobile. A separate deterministic
+production-browser profile verifies the selected token/revision calldata, exact
+current value, pending-hash persistence and authoritative success restoration on
+desktop/mobile; live deployed-chain and named real-wallet verification remain
+pending.
 
 **Goal:** Complete the collector exact-token mint journey on Base Sepolia.
 
@@ -168,9 +171,11 @@ pending; open HIGH findings prevent M10 completion.
 **Status:** IN DEVELOPMENT — optimized production-server desktop/mobile tests
 cover the public pages, Admin foundations, security headers and deterministic
 injected-wallet connect/reject/account/disconnect/network-switch journeys while
-preserving approved visual baselines. Mint, Admin signing/publication, asset and
-recovery journeys against deployed services plus the approved browser/wallet
-matrix remain pending.
+preserving approved visual baselines. The deterministic mint profile also covers
+exact transaction submission, pending persistence and successful receipt
+restoration. Admin signing/publication, asset and recovery journeys against
+deployed services plus live mint and the approved browser/wallet matrix remain
+pending.
 
 **Goal:** Verify all critical journeys and visual contracts together.
 
