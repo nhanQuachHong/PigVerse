@@ -71,11 +71,12 @@ and authoritative receipt outcomes are implemented locally. Deterministic
 production-browser EIP-1193 tests now cover approval, rejection, account change,
 disconnect and Base Sepolia switching on desktop/mobile. A separate deterministic
 production-browser profile verifies the selected token/revision calldata, exact
-current value, pending-hash persistence and authoritative success restoration on
-desktop/mobile. Wallet rejection is also verified to leave no pending hash or
-false success, while an included reverted receipt remains traceable and is
-reported as failed ownership. Live deployed-chain and named real-wallet
-verification remain pending.
+fresh on-chain value, pending-hash persistence and authoritative success
+restoration on desktop/mobile. A newly paused contract stops before wallet
+submission. Wallet rejection is also verified to leave no pending hash or false
+success, while an included reverted receipt remains traceable and is reported as
+failed ownership. Live deployed-chain and named real-wallet verification remain
+pending.
 
 **Goal:** Complete the collector exact-token mint journey on Base Sepolia.
 
@@ -176,9 +177,10 @@ injected-wallet connect/reject/account/disconnect/network-switch journeys while
 preserving approved visual baselines. The deterministic mint profile also covers
 exact transaction submission, pending persistence and successful receipt
 restoration, wallet-rejected submission without false success and included
-revert handling without a false ownership claim. Admin signing/publication,
-asset and recovery journeys against deployed services plus live mint and the
-approved browser/wallet matrix remain pending.
+revert handling without a false ownership claim. Fresh price and pause preflight
+behavior is verified before wallet submission. Admin signing/publication, asset
+and recovery journeys against deployed services plus live mint and the approved
+browser/wallet matrix remain pending.
 
 **Goal:** Verify all critical journeys and visual contracts together.
 
