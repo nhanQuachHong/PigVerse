@@ -72,7 +72,8 @@ production-browser EIP-1193 tests now cover approval, rejection, account change,
 disconnect and Base Sepolia switching on desktop/mobile. A separate deterministic
 production-browser profile verifies the selected token/revision calldata, exact
 current value, pending-hash persistence and authoritative success restoration on
-desktop/mobile; live deployed-chain and named real-wallet verification remain
+desktop/mobile. Wallet rejection is also verified to leave no pending hash or
+false success; live deployed-chain and named real-wallet verification remain
 pending.
 
 **Goal:** Complete the collector exact-token mint journey on Base Sepolia.
@@ -173,9 +174,9 @@ cover the public pages, Admin foundations, security headers and deterministic
 injected-wallet connect/reject/account/disconnect/network-switch journeys while
 preserving approved visual baselines. The deterministic mint profile also covers
 exact transaction submission, pending persistence and successful receipt
-restoration. Admin signing/publication, asset and recovery journeys against
-deployed services plus live mint and the approved browser/wallet matrix remain
-pending.
+restoration, plus wallet-rejected submission without false success. Admin
+signing/publication, asset and recovery journeys against deployed services plus
+live mint and the approved browser/wallet matrix remain pending.
 
 **Goal:** Verify all critical journeys and visual contracts together.
 
