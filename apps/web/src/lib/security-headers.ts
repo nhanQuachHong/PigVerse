@@ -1,4 +1,4 @@
-const contentSecurityPolicy = [
+const contentSecurityPolicyDirectives = [
   "default-src 'self'",
   "base-uri 'self'",
   "connect-src 'self' https: wss:",
@@ -7,13 +7,26 @@ const contentSecurityPolicy = [
   "frame-ancestors 'none'",
   "img-src 'self' blob: data:",
   "object-src 'none'",
-  "script-src 'self' 'unsafe-inline'",
-  "style-src 'self' 'unsafe-inline'",
   "worker-src 'self' blob:",
-].join("; ");
+];
+
+export function createContentSecurityPolicy(
+  nonce: string,
+  environment: "development" | "production" | "test" = "production",
+) {
+  if (!/^[a-zA-Z0-9+/=_-]+$/u.test(nonce)) throw new Error("Invalid CSP nonce");
+
+  const developmentScriptPolicy =
+    environment === "development" ? " 'unsafe-eval'" : "";
+
+  return [
+    ...contentSecurityPolicyDirectives,
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${developmentScriptPolicy}`,
+    "style-src 'self' 'unsafe-inline'",
+  ].join("; ");
+}
 
 export const securityHeaders = [
-  { key: "Content-Security-Policy", value: contentSecurityPolicy },
   { key: "Cross-Origin-Opener-Policy", value: "same-origin-allow-popups" },
   { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
   {

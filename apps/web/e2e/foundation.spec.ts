@@ -1,19 +1,25 @@
 import { expect, test } from "@playwright/test";
 
-test("serves the browser security baseline", async ({ request }) => {
-  const response = await request.get("/");
+test("serves a nonce-bound browser security baseline", async ({ request }) => {
+  const firstResponse = await request.get("/");
+  const secondResponse = await request.get("/");
+  const policy = firstResponse.headers()["content-security-policy"] ?? "";
+  const nonce = policy.match(/'nonce-([a-zA-Z0-9_-]+)'/u)?.[1];
 
-  expect(response.headers()["content-security-policy"]).toContain(
-    "default-src 'self'",
+  expect(policy).toContain("default-src 'self'");
+  expect(policy).toContain("frame-ancestors 'none'");
+  expect(policy).not.toMatch(/script-src[^;]*'unsafe-inline'/u);
+  expect(policy).not.toContain("'unsafe-eval'");
+  expect(nonce).toMatch(/^[a-zA-Z0-9_-]{16,}$/u);
+  expect(secondResponse.headers()["content-security-policy"]).not.toBe(policy);
+  expect(await firstResponse.text()).toMatch(
+    new RegExp(`<script[^>]+nonce=["']${nonce}["']`, "u"),
   );
-  expect(response.headers()["content-security-policy"]).toContain(
-    "frame-ancestors 'none'",
-  );
-  expect(response.headers()["permissions-policy"]).toBe(
+  expect(firstResponse.headers()["permissions-policy"]).toBe(
     "camera=(), geolocation=(), microphone=(), payment=(), usb=()",
   );
-  expect(response.headers()["x-content-type-options"]).toBe("nosniff");
-  expect(response.headers()["x-frame-options"]).toBe("DENY");
+  expect(firstResponse.headers()["x-content-type-options"]).toBe("nosniff");
+  expect(firstResponse.headers()["x-frame-options"]).toBe("DENY");
 });
 
 test("serves a redacted deployment health signal", async ({ request }) => {

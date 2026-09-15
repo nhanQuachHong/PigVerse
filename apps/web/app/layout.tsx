@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { connection } from "next/server";
 import type { ReactNode } from "react";
 
 import { LocaleProvider } from "../src/components/i18n/locale-provider";
@@ -14,9 +15,11 @@ export const metadata: Metadata = {
   description: "Ten unique pig characters. One connected universe.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: ReactNode }>) {
+  await connection();
+
   return (
     <html data-scroll-behavior="smooth" lang="vi">
       <body>
