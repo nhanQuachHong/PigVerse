@@ -4,10 +4,13 @@ pragma solidity 0.8.34;
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {GenesisTokenDomain} from "./GenesisTokenDomain.sol";
 
+/// @title Pigverse Genesis NFT core
+/// @author Pigverse
 /// @notice Immutable Genesis ownership/metadata core; mint authorization belongs
 /// to the concrete application contract, not to this abstract component.
 abstract contract GenesisNFTCore is ERC721, GenesisTokenDomain {
     mapping(uint256 tokenId => string uri) private _mintedURIs;
+    /// @notice Number of Genesis identities minted successfully.
     uint256 public totalSupply;
 
     error GenesisAlreadyMinted(uint256 tokenId);
@@ -17,6 +20,9 @@ abstract contract GenesisNFTCore is ERC721, GenesisTokenDomain {
 
     constructor() ERC721("Pigverse Genesis", "PIGVERSE") {}
 
+    /// @notice Returns the immutable metadata URI captured when a token minted.
+    /// @param tokenId Genesis token identity in the range 1 through 10.
+    /// @return Metadata URI permanently associated with the minted token.
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
         _requireOwned(tokenId);
         return _mintedURIs[tokenId];
@@ -30,7 +36,7 @@ abstract contract GenesisNFTCore is ERC721, GenesisTokenDomain {
         // Publish all token state before ERC721Receiver executes. A failed
         // receiver rolls back ownership, URI and supply together.
         _mintedURIs[tokenId] = uri;
-        totalSupply++;
+        ++totalSupply;
         _safeMint(recipient, tokenId);
     }
 

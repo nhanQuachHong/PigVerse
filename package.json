@@ -14,7 +14,7 @@
     "dev": "pnpm --filter @pigverse/web dev",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "lint": "eslint .",
+    "lint": "eslint . && pnpm --filter @pigverse/contracts lint",
     "recovery:inspect": "pnpm --filter @pigverse/web recovery:inspect",
     "test": "pnpm -r --if-present test",
     "test:e2e": "pnpm --filter @pigverse/web test:e2e",
