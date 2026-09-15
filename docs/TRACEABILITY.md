@@ -13,7 +13,7 @@
 | FR-ADMIN-001 | BR-010,013 | Auth API, Admin Authorization, Session | AT-ADMIN-001,002,003 | M1/M8 |
 | FR-ADMIN-002 | BR-001,007,010,011,012 | Admin UI/API, Content, Audit | AT-ADMIN-004,005 | M1/M9 |
 | FR-ASSET-001 | BR-007,012,014 | Asset Pipeline, IPFS, Backup | AT-ASSET-001,002 | M9 |
-| FR-ADMIN-003 | BR-011,012 | Admin UI/API, Content, Chain Recheck | AT-PUBLISH-001,002 | M1/M9 |
+| FR-ADMIN-003 | BR-011,012 | Admin UI/API, Content, Chain Recheck | AT-PUBLISH-001,002 + authoritative receipt-state unit coverage; Admin browser/live chain pending | M1/M9 |
 | FR-ADMIN-004 | BR-010,013 | Audit Module | AT-AUDIT-001 | M1/M9 |
 | FR-ADMIN-005 | BR-009,013 | Mint Activity/Reconciliation | AT-ACTIVITY-001 | M1/M9 |
 | FR-CONTRACT-001 | BR-005,010 | Genesis Contract | AT-OWNER-001, AT-MINT-003 + focused source/static review; live deployment pending | M2/M10 |

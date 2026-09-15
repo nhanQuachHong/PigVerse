@@ -139,9 +139,11 @@ idempotent inclusion/audit persistence are implemented and locally verified. The
 bilingual 10-slot editor, guarded publication controls, paginated immutable
 audit history and chain-reconciled mint activity view pass component, API and
 desktop/mobile visual tests. Verified successful mint observations atomically
-lock the current matching content revision. Concrete IPFS and backup-provider
-adapters, the Admin asset-processing route/UI and live database/deployed-chain
-verification remain pending.
+lock the current matching content revision. Publication and Owner-control UI now
+share raw/wait receipt resolution so included reverts cannot be mistaken for
+success or an unknown chain outcome. Concrete IPFS and backup-provider adapters,
+the Admin asset-processing route/UI and live database/deployed-chain verification
+remain pending.
 
 **Goal:** Manage and publish complete asset packages for the 10 unminted characters safely.
 
