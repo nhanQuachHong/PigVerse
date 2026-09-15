@@ -67,8 +67,10 @@ The current detail experience deliberately labels editorial content as pending a
 
 **Status:** IN DEVELOPMENT — the reactive injected/EIP-6963 wallet foundation,
 Base Sepolia network guard, exact-token preflight/submission, pending restoration
-and authoritative receipt outcomes are implemented locally; live deployed-chain
-and browser-wallet verification remain pending.
+and authoritative receipt outcomes are implemented locally. Deterministic
+production-browser EIP-1193 tests now cover approval, rejection, account change,
+disconnect and Base Sepolia switching on desktop/mobile; live deployed-chain and
+named real-wallet verification remain pending.
 
 **Goal:** Complete the collector exact-token mint journey on Base Sepolia.
 
@@ -160,6 +162,13 @@ pending; open HIGH findings prevent M10 completion.
 **DoD:** no unresolved BLOCKER/HIGH security finding in approved scope.
 
 ## M11 — Full E2E + Visual Regression
+
+**Status:** IN DEVELOPMENT — optimized production-server desktop/mobile tests
+cover the public pages, Admin foundations, security headers and deterministic
+injected-wallet connect/reject/account/disconnect/network-switch journeys while
+preserving approved visual baselines. Mint, Admin signing/publication, asset and
+recovery journeys against deployed services plus the approved browser/wallet
+matrix remain pending.
 
 **Goal:** Verify all critical journeys and visual contracts together.
 
