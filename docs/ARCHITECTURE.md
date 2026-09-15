@@ -54,6 +54,7 @@ Backend/Public UI ----------------------> Base RPC (authoritative reads)
 | Immutable minted asset reference | Contract/token URI + content-addressed storage according to final contract design |
 | Draft content before mint | Application datastore |
 | Admin authorization | Authenticated wallet session checked against current on-chain Contract Owner |
+| Admin authentication abuse windows | Operational database, shared by every application instance |
 | Admin audit history | Application audit store |
 | Mint activity dashboard | Chain receipt/events are authoritative; DB is an index/observation |
 | Artwork/metadata durability | IPFS + required backup storage |
@@ -77,6 +78,7 @@ Backend/Public UI ----------------------> Base RPC (authoritative reads)
 
 - Keeps no user private keys.
 - Issues replay-resistant wallet-signature challenges.
+- Enforces Admin authentication abuse limits through atomic shared-database counters.
 - Enforces Admin authorization server-side.
 - Treats chain conflicts as chain-wins for ownership.
 - Orchestrates IPFS + backup as a durable unit before READY.

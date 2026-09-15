@@ -106,8 +106,8 @@ final Product Owner-approved bilingual narrative copy is still required.
 **Status:** IN DEVELOPMENT — hashed PostgreSQL challenge/session persistence,
 origin-bound expiring single-use wallet challenges, signature verification,
 current-owner authorization, strict opaque cookies, logout/session routes and
-bounded app-level abuse controls plus a wallet-signature access UI pass local
-security, component and visual tests; deployed PostgreSQL/RPC wallet E2E and the
+bounded PostgreSQL-shared abuse controls plus a wallet-signature access UI pass
+local security, component and visual tests; deployed PostgreSQL/RPC wallet E2E and the
 privileged workflows assigned to later milestones remain pending.
 
 **Goal:** Establish the admin shell and secure Admin Dashboard access.
@@ -148,8 +148,10 @@ repository secret gate and high-severity production dependency audit are wired
 into CI, and the living threat/risk review is recorded in `SECURITY_REVIEW.md`.
 A per-request nonce now protects production framework scripts without
 `unsafe-inline` or `unsafe-eval`, with wallet and visual regression coverage.
-Inline style compatibility, upload hardening and the complete contract review
-remain pending; open HIGH findings prevent M10 completion.
+Admin authentication rate limits now use atomic PostgreSQL counters shared
+across application instances. Inline style compatibility, live multi-instance
+rate-limit verification, upload hardening and the complete contract review remain
+pending; open HIGH findings prevent M10 completion.
 
 **Goal:** Remove critical/high security blockers.
 

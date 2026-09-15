@@ -23,6 +23,7 @@ chain ownership. RPC, IPFS and backup providers are external trust boundaries.
 | Mutable content after mint | Mint copies the published URI into immutable token storage; contract and database tests reject later content/publication changes. | Verified locally |
 | Unauthorized pause, price, publication or withdrawal | OpenZeppelin `Ownable2Step`; every privileged contract mutation uses `onlyOwner`; withdrawal has no arbitrary recipient. Negative contract tests cover non-owner calls. | Verified locally |
 | Admin signature replay or stale authorization | High-entropy expiring challenges are stored hashed, atomically single-use, domain/URI/chain-bound and verified before a hashed session is created. Every session use re-reads `owner()` and revokes on mismatch/unavailability. | Verified locally |
+| Horizontally scaled authentication abuse | Challenge and verification attempts use scoped, hashed identifiers and an atomic PostgreSQL fixed-window decision shared by every application instance. Expired counters are removed opportunistically and database failure denies authentication. | Implementation verified locally |
 | Session theft through browser script or cross-site request | Production cookie uses the `__Host-` prefix, `Secure`, `HttpOnly`, `SameSite=Strict` and bounded lifetime. State-changing routes require the exact configured Origin. | Verified locally |
 | False success from client-supplied chain state | Mint, publication and Owner-control flows resolve transaction/receipt/calldata/event evidence against the configured chain and contract; inconsistent or unavailable evidence fails closed. | Verified locally at inclusion level |
 | Audit duplication or split writes | Publication, mint and Owner inclusion stores use deployment-scoped identifiers, database transactions and idempotency/conflict checks. | Verified locally |
@@ -65,7 +66,7 @@ Primary implementation evidence includes:
 | SEC-REV-003 | HIGH / release blocker | Concrete IPFS/backup providers and the metadata schema are unresolved (`OD-005`, `OD-006`, `OD-015`), preventing integrity, permission and recovery review. | Approved providers/schema, least-privilege credentials, pin/backup/recovery drill |
 | SEC-REV-004 | MEDIUM | Included receipts are not product finality; reorg repair and the confirmation policy remain open (`OD-008`). | Approved policy plus canonical-block reconciliation and reorg tests |
 | SEC-REV-005 | MEDIUM | Script CSP is nonce-bound and production `unsafe-inline`/`unsafe-eval` are removed. `style-src 'unsafe-inline'` remains because Next/Image and React emit style attributes; a nonce does not authorize those attributes. | Style-compatible hash/class strategy plus wallet and visual regression suite |
-| SEC-REV-006 | MEDIUM | Authentication abuse limits are process-local and therefore not globally bounded across horizontally scaled instances. | Deployment topology decision or shared rate limiter with multi-instance tests |
+| SEC-REV-006 | MEDIUM | Authentication abuse limits now use shared PostgreSQL counters rather than process memory. The atomic query and fail-closed route behavior pass locally, but concurrent multi-instance behavior has not been exercised against the hosted database. | Hosted migration plus concurrent multi-instance limit/reset test |
 | SEC-REV-007 | MEDIUM | RPC provider/failover and failure alerting are unresolved (`OD-007`). | Provider decision, timeout/failover configuration and controlled failure drill |
 | SEC-REV-008 | MEDIUM | Live PostgreSQL migrations, hosted HTTPS headers, real browser wallets and Base Sepolia transaction paths have not been rehearsed together. | M12 deployment runbook and end-to-end release-candidate evidence |
 
@@ -77,6 +78,7 @@ item is open, and Base Mainnet remains unauthorized.
 | ID | Updated | Evidence and residual boundary |
 |---|---|---|
 | SEC-REV-005 | 2026-09-15 | A request proxy generates a fresh nonce, supplies it to the Next.js renderer and returns a nonce-bound `script-src` without `unsafe-inline`, remote script origins or production `unsafe-eval`. Production E2E verifies nonce rotation, nonce-bearing framework scripts, wallet UI behavior and unchanged desktop/mobile visual baselines. Dynamic rendering is the accepted nonce trade-off. The finding remains open only for inline style compatibility. |
+| SEC-REV-006 | 2026-09-15 | Production route defaults use a PostgreSQL-backed limiter with a `(scope, key_hash)` primary key and atomic upsert; memory limits remain only injectable test doubles. Unit, route and migration tests verify allow/deny mapping, hashed bounded keys, separate challenge/verification scopes and database-failure denial. Hosted multi-instance concurrency evidence remains outstanding. |
 
 ## Commands and evidence cadence
 
