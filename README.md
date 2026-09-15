@@ -26,6 +26,15 @@ pnpm db:migrate
 docker compose down
 ```
 
+Read-only Base Sepolia recovery inspection is available after a contract is
+deployed and the public RPC/contract environment is configured:
+
+```bash
+pnpm recovery:inspect
+```
+
+See `docs/RECOVERY_RUNBOOK.md`. This command never writes application data.
+
 ## Repository map
 
 - `apps/web` — public and Admin web application/backend boundary

@@ -184,6 +184,12 @@ pending; open HIGH findings prevent M10 completion.
 
 ## M14 — Recovery & Reconciliation
 
+**Status:** IN DEVELOPMENT — a read-only Base Sepolia inspection CLI captures
+all ten ownership/publication/immutable-URI records at one verified block and
+fails closed on wrong contract identity, ambiguous token reverts or inconsistent
+supply. Local deterministic recovery fixtures pass. Content reconstruction,
+database apply mode and a live chain + IPFS + backup drill remain pending.
+
 **Goal:** Demonstrate recovery of Genesis public state.
 
 **Requirements:** `FR-RECOVERY-001`.  

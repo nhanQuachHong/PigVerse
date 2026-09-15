@@ -19,7 +19,7 @@
 | FR-CONTRACT-001 | BR-005,010 | Genesis Contract | AT-OWNER-001, AT-MINT-003 | M2 |
 | FR-CONTRACT-002 | BR-004,010 | Genesis Contract | AT-OWNER-002, AT-MINT-005 | M2 |
 | FR-I18N-001 | BR-007 | i18n, Content | AT-I18N-001 | M1/M3-M9/M13 |
-| FR-RECOVERY-001 | BR-009,014,015 | Reconciliation, Recovery, Ops | AT-RECOVERY-001,002 | M14 |
+| FR-RECOVERY-001 | BR-009,014,015 | Reconciliation, Recovery, Ops | Chain snapshot unit/CLI foundation; AT-RECOVERY-001,002 pending live content drill | M14 |
 | FR-LICENSE-001 | BR-016 | Public UI/Content | AT-LICENSE-001 | M1/M4/M7/M13 |
 
 ## Product Goal Traceability
