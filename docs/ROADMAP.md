@@ -75,8 +75,9 @@ fresh on-chain value, pending-hash persistence and authoritative success
 restoration on desktop/mobile. A newly paused contract stops before wallet
 submission. Wallet rejection is also verified to leave no pending hash or false
 success, while an included reverted receipt remains traceable and is reported as
-failed ownership. Live deployed-chain and named real-wallet verification remain
-pending.
+failed ownership. An unavailable preflight RPC fails before wallet submission;
+retry submits once only after the fixture recovers. Live deployed-chain and
+named real-wallet verification remain pending.
 
 **Goal:** Complete the collector exact-token mint journey on Base Sepolia.
 
@@ -178,8 +179,9 @@ preserving approved visual baselines. The deterministic mint profile also covers
 exact transaction submission, pending persistence and successful receipt
 restoration, wallet-rejected submission without false success and included
 revert handling without a false ownership claim. Fresh price and pause preflight
-behavior is verified before wallet submission. Admin signing/publication, asset
-and recovery journeys against deployed services plus live mint and the approved
+behavior is verified before wallet submission, and a degraded RPC stays
+fail-closed until a successful retry. Admin signing/publication, asset and
+recovery journeys against deployed services plus live mint and the approved
 browser/wallet matrix remain pending.
 
 **Goal:** Verify all critical journeys and visual contracts together.
