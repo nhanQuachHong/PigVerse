@@ -54,7 +54,9 @@ test("submits the exact selected token and restores its authoritative outcome", 
         ? {
             result: receiptFixture(transactionHash, "0x1"),
           }
-        : resolveBaseRpcFixture(payload.method, payload.params ?? []);
+        : resolveBaseRpcFixture(payload.method, payload.params ?? [], {
+            mintPrice: 200n,
+          });
     await route.fulfill({
       json: { id: payload.id, jsonrpc: "2.0", ...outcome },
     });
@@ -98,7 +100,7 @@ test("submits the exact selected token and restores its authoritative outcome", 
     }),
     from: account,
     to: contract,
-    value: "0x64",
+    value: "0xc8",
   });
 
   receiptAvailable = true;
@@ -210,5 +212,53 @@ test("keeps chain state unconfirmed when the wallet rejects mint", async ({
       ({ method }) => method === "eth_sendTransaction",
     ),
   ).toHaveLength(1);
+  await page.waitForLoadState("networkidle");
+});
+
+test("stops before wallet submission when fresh chain state is paused", async ({
+  page,
+}) => {
+  await installInjectedWallet(page, {
+    account,
+    chainId: 84532,
+    transactionHash,
+  });
+  await page.route("https://sepolia.base.org/**", async (route) => {
+    const payload = route.request().postDataJSON() as {
+      id: number;
+      jsonrpc: "2.0";
+      method: string;
+      params?: readonly unknown[];
+    };
+    await route.fulfill({
+      json: {
+        id: payload.id,
+        jsonrpc: "2.0",
+        ...resolveBaseRpcFixture(payload.method, payload.params ?? [], {
+          paused: true,
+        }),
+      },
+    });
+  });
+
+  await page.goto("/nft/4");
+  await expect(page.getByText("Mint NFT này")).toBeVisible();
+  await chooseInjectedWallet(page);
+  await page.getByRole("button", { name: "Mint NFT" }).click();
+
+  await expect(page.locator(".pv-mint-panel__error")).toContainText(
+    "Mint đang tạm dừng on-chain",
+  );
+  expect(
+    (await getInjectedWalletRequests(page)).filter(
+      ({ method }) => method === "eth_sendTransaction",
+    ),
+  ).toHaveLength(0);
+  expect(
+    await page.evaluate(
+      (key) => window.localStorage.getItem(key),
+      `pigverse:mint:84532:${contract}:4:${account}`,
+    ),
+  ).toBeNull();
   await page.waitForLoadState("networkidle");
 });

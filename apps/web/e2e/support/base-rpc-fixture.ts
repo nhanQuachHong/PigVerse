@@ -22,12 +22,20 @@ export type RpcFixtureOutcome =
   | { error: { code: number; data?: `0x${string}`; message: string } }
   | { result: unknown };
 
-function resolveContractCall(data: `0x${string}`): RpcFixtureOutcome {
+export type BaseRpcFixtureOptions = {
+  mintPrice?: bigint;
+  paused?: boolean;
+};
+
+function resolveContractCall(
+  data: `0x${string}`,
+  options: BaseRpcFixtureOptions,
+): RpcFixtureOutcome {
   if (data.startsWith("0x82ad56cb")) {
     const decoded = decodeFunctionData({ abi: multicallAbi, data });
     const calls = decoded.args[0];
     const results = calls.map(({ allowFailure, callData }) => {
-      const outcome = resolveContractCall(callData);
+      const outcome = resolveContractCall(callData, options);
       if ("result" in outcome)
         return { returnData: outcome.result as `0x${string}`, success: true };
       if (!allowFailure) throw new Error("Required fixture multicall failed");
@@ -62,9 +70,9 @@ function resolveContractCall(data: `0x${string}`): RpcFixtureOutcome {
   const result = (() => {
     switch (decoded.functionName) {
       case "paused":
-        return false;
+        return options.paused ?? false;
       case "mintPrice":
-        return 100n;
+        return options.mintPrice ?? 100n;
       case "publicationRevision":
         return tokenId === 4 ? 3n : 0n;
       case "publishedURI":
@@ -88,6 +96,7 @@ function resolveContractCall(data: `0x${string}`): RpcFixtureOutcome {
 export function resolveBaseRpcFixture(
   method: string,
   params: readonly unknown[],
+  options: BaseRpcFixtureOptions = {},
 ): RpcFixtureOutcome {
   if (method === "eth_chainId") return { result: "0x14a34" };
   if (method === "eth_blockNumber") return { result: "0x100" };
@@ -100,5 +109,5 @@ export function resolveBaseRpcFixture(
   const request = params[0] as { data?: unknown } | undefined;
   if (typeof request?.data !== "string")
     return { error: { code: -32_602, message: "Invalid params" } };
-  return resolveContractCall(request.data as `0x${string}`);
+  return resolveContractCall(request.data as `0x${string}`, options);
 }
