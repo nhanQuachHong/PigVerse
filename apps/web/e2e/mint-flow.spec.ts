@@ -107,3 +107,52 @@ test("submits the exact selected token and restores its authoritative outcome", 
   ).toHaveAttribute("href", "/my-nfts");
   await page.waitForLoadState("networkidle");
 });
+
+test("keeps chain state unconfirmed when the wallet rejects mint", async ({
+  page,
+}) => {
+  await installInjectedWallet(page, {
+    account,
+    chainId: 84532,
+    rejectTransaction: true,
+  });
+  await page.route("https://sepolia.base.org/**", async (route) => {
+    const payload = route.request().postDataJSON() as {
+      id: number;
+      jsonrpc: "2.0";
+      method: string;
+      params?: readonly unknown[];
+    };
+    await route.fulfill({
+      json: {
+        id: payload.id,
+        jsonrpc: "2.0",
+        ...resolveBaseRpcFixture(payload.method, payload.params ?? []),
+      },
+    });
+  });
+
+  await page.goto("/nft/4");
+  await chooseInjectedWallet(page);
+  await page.getByRole("button", { name: "Mint NFT" }).click();
+
+  await expect(page.locator(".pv-mint-panel__error")).toContainText(
+    "Giao dịch chưa được gửi",
+  );
+  await expect(page.getByText("Mint đã xác nhận!")).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Xem giao dịch" })).toHaveCount(
+    0,
+  );
+  expect(
+    await page.evaluate(
+      (key) => window.localStorage.getItem(key),
+      `pigverse:mint:84532:${contract}:4:${account}`,
+    ),
+  ).toBeNull();
+  expect(
+    (await getInjectedWalletRequests(page)).filter(
+      ({ method }) => method === "eth_sendTransaction",
+    ),
+  ).toHaveLength(1);
+  await page.waitForLoadState("networkidle");
+});

@@ -6,11 +6,18 @@ export async function installInjectedWallet(
     account: `0x${string}`;
     chainId: number;
     rejectConnection?: boolean;
+    rejectTransaction?: boolean;
     transactionHash?: `0x${string}`;
   },
 ) {
   await page.addInitScript(
-    ({ account, chainId, rejectConnection, transactionHash }) => {
+    ({
+      account,
+      chainId,
+      rejectConnection,
+      rejectTransaction,
+      transactionHash,
+    }) => {
       type Listener = (...parameters: unknown[]) => void;
       const listeners = new Map<string, Set<Listener>>();
       const requests: Array<{
@@ -60,8 +67,13 @@ export async function installInjectedWallet(
             emit("chainChanged", requested);
             return null;
           }
-          if (method === "eth_sendTransaction" && transactionHash)
-            return transactionHash;
+          if (method === "eth_sendTransaction") {
+            if (rejectTransaction)
+              throw Object.assign(new Error("User rejected transaction"), {
+                code: 4001,
+              });
+            if (transactionHash) return transactionHash;
+          }
           throw Object.assign(new Error("Unsupported mock wallet method"), {
             code: 4200,
           });
