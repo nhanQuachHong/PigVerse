@@ -34,7 +34,7 @@ export type MintActivityFailureCategory =
   | "unavailable";
 export type PublicReadFailureCategory =
   "chain_unavailable" | "configuration_unavailable" | "unavailable";
-export type PublicReadSurface = "collection";
+export type PublicReadSurface = "collection" | "nft_detail";
 
 export type OperationalLogSink = (line: string) => void;
 
@@ -194,7 +194,7 @@ export function logPublicReadFailure(
     !["chain_unavailable", "configuration_unavailable", "unavailable"].includes(
       input.category,
     ) ||
-    input.surface !== "collection"
+    !["collection", "nft_detail"].includes(input.surface)
   )
     throw new Error("Invalid operational log input");
   writeLog(
