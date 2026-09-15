@@ -1,7 +1,7 @@
 # ADR 0013 — Browser security header baseline
 
-Status: Accepted baseline for M10; nonce/hash CSP hardening and production-domain
-verification remain pending.
+Status: Accepted baseline for M10; its temporary inline-script exception is
+superseded by ADR 0015. Production-domain verification remains pending.
 
 ## Decision
 
@@ -18,11 +18,10 @@ route, including API responses:
 - MIME-sniffing and referrer protections; and
 - one-year HSTS without the unverified `includeSubDomains` or `preload` claims.
 
-The current production Next.js output requires inline framework bootstrap and
-style content, so the baseline permits `'unsafe-inline'` for scripts and styles.
-It does not allow remote script origins, wildcard script sources or `unsafe-eval`.
-Moving to request nonces or build-time script hashes is a remaining M10 hardening
-task and must be verified without losing static rendering or wallet behavior.
+This baseline initially permitted `'unsafe-inline'` for framework scripts and
+styles. ADR 0015 replaces the script exception with per-request nonces after
+production wallet and visual verification. Inline style compatibility remains
+explicitly bounded there.
 
 ## Security boundary
 

@@ -146,7 +146,9 @@ referrer, browser-capability, cross-origin isolation and HSTS response headers a
 implemented and verified against a production Next.js server. A redacting
 repository secret gate and high-severity production dependency audit are wired
 into CI, and the living threat/risk review is recorded in `SECURITY_REVIEW.md`.
-Nonce/hash-based script CSP, upload hardening and the complete contract review
+A per-request nonce now protects production framework scripts without
+`unsafe-inline` or `unsafe-eval`, with wallet and visual regression coverage.
+Inline style compatibility, upload hardening and the complete contract review
 remain pending; open HIGH findings prevent M10 completion.
 
 **Goal:** Remove critical/high security blockers.

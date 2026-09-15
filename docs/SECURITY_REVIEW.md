@@ -26,7 +26,7 @@ chain ownership. RPC, IPFS and backup providers are external trust boundaries.
 | Session theft through browser script or cross-site request | Production cookie uses the `__Host-` prefix, `Secure`, `HttpOnly`, `SameSite=Strict` and bounded lifetime. State-changing routes require the exact configured Origin. | Verified locally |
 | False success from client-supplied chain state | Mint, publication and Owner-control flows resolve transaction/receipt/calldata/event evidence against the configured chain and contract; inconsistent or unavailable evidence fails closed. | Verified locally at inclusion level |
 | Audit duplication or split writes | Publication, mint and Owner inclusion stores use deployment-scoped identifiers, database transactions and idempotency/conflict checks. | Verified locally |
-| XSS/clickjacking/browser capability abuse | React renders text; application-wide CSP, frame denial, MIME, referrer, permissions, cross-origin and HSTS headers are asserted against the optimized server. | Baseline verified locally |
+| XSS/clickjacking/browser capability abuse | React renders text; each document request receives a fresh script nonce, Next.js applies it to framework scripts, and `script-src` denies untrusted inline/remote/eval execution. Frame denial, MIME, referrer, permissions, cross-origin and HSTS headers are asserted against the optimized server. | Nonce script policy verified locally |
 | Committed credentials | `verify:secrets` scans tracked and non-ignored candidate files, redacts values in findings and is part of `verify`; CI runs it. Blank examples remain valid. | Verified locally |
 | Known production dependency advisory | CI runs `pnpm audit --prod --audit-level high`. The 2026-09-14 local registry result reported no known vulnerabilities. | Time-bound pass |
 | Health failure log disclosure | Readiness failures emit only a bounded correlation ID and allowlisted integration category; raw exception/provider content never enters the structured logger. | Verified locally |
@@ -53,6 +53,7 @@ Primary implementation evidence includes:
 - `apps/web/src/server/owner-transaction-reader.ts`
 - `apps/web/src/server/operational-log.ts`
 - `apps/web/src/lib/security-headers.ts`
+- `apps/web/proxy.ts`
 - `scripts/verify-secrets.mjs`
 
 ## Open findings and release blockers
@@ -63,13 +64,19 @@ Primary implementation evidence includes:
 | SEC-REV-002 | HIGH / release blocker | The Admin asset upload surface is not implemented and format/size limits remain open (`OD-014`). No upload endpoint may be released without actual media inspection, resource bounds and non-executable storage. | Approved limits plus negative upload tests and provider-backed E2E |
 | SEC-REV-003 | HIGH / release blocker | Concrete IPFS/backup providers and the metadata schema are unresolved (`OD-005`, `OD-006`, `OD-015`), preventing integrity, permission and recovery review. | Approved providers/schema, least-privilege credentials, pin/backup/recovery drill |
 | SEC-REV-004 | MEDIUM | Included receipts are not product finality; reorg repair and the confirmation policy remain open (`OD-008`). | Approved policy plus canonical-block reconciliation and reorg tests |
-| SEC-REV-005 | MEDIUM | CSP permits inline framework scripts/styles to preserve current static Next.js output. Remote scripts and `unsafe-eval` remain denied. | Nonce/hash implementation and wallet/static-render regression suite |
+| SEC-REV-005 | MEDIUM | Script CSP is nonce-bound and production `unsafe-inline`/`unsafe-eval` are removed. `style-src 'unsafe-inline'` remains because Next/Image and React emit style attributes; a nonce does not authorize those attributes. | Style-compatible hash/class strategy plus wallet and visual regression suite |
 | SEC-REV-006 | MEDIUM | Authentication abuse limits are process-local and therefore not globally bounded across horizontally scaled instances. | Deployment topology decision or shared rate limiter with multi-instance tests |
 | SEC-REV-007 | MEDIUM | RPC provider/failover and failure alerting are unresolved (`OD-007`). | Provider decision, timeout/failover configuration and controlled failure drill |
 | SEC-REV-008 | MEDIUM | Live PostgreSQL migrations, hosted HTTPS headers, real browser wallets and Base Sepolia transaction paths have not been rehearsed together. | M12 deployment runbook and end-to-end release-candidate evidence |
 
 No finding in this table is waived. M10 remains in development while any HIGH
 item is open, and Base Mainnet remains unauthorized.
+
+## Partially remediated findings
+
+| ID | Updated | Evidence and residual boundary |
+|---|---|---|
+| SEC-REV-005 | 2026-09-15 | A request proxy generates a fresh nonce, supplies it to the Next.js renderer and returns a nonce-bound `script-src` without `unsafe-inline`, remote script origins or production `unsafe-eval`. Production E2E verifies nonce rotation, nonce-bearing framework scripts, wallet UI behavior and unchanged desktop/mobile visual baselines. Dynamic rendering is the accepted nonce trade-off. The finding remains open only for inline style compatibility. |
 
 ## Commands and evidence cadence
 
