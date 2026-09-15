@@ -15,6 +15,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint .",
+    "recovery:inspect": "pnpm --filter @pigverse/web recovery:inspect",
     "test": "pnpm -r --if-present test",
     "test:e2e": "pnpm --filter @pigverse/web test:e2e",
     "test:failure-drills": "pnpm --filter @pigverse/web exec vitest run src/server/health-route.test.ts src/server/health.test.ts src/server/admin-auth-routes.test.ts src/server/mint-activity-routes.test.ts src/server/asset-pipeline.test.ts src/lib/collection-api.test.ts src/lib/public-nft-api.test.ts src/lib/my-nfts-api.test.ts",
