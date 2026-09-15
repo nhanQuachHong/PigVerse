@@ -36,6 +36,7 @@ chain ownership. RPC, IPFS and backup providers are external trust boundaries.
 | Mint-activity failure log disclosure | Public ingestion uses a distinct fixed-stage event; Admin reconciliation uses a fixed-operation event. Both exclude wallet, transaction, token/content, value and raw provider/error data. Pending and not-yet-visible transactions are not logged as failures. | Verified locally |
 | Admin content failure log disclosure | Content list/update failures emit only bounded correlation ID, fixed operation and allowlisted category; bilingual content, wallet, token identifier and raw chain/database errors never enter the logger. | Verified locally |
 | Admin audit failure log disclosure | Audit authorization, pagination and store failures emit only bounded correlation ID, fixed operation and allowlisted category; actor, action, target, context and raw database errors never enter the logger. | Verified locally |
+| Public collection degradation log disclosure | Degraded collection reads emit only bounded correlation ID, fixed surface and allowlisted configuration/chain category; contract, owner, NFT state, metadata and provider details never enter the logger. | Verified locally |
 
 Primary implementation evidence includes:
 

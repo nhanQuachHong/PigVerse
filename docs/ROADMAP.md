@@ -201,8 +201,10 @@ events. Inclusion polling and not-yet-visible mint transactions do not warn, and
 operation events exclude wallet, transaction, token/content, value, URI and
 provider-error data. Admin content list/update routes now carry the same redacted
 correlation and failure contract, as does the paginated Admin audit route.
-Broader asset failure instrumentation, metrics/alerts, provider retry/failover
-and controlled failure drills remain.
+The public collection API now propagates correlation IDs and emits a distinct
+redacted degradation event when configuration or chain state is unavailable.
+NFT-detail/My-NFT and asset failure instrumentation, metrics/alerts, provider
+retry/failover and controlled failure drills remain.
 
 **Goal:** Production-grade failure handling and visibility.
 
