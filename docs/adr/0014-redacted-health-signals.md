@@ -31,9 +31,9 @@ failure cannot change the health response. Liveness and readiness are separate
 so a provider outage does not cause an orchestrator to restart a healthy
 application process.
 
-The same narrow logger boundary covers Admin authentication, content, Owner-
-control, publication and mint-activity API failures. Authentication and public
-mint-ingestion events accept only a fixed stage and failure category.
+The same narrow logger boundary covers Admin authentication, content/audit,
+Owner-control, publication and mint-activity API failures. Authentication and
+public mint-ingestion events accept only a fixed stage and failure category.
 Privileged-operation events accept only a fixed operation and an allowlisted
 category; they exclude wallet addresses, transaction hashes, token/content
 identifiers, URIs, action values and raw errors. Pending or not-yet-visible
@@ -57,9 +57,9 @@ SEC-SECRETS-001 and SEC-LOG-001.
 
 Unit and route tests cover ready, missing configuration, false, rejected and
 timed-out integrations, cache/coalescing behavior, correlation propagation,
-structured allowlists, Admin auth/content, Owner-control, publication and mint-
-activity failure classification, response/log redaction, correlation propagation
-and logging-sink isolation. Playwright verifies the emitted degraded response
-and safe JSON events from the optimized server when deployment configuration is
-intentionally absent. Live provider and hosted monitoring verification remain
-pending.
+structured allowlists, Admin auth/content/audit, Owner-control, publication and
+mint-activity failure classification, response/log redaction, correlation
+propagation and logging-sink isolation. Playwright verifies the emitted degraded
+response and safe JSON events from the optimized server when deployment
+configuration is intentionally absent. Live provider and hosted monitoring
+verification remain pending.

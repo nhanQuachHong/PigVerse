@@ -200,8 +200,9 @@ now propagate correlation IDs and emit separate redacted failure/degradation
 events. Inclusion polling and not-yet-visible mint transactions do not warn, and
 operation events exclude wallet, transaction, token/content, value, URI and
 provider-error data. Admin content list/update routes now carry the same redacted
-correlation and failure contract. Broader asset failure instrumentation,
-metrics/alerts, provider retry/failover and controlled failure drills remain.
+correlation and failure contract, as does the paginated Admin audit route.
+Broader asset failure instrumentation, metrics/alerts, provider retry/failover
+and controlled failure drills remain.
 
 **Goal:** Production-grade failure handling and visibility.
 

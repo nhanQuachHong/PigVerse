@@ -32,6 +32,10 @@ that ID, a fixed operation, allowlisted category, severity and timestamp;
 bilingual content, wallet/token identifiers and raw chain/database errors are
 excluded. Logging failure cannot change the content API outcome.
 
+The protected paginated audit read follows the same correlation and redacted
+failure contract. Its operational event never includes historical actor, action,
+target or context data and remains separate from the audit records it reports.
+
 Publication prepare and inclusion failures emit separate structured operational
 events containing only the bounded correlation ID, fixed operation and allowlisted
 category. Wallet/transaction identifiers, token/content identifiers, metadata
