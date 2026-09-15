@@ -82,8 +82,10 @@ named real-wallet verification remain pending.
 ## M6 — My NFTs
 
 **Status:** VERIFIED LOCALLY — chain-derived ownership, zero-token, unavailable,
-refresh and account-change behavior pass unit/API/UI and responsive visual tests;
-live Base Sepolia transfer verification awaits deployment.
+refresh and account-change behavior pass unit/API/UI and responsive visual tests.
+Production-browser coverage connects a deterministic injected wallet, renders
+the owned card response and re-queries to a verified empty state after
+`accountsChanged`; live Base Sepolia transfer verification awaits deployment.
 
 **Goal:** Show Genesis NFTs currently owned by the connected wallet.
 

@@ -9,7 +9,7 @@
 | FR-MINT-001 | BR-001,002,003,004,005,008,009 | Contract, Wallet, Chain Client | AT-MINT-001,002,003,005 | M2/M5 |
 | FR-MINT-002 | BR-009,015 | Mint UX, Tx Resolver | AT-MINT-004 | M1/M5 |
 | FR-MINT-003 | BR-005 | Contract, Public UI | AT-MINT-003 | M1/M2/M5 |
-| FR-WALLET-002 | BR-009,015 | My NFTs, Chain Read | AT-MYNFT-001,002 | M1/M6 |
+| FR-WALLET-002 | BR-009,015 | My NFTs, Chain Read | AT-MYNFT-001,002 unit/API + deterministic connected-browser coverage; live transfer pending | M1/M6 |
 | FR-ADMIN-001 | BR-010,013 | Auth API, Admin Authorization, Session | AT-ADMIN-001,002,003 | M1/M8 |
 | FR-ADMIN-002 | BR-001,007,010,011,012 | Admin UI/API, Content, Audit | AT-ADMIN-004,005 | M1/M9 |
 | FR-ASSET-001 | BR-007,012,014 | Asset Pipeline, IPFS, Backup | AT-ASSET-001,002 | M9 |
