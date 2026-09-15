@@ -5,6 +5,7 @@ import {
   logAdminOperationFailure,
   logHealthIntegrationFailure,
   logMintActivityFailure,
+  logPublicReadFailure,
 } from "./operational-log";
 
 describe("operational logging", () => {
@@ -134,6 +135,25 @@ describe("operational logging", () => {
       category: "transaction_invalid",
       event: "MINT_ACTIVITY_FAILED",
       stage: "ingestion",
+    });
+  });
+
+  it("logs public read degradation without public response data", () => {
+    const sink = vi.fn();
+    logPublicReadFailure(
+      {
+        category: "chain_unavailable",
+        correlationId: "public_read_1234",
+        surface: "collection",
+      },
+      { sink },
+    );
+
+    expect(JSON.parse(sink.mock.calls[0]?.[0] ?? "")).toMatchObject({
+      category: "chain_unavailable",
+      event: "PUBLIC_READ_DEGRADED",
+      level: "error",
+      surface: "collection",
     });
   });
 

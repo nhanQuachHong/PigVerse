@@ -32,6 +32,9 @@ export type MintActivityFailureCategory =
   | "request_denied"
   | "transaction_invalid"
   | "unavailable";
+export type PublicReadFailureCategory =
+  "chain_unavailable" | "configuration_unavailable" | "unavailable";
+export type PublicReadSurface = "collection";
 
 export type OperationalLogSink = (line: string) => void;
 
@@ -170,6 +173,37 @@ export function logMintActivityFailure(
           ? "error"
           : "warning",
       stage: input.stage,
+    },
+    options,
+  );
+}
+
+export function logPublicReadFailure(
+  input: {
+    category: PublicReadFailureCategory;
+    correlationId: string;
+    surface: PublicReadSurface;
+  },
+  options: {
+    now?: () => Date;
+    sink?: OperationalLogSink;
+  } = {},
+) {
+  if (
+    !safeCorrelationId.test(input.correlationId) ||
+    !["chain_unavailable", "configuration_unavailable", "unavailable"].includes(
+      input.category,
+    ) ||
+    input.surface !== "collection"
+  )
+    throw new Error("Invalid operational log input");
+  writeLog(
+    {
+      category: input.category,
+      correlationId: input.correlationId,
+      event: "PUBLIC_READ_DEGRADED",
+      level: "error",
+      surface: input.surface,
     },
     options,
   );
