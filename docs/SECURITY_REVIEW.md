@@ -67,7 +67,7 @@ Primary implementation evidence includes:
 | SEC-REV-004 | MEDIUM | Included receipts are not product finality; reorg repair and the confirmation policy remain open (`OD-008`). | Approved policy plus canonical-block reconciliation and reorg tests |
 | SEC-REV-005 | MEDIUM | Script CSP is nonce-bound and production `unsafe-inline`/`unsafe-eval` are removed. `style-src 'unsafe-inline'` remains because Next/Image and React emit style attributes; a nonce does not authorize those attributes. | Style-compatible hash/class strategy plus wallet and visual regression suite |
 | SEC-REV-006 | MEDIUM | Authentication abuse limits now use shared PostgreSQL counters rather than process memory. The atomic query and fail-closed route behavior pass locally, but concurrent multi-instance behavior has not been exercised against the hosted database. | Hosted migration plus concurrent multi-instance limit/reset test |
-| SEC-REV-007 | MEDIUM | RPC provider/failover and failure alerting are unresolved (`OD-007`). | Provider decision, timeout/failover configuration and controlled failure drill |
+| SEC-REV-007 | MEDIUM | Read-only RPC calls now have a bounded transient-failure retry, but provider/failover and failure alerting remain unresolved (`OD-007`). | Provider decision, hosted timeout/failover configuration and controlled failure drill |
 | SEC-REV-008 | MEDIUM | Live PostgreSQL migrations, hosted HTTPS headers, real browser wallets and Base Sepolia transaction paths have not been rehearsed together. | M12 deployment runbook and end-to-end release-candidate evidence |
 
 No finding in this table is waived. M10 remains in development while any HIGH
@@ -79,6 +79,7 @@ item is open, and Base Mainnet remains unauthorized.
 |---|---|---|
 | SEC-REV-005 | 2026-09-15 | A request proxy generates a fresh nonce, supplies it to the Next.js renderer and returns a nonce-bound `script-src` without `unsafe-inline`, remote script origins or production `unsafe-eval`. Production E2E verifies nonce rotation, nonce-bearing framework scripts, wallet UI behavior and unchanged desktop/mobile visual baselines. Dynamic rendering is the accepted nonce trade-off. The finding remains open only for inline style compatibility. |
 | SEC-REV-006 | 2026-09-15 | Production route defaults use a PostgreSQL-backed limiter with a `(scope, key_hash)` primary key and atomic upsert; memory limits remain only injectable test doubles. Unit, route and migration tests verify allow/deny mapping, hashed bounded keys, separate challenge/verification scopes and database-failure denial. Hosted multi-instance concurrency evidence remains outstanding. |
+| SEC-REV-007 | 2026-09-15 | Shared read-only JSON-RPC transport retries at most one transient network/408/425/429/5xx failure by default, assigns a new request ID and uses a bounded delay. Contract reverts, invalid responses and permanent HTTP errors are not retried. Unit, build and production-browser suites pass. Provider selection, failover, hosted timeout evidence and alert routing remain open. |
 
 ## Commands and evidence cadence
 

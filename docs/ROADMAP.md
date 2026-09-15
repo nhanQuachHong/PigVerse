@@ -233,8 +233,11 @@ the NFT-detail API now follows the same contract while treating out-of-domain
 IDs as ordinary non-alerting 404 responses. My NFTs now reports ownership-read
 degradation with the same redacted contract while invalid wallet input remains
 non-alerting. The provider-neutral asset pipeline now emits correlation-bound,
-allowlisted failure codes without asset/content/provider data. Provider-specific
-health, metrics/alerts and retry/failover remain. A deterministic 42-case local
+allowlisted failure codes without asset/content/provider data. Read-only RPC
+transport now retries one transient network/408/425/429/5xx failure with bounded
+linear delay while contract reverts, invalid payloads and permanent HTTP errors
+fail immediately. Provider-specific health, metrics/alerts and failover remain.
+A deterministic 42-case local
 failure-drill gate covers readiness, authentication, mint reconciliation, public
 chain reads and the asset pipeline; hosted/live-provider drills remain pending.
 
