@@ -206,8 +206,9 @@ redacted degradation event when configuration or chain state is unavailable;
 the NFT-detail API now follows the same contract while treating out-of-domain
 IDs as ordinary non-alerting 404 responses. My NFTs now reports ownership-read
 degradation with the same redacted contract while invalid wallet input remains
-non-alerting. Asset failure instrumentation, metrics/alerts, provider retry/
-failover and controlled failure drills remain.
+non-alerting. The provider-neutral asset pipeline now emits correlation-bound,
+allowlisted failure codes without asset/content/provider data. Provider-specific
+health, metrics/alerts, retry/failover and controlled failure drills remain.
 
 **Goal:** Production-grade failure handling and visibility.
 

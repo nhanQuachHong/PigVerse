@@ -39,6 +39,7 @@ chain ownership. RPC, IPFS and backup providers are external trust boundaries.
 | Public collection degradation log disclosure | Degraded collection reads emit only bounded correlation ID, fixed surface and allowlisted configuration/chain category; contract, owner, NFT state, metadata and provider details never enter the logger. | Verified locally |
 | Public NFT-detail degradation log disclosure | Degraded detail reads use the same bounded public-read event without token ID, owner, metadata, contract/provider or raw exception data; invalid Genesis IDs remain non-alerting 404 responses. | Verified locally |
 | My NFTs degradation log disclosure | Unavailable ownership reads emit only bounded correlation ID, fixed surface and allowlisted category; queried wallet, owned tokens, ownership state and provider/error data never enter the logger. Invalid wallet input remains non-alerting. | Verified locally |
+| Asset-pipeline failure log disclosure | Every safe pipeline error and unexpected failure emits only bounded correlation ID and an allowlisted code; artwork bytes, bilingual content, token/content identifiers, CIDs, backup references, provider payloads and raw exceptions never enter the logger. | Verified locally |
 
 Primary implementation evidence includes:
 

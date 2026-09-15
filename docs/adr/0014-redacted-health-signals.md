@@ -50,6 +50,15 @@ raw exceptions never enter this event, and a logging-sink failure cannot change
 the honest degraded response. Invalid Genesis IDs and wallet inputs are normal
 non-alerting client outcomes.
 
+Provider-neutral asset processing emits `ASSET_PIPELINE_FAILED` once for every
+safe error result and uses `UNEXPECTED_FAILURE` before rethrowing an unclassified
+runtime/store failure. The event contains only the bounded correlation ID,
+allowlisted error code, derived severity and timestamp. Artwork/metadata bytes,
+bilingual content, token/content identifiers, hashes/CIDs, backup references,
+provider payloads and raw exceptions are excluded. Logging failure cannot alter
+or mask the pipeline result. This does not select or claim verification of the
+still-open IPFS and backup providers.
+
 ## Boundaries and follow-up
 
 This signal detects reachability, not full business correctness, provider
@@ -69,7 +78,7 @@ timed-out integrations, cache/coalescing behavior, correlation propagation,
 structured allowlists, Admin auth/content/audit, Owner-control, publication and
 mint-activity failure classification, response/log redaction, correlation
 propagation, public collection/detail/ownership degradation and logging-sink
-isolation.
+isolation, including provider-neutral asset-pipeline failures.
 Playwright verifies the emitted degraded response and safe JSON events from the
 optimized server when deployment configuration is intentionally absent. Live
 provider and hosted monitoring verification remain pending.
