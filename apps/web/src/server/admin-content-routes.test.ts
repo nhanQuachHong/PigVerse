@@ -4,6 +4,7 @@ import { createContentUpdateHandler } from "../../app/api/admin/content/[tokenId
 import { createContentListHandler } from "../../app/api/admin/content/route";
 import { MemoryAdminContentStore } from "./admin-content-store";
 import type { TokenMutationState } from "./admin-content-store";
+import type { logAdminOperationFailure } from "./operational-log";
 
 const appOrigin = "https://pigverse.example";
 const contractAddress = "0x3333333333333333333333333333333333333333" as const;
@@ -64,24 +65,36 @@ describe("Admin content route boundary", () => {
   it("denies unauthenticated reads before accessing content", async () => {
     const store = new MemoryAdminContentStore();
     const runtime = createRuntime(store, "unminted", false);
-    const response = await createContentListHandler(() => runtime)(
-      new Request(`${appOrigin}/api/admin/content`),
-    );
+    const logFailure = vi.fn<typeof logAdminOperationFailure>();
+    const response = await createContentListHandler(
+      () => runtime,
+      () => "correlation_1",
+      logFailure,
+    )(new Request(`${appOrigin}/api/admin/content`));
 
     expect(response.status).toBe(401);
     expect(response.headers.get("cache-control")).toBe("no-store");
+    expect(response.headers.get("x-correlation-id")).toBe("correlation_1");
     expect(store.deployments.size).toBe(0);
     expect(runtime.readTokenStates).not.toHaveBeenCalled();
+    expect(logFailure).toHaveBeenCalledWith({
+      category: "authentication_required",
+      correlationId: "correlation_1",
+      operation: "admin_content_list",
+    });
   });
 
   it("returns exactly ten protected slots with chain status", async () => {
     const store = new MemoryAdminContentStore();
-    const response = await createContentListHandler(() => createRuntime(store))(
-      new Request(`${appOrigin}/api/admin/content`),
-    );
+    const response = await createContentListHandler(
+      () => createRuntime(store),
+      () => "correlation_1",
+    )(new Request(`${appOrigin}/api/admin/content`));
     const body = await response.json();
 
     expect(response.status).toBe(200);
+    expect(response.headers.get("x-correlation-id")).toBe("correlation_1");
+    expect(body.correlationId).toBe("correlation_1");
     expect(body.slots).toHaveLength(10);
     expect(body.slots[1]).toMatchObject({
       chainState: "unminted",
@@ -93,14 +106,21 @@ describe("Admin content route boundary", () => {
   it("denies cross-origin writes before session or content access", async () => {
     const store = new MemoryAdminContentStore();
     const runtime = createRuntime(store);
+    const logFailure = vi.fn<typeof logAdminOperationFailure>();
     const response = await createContentUpdateHandler(
       () => runtime,
       () => "correlation_1",
+      logFailure,
     )(updateRequest(draftBody, "https://evil.example"), context);
 
     expect(response.status).toBe(403);
     expect(runtime.authenticate).not.toHaveBeenCalled();
     expect(store.revisions).toHaveLength(0);
+    expect(logFailure).toHaveBeenCalledWith({
+      category: "request_denied",
+      correlationId: "correlation_1",
+      operation: "admin_content_update",
+    });
   });
 
   it("writes an authorized revision and audit record", async () => {
@@ -112,6 +132,7 @@ describe("Admin content route boundary", () => {
     const body = await response.json();
 
     expect(response.status).toBe(200);
+    expect(response.headers.get("x-correlation-id")).toBe("correlation_1");
     expect(body).toMatchObject({
       content: { revision: 1, tokenId: 2 },
       correlationId: "correlation_1",
@@ -123,14 +144,21 @@ describe("Admin content route boundary", () => {
 
   it("returns stable conflict, minted and unavailable codes without extra writes", async () => {
     const store = new MemoryAdminContentStore();
+    const logFailure = vi.fn<typeof logAdminOperationFailure>();
     const handler = createContentUpdateHandler(
       () => createRuntime(store),
       () => "correlation_1",
+      logFailure,
     );
     expect((await handler(updateRequest(), context)).status).toBe(200);
     const stale = await handler(updateRequest(), context);
     expect(stale.status).toBe(409);
     await expect(stale.json()).resolves.toMatchObject({ code: "STALE_EDIT" });
+    expect(logFailure).toHaveBeenLastCalledWith({
+      category: "conflict",
+      correlationId: "correlation_1",
+      operation: "admin_content_update",
+    });
     expect(store.revisions).toHaveLength(1);
 
     for (const [state, expectedCode, expectedStatus] of [
@@ -141,6 +169,7 @@ describe("Admin content route boundary", () => {
       const response = await createContentUpdateHandler(
         () => createRuntime(isolatedStore, state),
         () => "correlation_2",
+        logFailure,
       )(updateRequest(), context);
       expect(response.status).toBe(expectedStatus);
       await expect(response.json()).resolves.toMatchObject({
@@ -148,14 +177,22 @@ describe("Admin content route boundary", () => {
       });
       expect(isolatedStore.revisions).toHaveLength(0);
       expect(isolatedStore.auditEvents).toHaveLength(0);
+      expect(logFailure).toHaveBeenLastCalledWith({
+        category:
+          state === "minted" ? "token_already_minted" : "chain_unavailable",
+        correlationId: "correlation_2",
+        operation: "admin_content_update",
+      });
     }
   });
 
   it("rejects malformed bodies with a safe validation contract", async () => {
     const store = new MemoryAdminContentStore();
+    const logFailure = vi.fn<typeof logAdminOperationFailure>();
     const response = await createContentUpdateHandler(
       () => createRuntime(store),
       () => "correlation_1",
+      logFailure,
     )(updateRequest({ expectedRevision: 0 }), context);
 
     expect(response.status).toBe(400);
@@ -165,5 +202,29 @@ describe("Admin content route boundary", () => {
       message: "Invalid content",
     });
     expect(store.revisions).toHaveLength(0);
+    expect(logFailure).toHaveBeenCalledWith({
+      category: "invalid_input",
+      correlationId: "correlation_1",
+      operation: "admin_content_update",
+    });
+    expect(JSON.stringify(logFailure.mock.calls)).not.toContain(
+      draftBody.descriptionVi,
+    );
+  });
+
+  it("keeps content responses stable when logging fails", async () => {
+    const response = await createContentUpdateHandler(
+      () => createRuntime(new MemoryAdminContentStore()),
+      () => "correlation_1",
+      () => {
+        throw new Error("logging unavailable");
+      },
+    )(updateRequest(draftBody, "https://evil.example"), context);
+
+    expect(response.status).toBe(403);
+    await expect(response.json()).resolves.toMatchObject({
+      code: "REQUEST_DENIED",
+      correlationId: "correlation_1",
+    });
   });
 });

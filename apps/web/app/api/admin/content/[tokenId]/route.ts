@@ -13,6 +13,10 @@ import {
   saveGenesisDraft,
 } from "../../../../../src/server/admin-content";
 import { getAdminContentRuntime } from "../../../../../src/server/admin-content-runtime";
+import {
+  type AdminOperationFailureCategory,
+  logAdminOperationFailure,
+} from "../../../../../src/server/operational-log";
 
 type UpdateRuntime = AdminContentDependencies & {
   appOrigin: string;
@@ -36,48 +40,72 @@ function errorResponse(
   correlationId: string,
   status: number,
 ) {
-  return adminAuthJson({ code, correlationId, message }, { status });
+  return adminAuthJson(
+    { code, correlationId, message },
+    { status },
+    correlationId,
+  );
 }
 
 export function createContentUpdateHandler(
   resolveRuntime: () => UpdateRuntime,
   createCorrelationId: () => string = randomUUID,
+  logFailure: typeof logAdminOperationFailure = logAdminOperationFailure,
 ) {
   return async function PUT(request: Request, context: UpdateContext) {
     const correlationId = createCorrelationId();
+    const reportFailure = (category: AdminOperationFailureCategory) => {
+      try {
+        logFailure({
+          category,
+          correlationId,
+          operation: "admin_content_update",
+        });
+      } catch {
+        // Observability must not change the API outcome.
+      }
+    };
     try {
       const runtime = resolveRuntime();
-      if (!hasExpectedOrigin(request, runtime.appOrigin))
+      if (!hasExpectedOrigin(request, runtime.appOrigin)) {
+        reportFailure("request_denied");
         return errorResponse(
           "REQUEST_DENIED",
           "Request denied",
           correlationId,
           403,
         );
+      }
       const session = await runtime.authenticate(request);
-      if (!session)
+      if (!session) {
+        reportFailure("authentication_required");
         return errorResponse(
           "ADMIN_AUTH_REQUIRED",
           "Admin access required",
           correlationId,
           401,
         );
+      }
       const length = Number(request.headers.get("content-length") ?? "0");
-      if (length > 131_072)
+      if (length > 131_072) {
+        reportFailure("invalid_input");
         return errorResponse(
           "INVALID_CONTENT",
           "Invalid content",
           correlationId,
           413,
         );
+      }
       const source = await request.text();
-      if (source.length > 65_536)
+      if (source.length > 65_536) {
+        reportFailure("invalid_input");
         return errorResponse(
           "INVALID_CONTENT",
           "Invalid content",
           correlationId,
           413,
         );
+      }
       let parsed: unknown;
       try {
         parsed = JSON.parse(source);
@@ -118,36 +146,49 @@ export function createContentUpdateHandler(
         },
         runtime,
       );
-      if (result.status === "conflict")
+      if (result.status === "conflict") {
+        reportFailure("conflict");
         return errorResponse(
           "STALE_EDIT",
           "The draft has changed",
           correlationId,
           409,
         );
-      if (result.status === "minted-locked")
+      }
+      if (result.status === "minted-locked") {
+        reportFailure("token_already_minted");
         return errorResponse(
           "TOKEN_ALREADY_MINTED",
           "Minted content cannot be changed",
           correlationId,
           409,
         );
-      if (result.status === "chain-unavailable")
+      }
+      if (result.status === "chain-unavailable") {
+        reportFailure("chain_unavailable");
         return errorResponse(
           "CHAIN_STATE_UNAVAILABLE",
           "Chain state is unavailable",
           correlationId,
           503,
         );
-      return adminAuthJson({ content: result.content, correlationId });
+      }
+      return adminAuthJson(
+        { content: result.content, correlationId },
+        undefined,
+        correlationId,
+      );
     } catch (error) {
-      if (error instanceof AdminContentError)
+      if (error instanceof AdminContentError) {
+        reportFailure("invalid_input");
         return errorResponse(
           "INVALID_CONTENT",
           "Invalid content",
           correlationId,
           400,
         );
+      }
+      reportFailure("unavailable");
       return errorResponse(
         "ADMIN_CONTENT_UNAVAILABLE",
         "Admin content is unavailable",
