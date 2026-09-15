@@ -7,6 +7,7 @@ export type AdminAuthFailureCategory =
   | "rate_limited"
   | "unavailable";
 export type AdminOperation =
+  | "admin_audit"
   | "admin_content_list"
   | "admin_content_update"
   | "admin_mint_activity"
@@ -108,6 +109,7 @@ export function logAdminOperationFailure(
       "unavailable",
     ].includes(input.category) ||
     ![
+      "admin_audit",
       "admin_content_list",
       "admin_content_update",
       "admin_mint_activity",

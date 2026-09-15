@@ -6,6 +6,7 @@ import type {
   AdminAuditStore,
   AuditPageQuery,
 } from "./admin-audit-store";
+import type { logAdminOperationFailure } from "./operational-log";
 
 const appOrigin = "https://pigverse.example";
 const currentOwner = "0x1111111111111111111111111111111111111111" as const;
@@ -62,13 +63,22 @@ function runtime(store: AdminAuditStore, authenticated = true) {
 describe("Admin audit route boundary", () => {
   it("denies unauthenticated reads before querying history", async () => {
     const store = new MemoryAuditStore([event(2)]);
-    const response = await createAdminAuditHandler(() => runtime(store, false))(
-      new Request(`${appOrigin}/api/admin/audit`),
-    );
+    const logFailure = vi.fn<typeof logAdminOperationFailure>();
+    const response = await createAdminAuditHandler(
+      () => runtime(store, false),
+      () => "correlation_1",
+      logFailure,
+    )(new Request(`${appOrigin}/api/admin/audit`));
 
     expect(response.status).toBe(401);
     expect(response.headers.get("cache-control")).toBe("no-store");
+    expect(response.headers.get("x-correlation-id")).toBe("correlation_1");
     expect(store.calls).toHaveLength(0);
+    expect(logFailure).toHaveBeenCalledWith({
+      category: "authentication_required",
+      correlationId: "correlation_1",
+      operation: "admin_audit",
+    });
   });
 
   it("paginates newest-first with a stable exclusive cursor", async () => {
@@ -78,13 +88,18 @@ describe("Admin audit route boundary", () => {
       event(2),
       event(1),
     ]);
-    const handler = createAdminAuditHandler(() => runtime(store));
+    const handler = createAdminAuditHandler(
+      () => runtime(store),
+      () => "correlation_1",
+    );
     const first = await handler(
       new Request(`${appOrigin}/api/admin/audit?limit=2`),
     );
     const firstBody = await first.json();
 
     expect(first.status).toBe(200);
+    expect(first.headers.get("x-correlation-id")).toBe("correlation_1");
+    expect(firstBody.correlationId).toBe("correlation_1");
     expect(
       firstBody.events.map(
         (item: { auditEventId: string }) => item.auditEventId,
@@ -127,12 +142,20 @@ describe("Admin audit route boundary", () => {
     "rejects invalid limit %s without querying history",
     async (limit) => {
       const store = new MemoryAuditStore([]);
-      const response = await createAdminAuditHandler(() => runtime(store))(
-        new Request(`${appOrigin}/api/admin/audit?limit=${limit}`),
-      );
+      const logFailure = vi.fn<typeof logAdminOperationFailure>();
+      const response = await createAdminAuditHandler(
+        () => runtime(store),
+        () => "correlation_1",
+        logFailure,
+      )(new Request(`${appOrigin}/api/admin/audit?limit=${limit}`));
 
       expect(response.status).toBe(400);
       expect(store.calls).toHaveLength(0);
+      expect(logFailure).toHaveBeenCalledWith({
+        category: "invalid_input",
+        correlationId: "correlation_1",
+        operation: "admin_audit",
+      });
     },
   );
 
@@ -140,12 +163,52 @@ describe("Admin audit route boundary", () => {
     "rejects invalid cursor %s without querying history",
     async (cursor) => {
       const store = new MemoryAuditStore([]);
-      const response = await createAdminAuditHandler(() => runtime(store))(
-        new Request(`${appOrigin}/api/admin/audit?cursor=${cursor}`),
-      );
+      const logFailure = vi.fn<typeof logAdminOperationFailure>();
+      const response = await createAdminAuditHandler(
+        () => runtime(store),
+        () => "correlation_1",
+        logFailure,
+      )(new Request(`${appOrigin}/api/admin/audit?cursor=${cursor}`));
 
       expect(response.status).toBe(400);
       expect(store.calls).toHaveLength(0);
+      expect(logFailure).toHaveBeenCalledWith({
+        category: "invalid_input",
+        correlationId: "correlation_1",
+        operation: "admin_audit",
+      });
     },
   );
+
+  it("redacts store failures and isolates logging failures", async () => {
+    const store: AdminAuditStore = {
+      list: vi.fn().mockRejectedValue(new Error("database-secret")),
+    };
+    const logFailure = vi.fn<typeof logAdminOperationFailure>();
+    const response = await createAdminAuditHandler(
+      () => runtime(store),
+      () => "correlation_1",
+      logFailure,
+    )(new Request(`${appOrigin}/api/admin/audit`));
+
+    expect(response.status).toBe(503);
+    expect(JSON.stringify(await response.json())).not.toContain(
+      "database-secret",
+    );
+    expect(logFailure).toHaveBeenCalledWith({
+      category: "unavailable",
+      correlationId: "correlation_1",
+      operation: "admin_audit",
+    });
+    expect(JSON.stringify(logFailure.mock.calls)).not.toContain(currentOwner);
+
+    const denied = await createAdminAuditHandler(
+      () => runtime(new MemoryAuditStore([]), false),
+      () => "correlation_2",
+      () => {
+        throw new Error("logging unavailable");
+      },
+    )(new Request(`${appOrigin}/api/admin/audit`));
+    expect(denied.status).toBe(401);
+  });
 });
